@@ -11,9 +11,14 @@ def fetch_friend_list():
     url = f"https://api.steampowered.com/ISteamUser/GetFriendList/v1/?key={API_KEY}&steamid={STEAM_ID}&relationship=friend"
     response = requests.get(url)
     print("Steam API response status:", response.status_code)
-    print("Steam API response text:", response.text)  # 加這行印出回傳內容
+    print("Steam API response text:", response.text)
+
+    if response.status_code != 200:
+        raise Exception(f"Steam API Error: {response.status_code} {response.text}")
+
     data = response.json()
     return data.get('friendslist', {}).get('friends', [])
+
 
 def get_friend_data():
     if not os.path.exists(DB_PATH):

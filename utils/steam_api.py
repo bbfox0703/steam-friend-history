@@ -8,6 +8,9 @@ STEAM_ID = os.getenv('STEAM_USER_ID')
 DB_PATH = './database/friends.json'
 
 def fetch_friend_list():
+    print(f"Current API_KEY: {API_KEY}")
+    print(f"Current STEAM_ID: {STEAM_ID}")
+    
     url = f"https://api.steampowered.com/ISteamUser/GetFriendList/v1/?key={API_KEY}&steamid={STEAM_ID}&relationship=friend"
     response = requests.get(url)
     print("Steam API response status:", response.status_code)

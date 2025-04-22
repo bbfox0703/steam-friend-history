@@ -8,8 +8,8 @@ from datetime import datetime
 
 app = Flask(__name__)
 import os
-print("=== API_KEY Loaded ===", os.getenv('STEAM_API_KEY'))
-print("=== STEAM_USER_ID Loaded ===", os.getenv('STEAM_USER_ID'))
+# print("=== API_KEY Loaded ===", os.getenv('STEAM_API_KEY'))
+# print("=== STEAM_USER_ID Loaded ===", os.getenv('STEAM_USER_ID'))
 @app.template_filter('datetimeformat')
 def datetimeformat(value):
     if not value:

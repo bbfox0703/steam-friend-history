@@ -10,6 +10,8 @@ DB_PATH = './database/friends.json'
 def fetch_friend_list():
     url = f"https://api.steampowered.com/ISteamUser/GetFriendList/v1/?key={API_KEY}&steamid={STEAM_ID}&relationship=friend"
     response = requests.get(url)
+    print(response.status_code)
+    print(response.text)
     data = response.json()
     return data.get('friendslist', {}).get('friends', [])
 

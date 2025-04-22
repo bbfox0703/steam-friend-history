@@ -1,8 +1,18 @@
 from flask import Flask, render_template
 import utils.steam_api as steam_api
 import utils.backup as backup
+from datetime import datetime
 
 app = Flask(__name__)
+
+@app.template_filter('datetimeformat')
+def datetimeformat(value):
+    if not value:
+        return ""
+    try:
+        return datetime.utcfromtimestamp(int(value)).strftime('%Y-%m-%d')
+    except Exception:
+        return value
 
 @app.route('/')
 def index():

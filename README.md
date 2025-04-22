@@ -17,8 +17,33 @@
 
 ## 🛠️ 安裝方法
 
-### 1. Clone 或下載專案
+### 1. 安裝 Docker
+```bash
+curl -sSL https://get.docker.com | sudo sh
+sudo usermod -aG docker $USER
+newgrp docker
+```
+
+### 2. Clone 或下載專案
 
 ```bash
-git clone https://github.com/你的帳號/steam-friend-history.git
+git clone https://github.com/bbfox0703/steam-friend-history.git
 cd steam-friend-history
+cp .env.example .env
+vi .env
+```
+
+修改 .env APIKEY & ID，填入Steam APIKEY和帳號的64位元ID 76561xxxxxxxxxxxx
+
+```bash
+docker compose build
+docker compose up -d
+```
+
+如要更新repos
+```bash
+docker compose down
+git pull
+docker compose build
+docker compose up -d
+```

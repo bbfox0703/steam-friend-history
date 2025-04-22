@@ -1,1 +1,11 @@
-# docker-compose.yml placeholder
+version: '3.8'
+
+services:
+  web:
+    build: .
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./backups:/app/backups
+      - ./database:/app/database
+    restart: unless-stopped

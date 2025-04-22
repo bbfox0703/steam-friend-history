@@ -1,1 +1,23 @@
-<!-- 網頁模板 placeholder -->
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <title>Steam Friend Tracker</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <h1>Steam Friend Tracker</h1>
+
+    <h2>好友列表</h2>
+    {% if data %}
+    <ul>
+        {% for friend in data %}
+            <li>{{ friend.steamid }} | 好友自 {{ friend.friend_since | datetimeformat }}</li>
+        {% endfor %}
+    </ul>
+    {% else %}
+    <p>尚無好友資料，請先點 `/update` 更新！</p>
+    {% endif %}
+
+</body>
+</html>

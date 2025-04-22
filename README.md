@@ -1,3 +1,5 @@
+# 未完成
+
 # Steam Friend History
 
 一個輕量級的 Raspberry Pi 專用系統，記錄自己的 Steam 好友列表與變化。

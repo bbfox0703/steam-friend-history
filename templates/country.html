@@ -31,7 +31,12 @@
                                         <img src="{{ friend.avatar if friend.avatar else '/static/default-avatar.png' }}" alt="avatar">
                                         <div class="friend-info">
                                             <strong>{{ friend.persona_name or '[未知名稱]' }}</strong><br>
-                                            <small>加入於 {{ friend.friend_since | datetimeformat }}</small>
+                                            <small>
+												加入於 
+												<time class="datetime-auto" data-timestamp="{{ friend.friend_since }}">
+													{{ friend.friend_since | datetimeformat }}
+												</time>
+											</small>
                                         </div>
                                     </a>
                                 </li>

@@ -203,7 +203,7 @@ def country_chart():
         code = f.get("country_code", "??")
         country_counts[code] += 1
 
-    country_name_map = steam_api.country_name_map  # 假設已在 steam_api.py 定義
+    global country_name_map  # 使用 app.py 裡的全域變數
     stats = []
     for code, count in sorted(country_counts.items(), key=lambda x: x[1], reverse=True):
         name = country_name_map.get(code, "Unknown")

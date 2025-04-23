@@ -10,7 +10,7 @@ from datetime import datetime
 from collections import defaultdict, Counter
 
 def load_data():
-    path = os.path.join('database', 'friend_data.json')
+    path = os.path.join('database', 'friends.json')
     if os.path.exists(path):
         with open(path, 'r', encoding='utf-8') as f:
             return json.load(f)

@@ -25,6 +25,16 @@
     {% endif %}
 
     <h2>好友增減紀錄</h2>
+	<div>
+		加入時間排序：
+		{% if join_sort == 'new' %}
+			<b>由新到舊</b> |
+			<a href="/history?join_sort=old">由舊到新</a>
+		{% else %}
+			<a href="/history?join_sort=new">由新到舊</a> |
+			<b>由舊到新</b>
+		{% endif %}
+	</div>	
     <ul>
     {% for timestamp, change in changes|dictsort(reverse=true) %}
         <li>

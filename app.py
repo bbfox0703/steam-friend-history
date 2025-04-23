@@ -475,7 +475,9 @@ def zip_backups():
 def achievement_trend(appid):
     mode = request.args.get("mode", "day")  # 新增切換模式參數
     try:
-        achievements = steam_api.fetch_achievements(appid)
+        playerstats = steam_api.fetch_achievement_data(appid)
+        achievements = playerstats.get("achievements", [])
+        game_name = playerstats.get("gameName", f"AppID {appid}")
     except Exception as e:
         return str(e)
 
@@ -519,6 +521,7 @@ def achievement_trend(appid):
 
     return render_template("achievement_trend.html",
                            appid=appid,
+                           game_name=game_name,
                            data=stats,
                            mode=mode,
                            achieved=len([a for a in achievements if a.get("achieved") == 1]),

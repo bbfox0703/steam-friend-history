@@ -473,30 +473,56 @@ def zip_backups():
 
 @app.route("/achievement/<appid>")
 def achievement_trend(appid):
+    mode = request.args.get("mode", "day")  # 新增切換模式參數
     try:
         achievements = steam_api.fetch_achievements(appid)
     except Exception as e:
         return str(e)
 
+    # 整理成就時間線
     timeline = []
     for a in achievements:
         if a.get("achieved") == 1 and a.get("unlocktime"):
-            dt = datetime.fromtimestamp(a["unlocktime"]).date()
+            dt = datetime.fromtimestamp(a["unlocktime"])
             timeline.append(dt)
 
     if not timeline:
         return "無達成成就資料"
 
-    counter = Counter(timeline)
+    # 分組依據：日 or 月
+    if mode == "month":
+        grouped = Counter([dt.strftime("%Y-%m") for dt in timeline])
+        date_format = "%Y-%m"
+        start = min(timeline).replace(day=1)
+        end = max(timeline).replace(day=1)
+        step = "month"
+    else:
+        grouped = Counter([dt.strftime("%Y-%m-%d") for dt in timeline])
+        date_format = "%Y-%m-%d"
+        start = min(timeline).date()
+        end = max(timeline).date()
+        step = "day"
 
-    # ✅ 補上所有日期
-    start_date = min(counter)
-    end_date = max(counter)
-    full_dates = [start_date + timedelta(days=i) for i in range((end_date - start_date).days + 1)]
+    # 填補缺失日期
+    stats = []
+    current = start
+    while current <= end:
+        label = current.strftime(date_format)
+        stats.append({"date": label, "count": grouped.get(label, 0)})
+        if step == "month":
+            if current.month == 12:
+                current = current.replace(year=current.year + 1, month=1)
+            else:
+                current = current.replace(month=current.month + 1)
+        else:
+            current += timedelta(days=1)
 
-    stats = [{"date": str(d), "count": counter.get(d, 0)} for d in full_dates]
-
-    return render_template("achievement_trend.html", appid=appid, data=stats)
+    return render_template("achievement_trend.html",
+                           appid=appid,
+                           data=stats,
+                           mode=mode,
+                           achieved=len([a for a in achievements if a.get("achieved") == 1]),
+                           total=len(achievements))
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=3000)

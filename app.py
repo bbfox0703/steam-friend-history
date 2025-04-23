@@ -479,21 +479,27 @@ def zip_backups():
 
 @app.route("/achievement/<appid>")
 def achievement_trend(appid):
-    def fetch_game_title(appid, lang="en"):
+    def fetch_game_info(appid, lang="en"):
         url = f"https://store.steampowered.com/api/appdetails?appids={appid}&l={lang}"
         try:
             r = requests.get(url)
             if r.status_code == 200:
                 data = r.json().get(str(appid), {}).get("data", {})
-                return data.get("name", "")
+                return {
+                    "name": data.get("name", ""),
+                    "header_image": data.get("header_image", "")
+                }
         except:
             pass
-        return ""
+        return {"name": "", "header_image": ""}
 
     # 語言偵測
     lang = request.accept_languages.best_match(["zh-tw", "ja", "en"], default="en")
     steam_lang = lang_map.get(lang, "english")
-    game_name = fetch_game_title(appid, steam_lang)
+    game_info = fetch_game_info(appid, steam_lang)
+    game_name = game_info["name"]
+    header_image = game_info["header_image"]
+
 
     mode = request.args.get("mode", "day")
 
@@ -526,6 +532,7 @@ def achievement_trend(appid):
     return render_template("achievement_trend.html",
                            appid=appid,
                            game_name=game_name,
+                           header_image=header_image,
                            dates=dates,
                            counts=counts,
                            data=data,

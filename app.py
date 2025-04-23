@@ -130,6 +130,29 @@ def filter_friend_list(args):
 
     return filtered    
 
+@app.template_filter('timeago')
+def timeago(timestamp):
+    try:
+        now = datetime.utcnow()
+        dt = datetime.utcfromtimestamp(int(timestamp))
+        diff = now - dt
+
+        seconds = int(diff.total_seconds())
+        minutes = seconds // 60
+        hours = minutes // 60
+        days = hours // 24
+
+        if seconds < 60:
+            return f"{seconds} 秒前"
+        elif minutes < 60:
+            return f"{minutes} 分鐘前"
+        elif hours < 24:
+            return f"{hours} 小時前"
+        else:
+            return f"{days} 天前"
+    except:
+        return "時間未知"
+
 app = Flask(__name__)
 import os
 # print("=== API_KEY Loaded ===", os.getenv('STEAM_API_KEY'))

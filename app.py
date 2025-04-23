@@ -70,18 +70,22 @@ def history():
                     try:
                         data = json.load(bf)
                         for f in data:
-                            friend_map[f["steamid"]] = f
+                                if f["steamid"] not in friend_map:
+                                    friend_map[f["steamid"]] = f
                     except:
                         pass
 
     for ts, change in changes.items():
         for sid in change.get("added", []):
             if sid not in friend_map:
-                print(f"❗️ {sid} not found in friend_map (added)")        
+                print(f"❗️ {sid} not found in friend_map (added)")      
+                
         added_info = []
         for sid in change.get("added", []):
-            f = friend_map.get(sid, {"steamid": sid})
-            added_info.append(f)
+            f = friend_map.get(sid)
+            if f:
+                print(f"🧪 SID: {sid} name: {f.get('persona_name')}")
+                added_info.append(f)
         added_info.sort(key=lambda f: int(f.get("friend_since", 0)), reverse=reverse)
         change["added_info"] = added_info
 

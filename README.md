@@ -38,7 +38,7 @@ vi .env
 修改 .env APIKEY & ID，填入Steam APIKEY和帳號的64位元ID 76561xxxxxxxxxxxx
 
 ```bash
-docker compose build
+COMPOSE_BAKE=true docker compose build
 docker compose up -d
 ```
 
@@ -46,7 +46,7 @@ docker compose up -d
 ```bash
 docker compose down
 git pull
-docker compose build
+COMPOSE_BAKE=true docker compose build
 docker compose up -d
 ```
 

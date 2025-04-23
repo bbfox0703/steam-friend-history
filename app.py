@@ -77,7 +77,7 @@ def history():
     for ts, change in changes.items():
         added_info = []
         for sid in change.get("added", []):
-            f = friend_map.get(sid, {"persona_name": sid})
+            f = friend_map.get(sid, {"steamid": sid})
             added_info.append(f)
         added_info.sort(key=lambda f: int(f.get("friend_since", 0)), reverse=reverse)
         change["added_info"] = added_info

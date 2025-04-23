@@ -13,12 +13,26 @@ HISTORY_PATH = './database/name_history.json'
 CHANGELOG_PATH = './database/friend_changes.json'
 BACKUP_DIR = './backups'
 
-def fetch_friend_list():
-    url = f"https://api.steampowered.com/ISteamUser/GetFriendList/v1/?key={API_KEY}&steamid={STEAM_ID}&relationship=friend"
-    response = requests.get(url)
-    if response.status_code != 200:
-        raise Exception(f"Steam API Error: {response.status_code} {response.text}")
-    return response.json().get('friendslist', {}).get('friends', [])
+def fetch_friend_profiles(steam_ids):
+    if not steam_ids:
+        return {}
+
+    result = {}
+    for i in range(0, len(steam_ids), 100):
+        batch = steam_ids[i:i+100]
+        ids_str = ','.join(batch)
+        url = f"https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v2/?key={API_KEY}&steamids={ids_str}"
+        response = requests.get(url)
+        if response.status_code == 200:
+            players = response.json().get('response', {}).get('players', [])
+            for p in players:
+                result[p['steamid']] = p
+        else:
+            print(f"⚠️ Failed batch {i} - Status {response.status_code}")
+            
+        time.sleep(0.3)    
+
+    return result
 
 def fetch_friend_profiles(steam_ids):
     if not steam_ids:

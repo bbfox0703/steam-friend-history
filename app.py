@@ -3,6 +3,7 @@ load_dotenv()
 
 from flask import Flask, render_template, request, redirect, url_for
 import utils.steam_api as steam_api
+#from utils.steam_api import get_friend_data
 import utils.backup as backup
 import pandas as pd
 import json
@@ -77,6 +78,16 @@ country_name_map = {
     "??": "Unknown", "ZZ": "Unknown"
 }
 
+STATUS_MAP = {
+    0: '離線',
+    1: '在線上',
+    2: '忙碌',
+    3: '離開',
+    4: '請勿打擾',
+    5: '想交易',
+    6: '想玩遊戲'
+}
+
 def load_data():
     path = os.path.join('database', 'friends.json')
     if os.path.exists(path):
@@ -92,10 +103,9 @@ import os
 @app.template_filter('datetimeformat')
 def datetimeformat(ts):
     try:
-        return datetime.fromtimestamp(int(ts)).strftime('%Y-%m-%d')
+        return datetime.fromtimestamp(int(ts)).strftime('%Y-%m-%d %H:%M:%S')
     except:
         return ts
-
 
 @app.route('/')
 def index():
@@ -292,6 +302,20 @@ def trend():
     stat["group"] = stat["group"].astype(str)
 
     return render_template("trend.html", stats=stat.to_dict(orient="records"), mode=mode)
+
+@app.route('/status-board')
+def status_board():
+    friends = get_friend_data()
+
+    # 依在線狀態與最後上線時間排序：在線在前，離線依照 lastlogoff 遞減排序
+    def sort_key(f):
+        state = f.get('personastate', 0)
+        lastlogoff = f.get('lastlogoff') or 0
+        return (-1 if state != 0 else 1, -lastlogoff)
+
+    sorted_friends = sorted(friends, key=sort_key)
+
+    return render_template('status_board.html', friends=sorted_friends, status_map=STATUS_MAP)
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=3000)

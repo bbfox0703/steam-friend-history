@@ -1,23 +1,22 @@
-# 未完成
+# 目前大部份皆可執行，部份未驗證
 
 # Steam Friend History
 
 一個輕量級的 Raspberry Pi 專用系統，記錄自己的 Steam 好友列表與變化。
 
----
-
-## 📦 預計功能、但可能沒有
-- 每天自動抓取 Steam 好友清單
-- 自動備份每日快照
-- 網頁界面顯示好友新增與刪除
+## 📦 目前功能
+- 定時自動抓取 Steam 好友清單
+- 網頁界面顯示好友新增與刪除資料；刪除資料要定時抓取才較準
 - 好友暱稱變更記錄
 - 國別統計與國別分類
-- 點擊好友可以連到 Steam 個人頁面
-- 使用 Docker 簡單部署
+- 好友加入趨勢圖
+- 好友狀態看板
+- 點擊好友可以連到Steam個人頁面
+- 使用Docker簡單部署，可運行於Raspberry Pi 5 (使用SSD裝置)
 
 ---
 
-## 🛠️ 安裝方法
+## 🛠️ 安裝方法 (Raspberry Pi 5)
 
 ### 1. 安裝 Docker
 ```bash
@@ -26,7 +25,7 @@ sudo usermod -aG docker $USER
 newgrp docker
 ```
 
-### 2. Clone 或下載專案
+### 2. Git Clone或下載專案
 
 ```bash
 git clone https://github.com/bbfox0703/steam-friend-history.git
@@ -35,8 +34,10 @@ cp .env.example .env
 vi .env
 ```
 
-修改 .env APIKEY & ID，填入Steam APIKEY和帳號的64位元ID 76561xxxxxxxxxxxx
+修改 .env的API KEY及ID，填入Steam API KEY、和帳號的64位元ID 76561xxxxxxxxxxxx
+Steam api key: https://steamcommunity.com/dev/apikey
 
+建立docker映像檔：
 ```bash
 COMPOSE_BAKE=true docker compose build
 docker compose up -d

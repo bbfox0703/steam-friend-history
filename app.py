@@ -47,23 +47,27 @@ def history():
 
     return render_template("history.html", name_history=name_history, changes=changes)
 
-@app.route("/country")
+@app.route('/country')
 def country():
-    try:
-        with open("database/friends.json", "r") as f:
-            friends = json.load(f)
-    except:
-        friends = []
+    friends = load_data()
+    country_counts = {}
+    country_members = {}
 
-    stats = defaultdict(list)
     for f in friends:
         code = f.get('country_code', '??')
-        stats[code].append(f)
+        country_counts[code] = country_counts.get(code, 0) + 1
+        country_members.setdefault(code, []).append(f)
 
-    # 預設排序：依照人數多寡
-    sorted_countries = sorted(stats.items(), key=lambda x: len(x[1]), reverse=True)
+    sort_mode = request.args.get('sort', 'count')  # 預設依人數
+    if sort_mode == 'name':
+        sorted_items = sorted(country_counts.items(), key=lambda x: x[0])
+    else:
+        sorted_items = sorted(country_counts.items(), key=lambda x: x[1], reverse=True)
 
-    return render_template("country.html", stats=sorted_countries)
+    return render_template("country.html",
+                           sorted_items=sorted_items,
+                           country_members=country_members,
+                           sort_mode=sort_mode)
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=3000)

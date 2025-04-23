@@ -47,7 +47,7 @@
                     {% for f in change.added_info %}
                         <li>
                             <a href="{{ f.profile_url or 'https://steamcommunity.com/profiles/' ~ f.steamid }}" target="_blank">
-                                {{ f.persona_name or f.steamid }}
+                                {{ f.persona_name | default(f.steamid, true) }}
                             </a>
                             <small>加入於 {{ f.friend_since | datetimeformat }}</small>
                         </li>
@@ -61,7 +61,7 @@
                     {% for f in change.removed_info %}
                         <li>
                             <a href="{{ f.profile_url or 'https://steamcommunity.com/profiles/' ~ f.steamid }}" target="_blank">
-                                {{ f.persona_name or f.steamid }}
+                                {{ f.persona_name | default(f.steamid, true) }}
                             </a>
                             <small>加入於 {{ f.friend_since | datetimeformat }}</small>
                         </li>

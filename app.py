@@ -4,6 +4,7 @@ load_dotenv()
 from flask import Flask, render_template, request, redirect, url_for, jsonify, send_from_directory, send_file
 import utils.steam_api as steam_api
 from utils.steam_api import get_friend_data
+import requests
 import utils.backup as backup
 import pandas as pd
 import json
@@ -469,6 +470,29 @@ def zip_backups():
 
     now_str = datetime.now().strftime('%Y%m%d_%H%M%S')
     return send_file(memory_file, as_attachment=True, download_name=f"steam_backups_{now_str}.zip", mimetype='application/zip')
+
+@app.route("/achievement/<appid>")
+def achievement_trend(appid):
+    try:
+        achievements = steam_api.fetch_achievements(appid)
+    except Exception as e:
+        return str(e)
+
+    timeline = []
+    for a in achievements:
+        if a.get("achieved") == 1 and a.get("unlocktime"):
+            dt = datetime.fromtimestamp(a["unlocktime"])
+            timeline.append(dt.date())
+
+    if not timeline:
+        return "無達成成就資料"
+
+    counter = Counter(timeline)
+    sorted_dates = sorted(counter.items())
+    dates = [str(d[0]) for d in sorted_dates]
+    counts = [d[1] for d in sorted_dates]
+
+    return render_template("achievement_trend.html", appid=appid, dates=dates, counts=counts)
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=3000)

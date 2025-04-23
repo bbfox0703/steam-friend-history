@@ -3,7 +3,7 @@
 # Steam Friend History
 
 一個輕量級、可在Raspberry Pi 5上跑的系統，可記錄自己的Steam好友列表與變化。  
-Steam api key可不外流，自己用就好。  
+Steam api key可不用外流，自己用就好。  
 好友列表要公開，不然api抓不到會變空值。  
 
 ## 📦 目前功能

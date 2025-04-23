@@ -199,7 +199,16 @@ def history():
 
     try:
         with open("database/friend_changes.json", "r") as f:
-            changes = json.load(f)
+            raw_changes = json.load(f)
+            changes = {}
+            for time_str, change in raw_changes.items():
+                try:
+                    dt = datetime.strptime(time_str, "%Y-%m-%d %H:%M:%S")
+                    dt = dt.replace(tzinfo=tz)
+                    ts = int(dt.timestamp())  # Unix timestamp 秒數
+                    changes[ts] = change
+                except Exception as e:
+                    print(f"⚠️ 時間字串格式錯誤：{time_str}, error: {e}")
     except:
         changes = {}
 

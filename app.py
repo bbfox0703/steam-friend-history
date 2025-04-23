@@ -333,16 +333,17 @@ def trend():
 @app.route('/status-board')
 def status_board():
     friends = get_friend_data()
+    show_online_only = request.args.get('online_only') == 'on'
 
-    # 依在線狀態與最後上線時間排序：在線在前，離線依照 lastlogoff 遞減排序
     def sort_key(f):
         state = f.get('personastate', 0)
         lastlogoff = f.get('lastlogoff') or 0
         return (-1 if state != 0 else 1, -lastlogoff)
 
-    sorted_friends = sorted(friends, key=sort_key)
+    filtered = [f for f in friends if not show_online_only or f.get('personastate', 0) != 0]
+    sorted_friends = sorted(filtered, key=sort_key)
 
-    return render_template('status_board.html', friends=sorted_friends, status_map=STATUS_MAP)
+    return render_template('status_board.html', friends=sorted_friends, status_map=STATUS_MAP, show_online_only=show_online_only)
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=3000)

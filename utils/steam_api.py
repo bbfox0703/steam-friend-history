@@ -74,6 +74,21 @@ def save_json(path, data):
     with open(path, 'w') as f:
         json.dump(data, f, indent=2)
 
+def update_trend_log(enriched_friends):
+    path = "database/friend_trend.json"
+    data = {}
+
+    if os.path.exists(path):
+        with open(path, "r", encoding="utf-8") as f:
+            data = json.load(f)
+
+    for f in enriched_friends:
+        ts = datetime.fromtimestamp(int(f.get("friend_since", 0))).strftime("%Y-%m-%d")
+        data[ts] = data.get(ts, 0) + 1
+
+    with open(path, "w", encoding="utf-8") as f:
+        json.dump(data, f, indent=2)  
+
 def update_friend_list():
     friend_list = fetch_friend_list()
     steam_ids = [f['steamid'] for f in friend_list]
@@ -127,4 +142,5 @@ def update_friend_list():
     save_json(HISTORY_PATH, name_history)
     save_json(CHANGELOG_PATH, changes)
     backup_friend_data(enriched_friends)
+    update_trend_log(enriched_friends)
     return len(enriched_friends)

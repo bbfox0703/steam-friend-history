@@ -13,7 +13,7 @@
                     <ul>
                     {% for record in logs %}
 					<li>
-						<time class="datetime-auto" data-timestamp="{{ record.time }}">{{ record.time }}</time>
+						<time class="datetime-auto" data-timestamp="{{ record.ts }}">{{ record.time }}</time>
 						：{{ record.old }} → {{ record.new }}
 					</li>               
                    {% endfor %}

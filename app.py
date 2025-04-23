@@ -4,8 +4,17 @@ load_dotenv()
 from flask import Flask, render_template
 import utils.steam_api as steam_api
 import utils.backup as backup
+import json
+import os
 from datetime import datetime
 from collections import defaultdict, Counter
+
+def load_data():
+    path = os.path.join('database', 'friend_data.json')
+    if os.path.exists(path):
+        with open(path, 'r', encoding='utf-8') as f:
+            return json.load(f)
+    return []
 
 app = Flask(__name__)
 import os

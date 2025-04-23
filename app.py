@@ -56,27 +56,29 @@ def history():
 
     return render_template("history.html", name_history=name_history, changes=changes)
 
-@app.route('/country')
+@app.route("/country")
 def country():
+    from collections import defaultdict
+    import operator
+
+    sort_mode = request.args.get("sort", "count")
     friends = load_data()
-    country_counts = {}
-    country_members = {}
 
+    country_members = defaultdict(list)
     for f in friends:
-        code = f.get('country_code', '??')
-        country_counts[code] = country_counts.get(code, 0) + 1
-        country_members.setdefault(code, []).append(f)
+        code = f.get("country_code", "??")
+        country_members[code].append(f)
 
-    sort_mode = request.args.get('sort', 'count')  # 預設依人數
-    if sort_mode == 'name':
-        sorted_items = sorted(country_counts.items(), key=lambda x: x[0])
+    if sort_mode == "name":
+        sorted_items = sorted(country_members.items(), key=lambda x: x[0])
     else:
-        sorted_items = sorted(country_counts.items(), key=lambda x: x[1], reverse=True)
+        sorted_items = sorted(country_members.items(), key=lambda x: len(x[1]), reverse=True)
 
-    return render_template("country.html",
+    return render_template("country.html", 
                            sorted_items=sorted_items,
                            country_members=country_members,
                            sort_mode=sort_mode)
+
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=3000)

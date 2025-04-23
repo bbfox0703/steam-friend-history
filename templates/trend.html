@@ -1,60 +1,75 @@
 <!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
-    <meta charset="UTF-8">
-    <title>好友增減趨勢圖 - Steam 好友追蹤系統</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <meta charset="utf-8">
+    <title>好友趨勢圖 - Steam 好友追蹤系統</title>
     <link rel="stylesheet" href="/static/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
-<div class="container">
-    <h1>Steam 好友追蹤系統 - 趨勢分析</h1>
+    <div class="container">
+        <h1>Steam 好友追蹤系統 - 好友新增趨勢</h1>
 
-    <p>
-        統計方式：
-        {% if mode == 'day' %}
-            <b>日</b> | <a href="/trend?mode=month">月</a> | <a href="/trend?mode=year">年</a>
-        {% elif mode == 'year' %}
-            <a href="/trend?mode=day">日</a> | <a href="/trend?mode=month">月</a> | <b>年</b>
-        {% else %}
-            <a href="/trend?mode=day">日</a> | <b>月</b> | <a href="/trend?mode=year">年</a>
-        {% endif %}
-    </p>
+        <p>
+            顯示單位：
+            {% if mode == 'day' %}
+                <b>日</b> | <a href="/trend?mode=month">月</a> | <a href="/trend?mode=year">年</a>
+            {% elif mode == 'year' %}
+                <a href="/trend?mode=day">日</a> | <a href="/trend?mode=month">月</a> | <b>年</b>
+            {% else %}
+                <a href="/trend?mode=day">日</a> | <b>月</b> | <a href="/trend?mode=year">年</a>
+            {% endif %}
+        </p>
 
-    <canvas id="trendChart" width="1000" height="400"></canvas>
+        <canvas id="trendChart" width="1000" height="400"></canvas>
+    </div>
 
     <script>
         const ctx = document.getElementById('trendChart').getContext('2d');
-        const data = {
-            labels: {{ stats | map(attribute='group') | list | tojson }},
-            datasets: [
-                {
-                    label: '新增好友',
-                    data: {{ stats | map(attribute='added') | list | tojson }},
-                    backgroundColor: 'rgba(75, 192, 192, 0.6)'
-                },
-                {
-                    label: '移除好友',
-                    data: {{ stats | map(attribute='removed') | list | tojson }},
-                    backgroundColor: 'rgba(255, 99, 132, 0.6)'
-                }
-            ]
-        };
+        const stats = {{ stats | tojson }};
+        const labels = stats.map(s => s.group);
+        const data = stats.map(s => s.count);
 
-        const config = {
-            type: 'bar',
-            data: data,
+        const chart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: '新增好友數',
+                    data: data,
+                    borderWidth: 2,
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                    tension: 0.2,
+                    fill: true,
+                    pointRadius: 3,
+                    pointHoverRadius: 5
+                }]
+            },
             options: {
                 responsive: true,
                 scales: {
-                    x: { stacked: true },
-                    y: { stacked: true, beginAtZero: true }
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: '人數'
+                        }
+                    },
+                    x: {
+                        title: {
+                            display: true,
+                            text: '時間區間'
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: true
+                    }
                 }
             }
-        };
-
-        new Chart(ctx, config);
+        });
     </script>
-</div>
 </body>
 </html>

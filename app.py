@@ -11,6 +11,35 @@ import operator
 from datetime import datetime
 from collections import defaultdict, Counter
 
+country_name_map = {
+    "TW": "Taiwan", "CN": "China", "HK": "Hong Kong", "MO": "Macau",
+    "AU": "Australia", "BH": "Bahrain", "BT": "Bhutan", "BN": "Brunei Darussalam",
+    "KH": "Cambodia", "FJ": "Fiji", "GU": "Guam", "IN": "India", "ID": "Indonesia",
+    "IR": "Iran", "IL": "Israel", "JP": "Japan", "JO": "Jordan", "KW": "Kuwait",
+    "KR": "Korea", "LA": "Lao", "MY": "Malaysia", "NR": "Nauru", "NZ": "New Zealand",
+    "OM": "Oman", "PK": "Pakistan", "PG": "Papua New Guinea", "PH": "Philippines",
+    "QA": "Qatar", "SG": "Singapore", "SA": "Saudi Arabia", "SB": "Solomon Islands",
+    "LK": "Sri Lanka", "SY": "Syrian Arab Republic", "TH": "Thailand", "TR": "Turkey",
+    "AE": "United Arab Emirates", "VN": "Viet Nam", "YE": "Yemen", "AM": "Armenia",
+    "AT": "Austria", "AZ": "Azerbaijan", "BY": "Belarus", "BE": "Belgium", "BG": "Bulgaria",
+    "CY": "Cyprus", "CZ": "Czech", "DK": "Denmark", "EE": "Estonia", "FI": "Finland",
+    "FR": "France", "GE": "Georgia", "DE": "Germany", "GB": "United Kingdom", "GR": "Greece",
+    "HU": "Hungary", "IE": "Ireland", "IT": "Italy", "KZ": "Kazakhstan", "KG": "Kyrgyzstan",
+    "LV": "Latvia", "LT": "Lithuania", "LU": "Luxembourg", "MT": "Malta", "MD": "Moldova",
+    "NL": "Netherlands", "NO": "Norway", "PL": "Poland", "PT": "Portugal", "RO": "Romania",
+    "RU": "Russian Federation", "SK": "Slovakia", "SI": "Slovenia", "ES": "Spain", "CH": "Switzerland",
+    "SE": "Sweden", "TJ": "Tajikistan", "TM": "Turkmenistan", "UA": "Ukraine", "UZ": "Uzbekistan",
+    "CA": "Canada", "US": "United States", "AR": "Argentina", "BB": "Barbados", "BO": "Bolivia",
+    "BR": "Brazil", "CL": "Chile", "CO": "Colombia", "CR": "Costa Rica", "EC": "Ecuador",
+    "SV": "El Salvador", "GT": "Guatemala", "HN": "Honduras", "JM": "Jamaica", "MX": "Mexico",
+    "PA": "Panama", "PY": "Paraguay", "PE": "Peru", "PR": "Puerto Rico", "UY": "Uruguay",
+    "VE": "Venezuela", "BJ": "Benin", "CI": "Ivory Coast (Cote D'Ivoire)", "DJ": "Djibouti",
+    "EG": "Egypt", "ET": "Ethiopia", "GH": "Ghana", "KE": "Kenya", "LS": "Lesotho",
+    "MG": "Madagascar", "MW": "Malawi", "ML": "Mali", "MU": "Mauritius", "MZ": "Mozambique",
+    "NE": "Niger", "NG": "Nigeria", "SN": "Senegal", "SL": "Sierra Leone", "ZA": "South Africa",
+    "SD": "Sudan", "TZ": "Tanzania", "TG": "Togo", "??": "Unknown"
+}
+
 def load_data():
     path = os.path.join('database', 'friends.json')
     if os.path.exists(path):
@@ -118,19 +147,6 @@ def country():
         sorted_items.sort(key=lambda x: x[0])
     else:
         sorted_items.sort(key=lambda x: x[1], reverse=True)
-
-    # 加上國名對照表
-    country_name_map = {
-        "JP": "Japan",
-        "TW": "Taiwan",
-        "US": "United States",
-        "HK": "Hong Kong",
-        "CA": "Canada",
-        "RU": "Russia",
-        "GB": "United Kingdom",
-        "PL": "Poland",
-        "??": "Unknown"
-    }
 
     return render_template("country.html",
                            sorted_items=sorted_items,

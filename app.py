@@ -146,7 +146,7 @@ def filter():
 @app.route("/trend")
 def trend():
     mode = request.args.get("mode", "month")  # 預設為月份
-    path = "database/friend_changes.json"
+    path = "database/friend_trend.json"
 
     if not os.path.exists(path):
         return "尚無統計資料"
@@ -154,31 +154,24 @@ def trend():
     with open(path, "r", encoding="utf-8") as f:
         raw = json.load(f)
 
-    records = []
-    for ts, change in raw.items():
+    trend_data = defaultdict(int)
+    for datestr, count in raw.items():
         try:
-            date = datetime.strptime(ts, "%Y-%m-%d %H:%M:%S")
-            added = len(change.get("added", []))
-            removed = len(change.get("removed", []))
-            records.append({"date": date, "added": added, "removed": removed})
+            date = datetime.strptime(datestr, "%Y-%m-%d")
+            if mode == "day":
+                group = date.strftime("%Y-%m-%d")
+            elif mode == "year":
+                group = date.strftime("%Y")
+            else:
+                group = date.strftime("%Y-%m")
+            trend_data[group] += count
         except:
             continue
 
-    df = pd.DataFrame(records)
-    if df.empty:
-        return "尚無可視覺化的統計資料"
+    sorted_data = sorted(trend_data.items())
+    stats = [{"group": k, "added": v, "removed": 0} for k, v in sorted_data]  # 統一格式
 
-    if mode == "day":
-        df["group"] = df["date"].dt.to_period("D")
-    elif mode == "year":
-        df["group"] = df["date"].dt.year
-    else:
-        df["group"] = df["date"].dt.to_period("M")
-
-    stat = df.groupby("group")[["added", "removed"]].sum().reset_index()
-    stat["group"] = stat["group"].astype(str)
-
-    return render_template("trend.html", stats=stat.to_dict(orient="records"), mode=mode)
+    return render_template("trend.html", stats=stats, mode=mode)
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=3000)

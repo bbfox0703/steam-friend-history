@@ -33,7 +33,28 @@
 <script>
     const ctx = document.getElementById('trendChart').getContext('2d');
     const stats = {{ stats | tojson }};
-    const labels = stats.map(s => s.group);
+    const rawLabels = stats.map(s => s.group);
+	const labels = rawLabels.map(label => {
+		// 根據 mode 判斷格式
+		let date;
+		if (label.length === 4) {
+			// 年，例如 "2025"
+			date = new Date(`${label}-01-01`);
+		} else if (label.length === 7) {
+			// 月份，例如 "2025-04"
+			date = new Date(`${label}-01`);
+		} else {
+			// 日期，例如 "2025-04-23"
+			date = new Date(label);
+		}
+
+		return date.toLocaleDateString('zh-TW', {
+			year: 'numeric',
+			month: '2-digit',
+			day: '2-digit',
+			timeZone: 'Asia/Taipei'
+		});
+	});
     const addedData = stats.map(s => s.added);
     const removedData = stats.map(s => s.removed);
 

@@ -60,6 +60,12 @@ def history():
 
     all_friends = steam_api.get_friend_data()
     friend_map = {f["steamid"]: f for f in all_friends}
+    
+    for ts, change in changes.items():
+    for sid in change.get("added", []):
+        if sid not in friend_map:
+            print(f"❗️ {sid} not found in friend_map (added)")
+
 
     # 加入歷史備份資料
     backup_dir = "./backups"

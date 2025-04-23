@@ -183,6 +183,8 @@ def trend():
     stat.rename(columns={"index": "group"}, inplace=True)
     stat["group"] = stat["group"].astype(str)
 
+    print(stat.head())
+  
     return render_template("trend.html", stats=stat.to_dict(orient="records"), mode=mode)
 
 if __name__ == '__main__':

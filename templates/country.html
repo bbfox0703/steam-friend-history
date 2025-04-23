@@ -1,40 +1,49 @@
 <!DOCTYPE html>
-<html>
+<html lang="zh-Hant">
 <head>
-    <meta charset="utf-8">
-    <title>好友國別分析</title>
+    <meta charset="UTF-8">
+    <title>好友國別分析 - Steam 好友追蹤系統</title>
     <link rel="stylesheet" href="/static/style.css">
-    <script>
-        function toggleList(id) {
-            const el = document.getElementById(id);
-            el.style.display = el.style.display === 'none' ? 'block' : 'none';
-        }
-    </script>
 </head>
 <body>
-    <h1>好友國別分析</h1>
-    {% if stats %}
-        <ul>
-        {% for code, friends in stats %}
-            <li>
-                <strong onclick="toggleList('list_{{ code }}')">
-                    {{ '未知' if code == '??' else code }}：{{ friends | length }} 人
-                </strong>
-                <ul id="list_{{ code }}" style="display: none;">
-                    {% for friend in friends %}
-                        <li>
-                            <a href="{{ friend.profile_url }}" target="_blank">
-                                <img src="{{ friend.avatar }}" width="24" height="24">
-                                {{ friend.persona_name }}
-                            </a>
-                        </li>
-                    {% endfor %}
-                </ul>
-            </li>
-        {% endfor %}
+    <div class="container">
+        <h1>Steam 好友追蹤系統 - 國別分析</h1>
+
+        <div>
+            排序：
+            {% if sort_mode == 'count' %}
+                <b>人數</b> |
+                <a href="/country?sort=name">國名</a>
+            {% else %}
+                <a href="/country?sort=count">人數</a> |
+                <b>國名</b>
+            {% endif %}
+        </div>
+
+        <ul class="country-list">
+            {% for code, count in sorted_items %}
+                <li>
+                    <details>
+                        <summary>
+                            <strong>{{ code }}</strong>：{{ count }} 人
+                        </summary>
+                        <ul class="friend-list">
+                            {% for friend in country_members[code] %}
+                                <li class="friend-item">
+                                    <a href="{{ friend.profile_url }}" target="_blank" style="display: flex; text-decoration: none; color: inherit;">
+                                        <img src="{{ friend.avatar if friend.avatar else '/static/default-avatar.png' }}" alt="avatar">
+                                        <div class="friend-info">
+                                            <strong>{{ friend.persona_name or '[未知名稱]' }}</strong><br>
+                                            <small>加入於 {{ friend.friend_since | datetimeformat }}</small>
+                                        </div>
+                                    </a>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    </details>
+                </li>
+            {% endfor %}
         </ul>
-    {% else %}
-        <p>目前無國別資料。</p>
-    {% endif %}
+    </div>
 </body>
 </html>

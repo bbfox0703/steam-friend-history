@@ -4,5 +4,5 @@
 curl http://localhost:3000/update
 
 # 保存快照（只留最近 30 份）
-cp ./database/friends.json ./backups/friends_$(date +'%Y%m%d_%H%M%S').json
-ls -1t ./backups/friends_*.json | tail -n +31 | xargs rm -f
+cp ../database/friends.json ../backups/friends_$(date +'%Y%m%d_%H%M%S').json
+ls -1t ../backups/friends_*.json | tail -n +31 | xargs rm -f

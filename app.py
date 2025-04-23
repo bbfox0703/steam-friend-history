@@ -8,6 +8,7 @@ import json
 import os
 from datetime import datetime
 from collections import defaultdict, Counter
+import operator
 
 def load_data():
     path = os.path.join('database', 'friends.json')
@@ -58,9 +59,6 @@ def history():
 
 @app.route("/country")
 def country():
-    from collections import defaultdict
-    import operator
-
     sort_mode = request.args.get("sort", "count")
     friends = load_data()
 
@@ -69,16 +67,17 @@ def country():
         code = f.get("country_code", "??")
         country_members[code].append(f)
 
+    # 正確處理排序所需資料
+    sorted_items = [(code, len(friends)) for code, friends in country_members.items()]
     if sort_mode == "name":
-        sorted_items = sorted(country_members.items(), key=lambda x: x[0])
+        sorted_items.sort(key=lambda x: x[0])
     else:
-        sorted_items = sorted(country_members.items(), key=lambda x: len(x[1]), reverse=True)
+        sorted_items.sort(key=lambda x: x[1], reverse=True)
 
-    return render_template("country.html", 
+    return render_template("country.html",
                            sorted_items=sorted_items,
                            country_members=country_members,
                            sort_mode=sort_mode)
-
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=3000)

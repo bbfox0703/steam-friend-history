@@ -1,77 +1,67 @@
-<!DOCTYPE html>
-<html lang="zh-Hant">
-<head>
-    <meta charset="UTF-8">
-    <title>國別統計圖表 - Steam 好友追蹤系統</title>
-    <link rel="stylesheet" href="/static/style.css">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-</head>
-<body>
-    <div class="container">
-        <h1>Steam 好友追蹤系統 - 國別統計圖表</h1>
-        <!-- 🔗 功能導航區 -->
-        <div style="margin-bottom: 1em;">
-            <strong>功能選單：</strong>
-            <a href="/">好友清單</a> |
-            <a href="/history">變更紀錄</a> |
-            <a href="/country">國別分析</a> |
-            國別統計圖 |
-            <a href="/trend">好友趨勢圖</a> |
-            <a href="/status-board">好友狀態看板</a> |
-            <a href="/filter">條件篩選</a> |
-            <a href="/update">更新好友資料 (非必要)</a> |
-        </div>		
-        <canvas id="countryChart" width="1000" height="500"></canvas>
-    </div>
-    <script>
-        const stats = {{ stats | tojson }};
-        const labels = stats.map(item => item.name + ' (' + item.code + ')');
-        const values = stats.map(item => item.count);
+{% extends "base.html" %}
 
-        const ctx = document.getElementById('countryChart').getContext('2d');
-        const chart = new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: labels,
-                datasets: [{
-                    label: '好友人數',
-                    data: values,
-                    borderWidth: 1,
-                    backgroundColor: 'rgba(54, 162, 235, 0.6)',
-                    borderColor: 'rgba(54, 162, 235, 1)'
-                }]
-            },
-            options: {
-                indexAxis: 'y',
-                responsive: true,
-                plugins: {
-                    legend: {
-                        display: false
-                    },
-                    tooltip: {
-                        callbacks: {
-                            label: function(context) {
-                                return '好友人數: ' + context.raw;
-                            }
-                        }
-                    }
+{% block title %}國別統計圖表 - Steam 好友追蹤系統{% endblock %}
+
+{% block extra_head %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1>Steam 好友追蹤系統 - 國別統計圖表</h1>
+    <canvas id="countryChart" width="1000" height="500"></canvas>
+</div>
+{% endblock %}
+
+{% block extra_script %}
+<script>
+    const stats = {{ stats | tojson }};
+    const labels = stats.map(item => item.name + ' (' + item.code + ')');
+    const values = stats.map(item => item.count);
+
+    const ctx = document.getElementById('countryChart').getContext('2d');
+    const chart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: '好友人數',
+                data: values,
+                borderWidth: 1,
+                backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                borderColor: 'rgba(54, 162, 235, 1)'
+            }]
+        },
+        options: {
+            indexAxis: 'y',
+            responsive: true,
+            plugins: {
+                legend: {
+                    display: false
                 },
-                scales: {
-                    x: {
-                        beginAtZero: true,
-                        title: {
-                            display: true,
-                            text: '人數'
-                        }
-                    },
-                    y: {
-                        ticks: {
-                            autoSkip: false
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return '好友人數: ' + context.raw;
                         }
                     }
                 }
+            },
+            scales: {
+                x: {
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: '人數'
+                    }
+                },
+                y: {
+                    ticks: {
+                        autoSkip: false
+                    }
+                }
             }
-        });
-    </script>
-</body>
-</html>
+        }
+    });
+</script>
+{% endblock %}

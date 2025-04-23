@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="utf-8">
+    <title>國別統計圖表 - Steam 好友追蹤系統</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h1>Steam 好友追蹤系統 - 國別統計圖表</h1>
+
+        <canvas id="countryChart" width="800" height="500"></canvas>
+    </div>
+
+    <script>
+        const stats = {{ stats | tojson }};
+        const labels = stats.map(s => s.country);
+        const counts = stats.map(s => s.count);
+
+        new Chart(document.getElementById('countryChart'), {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: '好友人數',
+                    data: counts,
+                    backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: '人數'
+                        }
+                    },
+                    x: {
+                        title: {
+                            display: true,
+                            text: '國家代碼'
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>

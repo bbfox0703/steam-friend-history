@@ -27,7 +27,7 @@
     <h1>好友增減紀錄</h1>
     {% if changes %}
         <ul>
-        {% for timestamp, change in changes.items()|dictsort(reverse=true) %}
+        {% for timestamp, change in changes|dictsort(reverse=true) %}
             <li>
                 <strong>{{ timestamp }}</strong><br>
                 {% if change.added %}

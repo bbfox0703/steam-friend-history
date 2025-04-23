@@ -37,7 +37,8 @@ country_name_map = {
     "EG": "Egypt", "ET": "Ethiopia", "GH": "Ghana", "KE": "Kenya", "LS": "Lesotho",
     "MG": "Madagascar", "MW": "Malawi", "ML": "Mali", "MU": "Mauritius", "MZ": "Mozambique",
     "NE": "Niger", "NG": "Nigeria", "SN": "Senegal", "SL": "Sierra Leone", "ZA": "South Africa",
-    "SD": "Sudan", "TZ": "Tanzania", "TG": "Togo", "??": "Unknown"
+    "SD": "Sudan", "TZ": "Tanzania", "TG": "Togo", "SM": "San Marino", 
+    "BA": "Bosnia and Herzegovina", "FR": "France", "??": "Unknown"
 }
 
 def load_data():

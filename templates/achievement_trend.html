@@ -7,13 +7,29 @@
 
 <p>已達成 {{ unlocked }} / {{ total }} 個成就</p>
 
-<p>顯示方式：
-    {% if mode == "day" %}
-        <b>日</b> | <a href="?mode=month">月</a>
-    {% else %}
-        <a href="?mode=day">日</a> | <b>月</b>
-    {% endif %}
-</p>
+<style>
+.toggle-buttons a {
+    display: inline-block;
+    padding: 6px 12px;
+    margin: 0 2px;
+    border: 1px solid #007bff;
+    background-color: white;
+    color: #007bff;
+    text-decoration: none;
+    border-radius: 4px;
+    font-weight: bold;
+}
+.toggle-buttons a.active {
+    background-color: #007bff;
+    color: white;
+}
+</style>
+
+<div class="toggle-buttons">
+    <span>顯示方式：</span>
+    <a href="?mode=day" class="{{ 'active' if mode == 'day' else '' }}">日</a>
+    <a href="?mode=month" class="{{ 'active' if mode == 'month' else '' }}">月</a>
+</div>
 
 <canvas id="achieveChart" width="1000" height="400"></canvas>
 

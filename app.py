@@ -113,17 +113,31 @@ def country():
         code = f.get("country_code", "??")
         country_members[code].append(f)
 
-    # 正確處理排序所需資料
     sorted_items = [(code, len(friends)) for code, friends in country_members.items()]
     if sort_mode == "name":
         sorted_items.sort(key=lambda x: x[0])
     else:
         sorted_items.sort(key=lambda x: x[1], reverse=True)
 
+    # 加上國名對照表
+    country_name_map = {
+        "JP": "Japan",
+        "TW": "Taiwan",
+        "US": "United States",
+        "HK": "Hong Kong",
+        "CA": "Canada",
+        "RU": "Russia",
+        "GB": "United Kingdom",
+        "PL": "Poland",
+        "??": "Unknown"
+    }
+
     return render_template("country.html",
                            sorted_items=sorted_items,
                            country_members=country_members,
-                           sort_mode=sort_mode)
+                           sort_mode=sort_mode,
+                           country_name_map=country_name_map)
+
 
 @app.route("/filter")
 def filter():

@@ -4,11 +4,12 @@ load_dotenv()
 from flask import Flask, render_template, request, redirect, url_for
 import utils.steam_api as steam_api
 import utils.backup as backup
+import pandas as pd
 import json
 import os
+import operator
 from datetime import datetime
 from collections import defaultdict, Counter
-import operator
 
 def load_data():
     path = os.path.join('database', 'friends.json')
@@ -141,6 +142,43 @@ def filter():
         friends = [f for f in friends if f.get("country_code") and f.get("country_code") != "??"]
 
     return render_template("filter.html", friends=friends, mode=mode)
+
+@app.route("/trend")
+def trend():
+    mode = request.args.get("mode", "month")  # 預設為月份
+    path = "database/friend_changes.json"
+
+    if not os.path.exists(path):
+        return "尚無統計資料"
+
+    with open(path, "r", encoding="utf-8") as f:
+        raw = json.load(f)
+
+    records = []
+    for ts, change in raw.items():
+        try:
+            date = datetime.strptime(ts, "%Y-%m-%d %H:%M:%S")
+            added = len(change.get("added", []))
+            removed = len(change.get("removed", []))
+            records.append({"date": date, "added": added, "removed": removed})
+        except:
+            continue
+
+    df = pd.DataFrame(records)
+    if df.empty:
+        return "尚無可視覺化的統計資料"
+
+    if mode == "day":
+        df["group"] = df["date"].dt.to_period("D")
+    elif mode == "year":
+        df["group"] = df["date"].dt.year
+    else:
+        df["group"] = df["date"].dt.to_period("M")
+
+    stat = df.groupby("group")[["added", "removed"]].sum().reset_index()
+    stat["group"] = stat["group"].astype(str)
+
+    return render_template("trend.html", stats=stat.to_dict(orient="records"), mode=mode)
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=3000)

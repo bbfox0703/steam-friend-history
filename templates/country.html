@@ -18,7 +18,7 @@
         {% for code, friends in stats %}
             <li>
                 <strong onclick="toggleList('list_{{ code }}')">
-                    {{ code }}：{{ friends | length }} 人
+                    {{ '未知' if code == '??' else code }}：{{ friends | length }} 人
                 </strong>
                 <ul id="list_{{ code }}" style="display: none;">
                     {% for friend in friends %}

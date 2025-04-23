@@ -37,7 +37,14 @@ def fetch_friend_profiles(steam_ids):
         if response.status_code == 200:
             players = response.json().get('response', {}).get('players', [])
             for p in players:
-                result[p['steamid']] = p
+                result[p['steamid']] = {
+                    'personaname': p.get('personaname', ''),
+                    'avatar': p.get('avatar', ''),
+                    'profileurl': p.get('profileurl', ''),
+                    'loccountrycode': p.get('loccountrycode', '??'),
+                    'lastlogoff': p.get('lastlogoff'),  # timestamp
+                    'personastate': p.get('personastate', 0)  # 0=offline
+                }
         else:
             print(f"⚠️ Failed batch {i} - Status {response.status_code}")
 
@@ -120,7 +127,9 @@ def update_friend_list():
             'persona_name': new_name,
             'avatar': profile.get('avatar', ''),
             'profile_url': profile.get('profileurl', f'https://steamcommunity.com/profiles/{sid}'),
-            'country_code': profile.get('loccountrycode', '??')
+            'country_code': profile.get('loccountrycode', '??'),
+            'lastlogoff': profile.get('lastlogoff'),
+            'personastate': profile.get('personastate')
         })
 
     save_friend_data(enriched_friends)

@@ -3,7 +3,7 @@ load_dotenv()
 
 from flask import Flask, render_template, request, redirect, url_for
 import utils.steam_api as steam_api
-#from utils.steam_api import get_friend_data
+from utils.steam_api import get_friend_data
 import utils.backup as backup
 import pandas as pd
 import json

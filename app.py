@@ -55,7 +55,13 @@ def history():
     except:
         changes = {}
 
-    return render_template("history.html", name_history=name_history, changes=changes)
+    # ⭐ 加這行來載入 steamid → 暱稱對照表
+    friend_map = {f['steamid']: f for f in steam_api.get_friend_data()}
+
+    return render_template("history.html", 
+                           name_history=name_history, 
+                           changes=changes,
+                           friend_map=friend_map)
 
 @app.route("/country")
 def country():

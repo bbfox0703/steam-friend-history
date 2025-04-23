@@ -1,0 +1,1 @@
+* * * * * root /app/cronjob/update.sh >> /var/log/cron_exec.log 2>&1

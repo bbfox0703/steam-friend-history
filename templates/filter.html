@@ -1,37 +1,54 @@
 {% extends "base.html" %}
 
-{% block title %}篩選模式{% endblock %}
+{% block title %}好友條件篩選{% endblock %}
 
 {% block content %}
-    <h1>Steam Friend Tracker - 篩選模式</h1>
-    <div>
-        <strong>篩選選項：</strong>
-        <a href="/filter?mode=all">全部</a> |
-        <a href="/filter?mode=named">只顯示有暱稱與頭像的</a> |
-        <a href="/filter?mode=with_country">只顯示有國別的</a>
-    </div>
+<h1>Steam 好友條件篩選</h1>
 
-    <hr>
+<form method="get" style="margin-bottom: 1em;">
+    <label><input type="checkbox" name="online_only" {% if request.args.get('online_only') %}checked{% endif %}> 只顯示在線上</label>
+    <label><input type="checkbox" name="has_avatar" {% if request.args.get('has_avatar') %}checked{% endif %}> 有頭像</label>
+    <label><input type="checkbox" name="has_country" {% if request.args.get('has_country') %}checked{% endif %}> 有國別</label>
+    <label>最近幾天內有上線：
+        <input type="number" name="recent_days" value="{{ request.args.get('recent_days', '') }}" min="1" max="365" style="width: 60px;">
+    </label>
+    <label>指定國家：
+        <select name="country_code">
+            <option value="">（不限）</option>
+            {% for code in all_countries %}
+                <option value="{{ code }}" {% if request.args.get('country_code') == code %}selected{% endif %}>{{ code }}</option>
+            {% endfor %}
+        </select>
+    </label>
+    <button type="submit">套用篩選</button>
+</form>
 
-    {% if friends %}
-        <ul class="friend-grid">
-        {% for friend in friends %}
-            <li>
-                <a class="friend-item" href="{{ friend.profile_url }}" target="_blank">
-                    <img src="{{ friend.avatar if friend.avatar else '/static/default-avatar.png' }}" alt="avatar">
-                    <div class="friend-info">
-                        <strong>{{ friend.persona_name if friend.persona_name else '[未知名稱]' }}</strong>
-                        <small>加入於 {{ friend.friend_since | datetimeformat }}
-                            {% if friend.country_code %}
-                                （{{ friend.country_code if friend.country_code != '??' else '未知' }}）
-                            {% endif %}
-                        </small>
-                    </div>
-                </a>
-            </li>
-        {% endfor %}
-        </ul>
-    {% else %}
-        <p>目前無符合條件的好友。</p>
-    {% endif %}
+<hr>
+
+{% if friends %}
+    <ul class="friend-grid">
+    {% for friend in friends %}
+        <li>
+            <a class="friend-item" href="{{ friend.profile_url }}" target="_blank">
+                <img src="{{ friend.avatar if friend.avatar else '/static/default-avatar.png' }}" alt="avatar">
+                <div class="friend-info">
+                    <strong>{{ friend.persona_name if friend.persona_name else '[未知名稱]' }}</strong>
+                    <small>
+                        加入於 {{ friend.friend_since | datetimeformat }}<br>
+                        狀態：{{ status_map.get(friend.personastate, '未知') }}<br>
+                        {% if friend.lastlogoff %}
+                            上次離線：{{ friend.lastlogoff | datetimeformat }}
+                        {% endif %}
+                        {% if friend.country_code %}
+                            <br>國別：{{ friend.country_code }}
+                        {% endif %}
+                    </small>
+                </div>
+            </a>
+        </li>
+    {% endfor %}
+    </ul>
+{% else %}
+    <p>目前無符合條件的好友。</p>
+{% endif %}
 {% endblock %}

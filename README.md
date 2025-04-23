@@ -16,7 +16,14 @@ Steam api key可不外流，自己用就好。
 - 點擊好友可以連到Steam個人頁面
 - 使用Docker簡單部署，可運行於Raspberry Pi 5 (使用SSD裝置)
 
+## 圖例：好友清單
 ![首頁預覽](./docs/index.png)
+## 圖例：國別分析
+![國別分析](./docs/country.png)
+## 圖例：好友趨勢圖
+![好友趨勢圖](./docs/trend.png)
+## 圖例：好友狀態看板 
+![好友狀態看板 ](./docs/status_board.png)
 
 ---
 

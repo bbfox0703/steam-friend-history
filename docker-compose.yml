@@ -8,4 +8,6 @@ services:
     volumes:
       - ./backups:/app/backups
       - ./database:/app/database
+    env_file:
+      - .env      
     restart: unless-stopped

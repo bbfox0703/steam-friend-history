@@ -1,7 +1,7 @@
 from dotenv import load_dotenv
 load_dotenv()
 
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, request, redirect, url_for, jsonify
 import utils.steam_api as steam_api
 from utils.steam_api import get_friend_data
 import utils.backup as backup
@@ -94,6 +94,41 @@ def load_data():
         with open(path, 'r', encoding='utf-8') as f:
             return json.load(f)
     return []
+    
+def filter_friend_list(args):
+    friends = get_friend_data()
+
+    # 取得查詢參數
+    online_only = args.get('online_only') == 'true'
+    has_avatar = args.get('has_avatar') == 'true'
+    has_country = args.get('has_country') == 'true'
+    recent_days = args.get('recent_days')
+    country_filter = args.get('country_code', '')
+
+    now = datetime.utcnow()
+    filtered = []
+
+    for f in friends:
+        if online_only and f.get('personastate', 0) == 0:
+            continue
+        if has_avatar and not f.get('avatar'):
+            continue
+        if has_country and (not f.get('country_code') or f['country_code'] == '??'):
+            continue
+        if recent_days:
+            try:
+                days = int(recent_days)
+                last = int(f.get('lastlogoff', 0))
+                last_time = datetime.utcfromtimestamp(last)
+                if now - last_time > timedelta(days=days):
+                    continue
+            except:
+                pass
+        if country_filter and f.get('country_code', '').lower() != country_filter.lower():
+            continue
+        filtered.append(f)
+
+    return filtered    
 
 app = Flask(__name__)
 import os
@@ -223,42 +258,13 @@ def country_chart():
 
 @app.route('/filter', methods=['GET'])
 def filter_friends():
-    friends = get_friend_data()
+    friends = filter_friend_list(request.args)
+    all_countries = sorted(set(f['country_code'] for f in get_friend_data() if f.get('country_code') and f['country_code'] != '??'))
 
-    # 取得查詢參數
-    online_only = request.args.get('online_only') == 'on'
-    has_avatar = request.args.get('has_avatar') == 'on'
-    has_country = request.args.get('has_country') == 'on'
-    recent_days = request.args.get('recent_days')
-    country_filter = request.args.get('country_code', '')
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        return jsonify(friends)
 
-    now = datetime.utcnow()
-    filtered = []
-
-    for f in friends:
-        if online_only and f.get('personastate', 0) == 0:
-            continue
-        if has_avatar and not f.get('avatar'):
-            continue
-        if has_country and (not f.get('country_code') or f['country_code'] == '??'):
-            continue
-        if recent_days:
-            try:
-                days = int(recent_days)
-                last = int(f.get('lastlogoff', 0))
-                last_time = datetime.utcfromtimestamp(last)
-                if now - last_time > timedelta(days=days):
-                    continue
-            except:
-                pass
-        if country_filter and f.get('country_code', '').lower() != country_filter.lower():
-            continue
-        filtered.append(f)
-
-    # 取得所有國家代碼
-    all_countries = sorted(set(f['country_code'] for f in friends if f.get('country_code') and f['country_code'] != '??'))
-
-    return render_template('filter.html', friends=filtered, status_map=STATUS_MAP, all_countries=all_countries)
+    return render_template('filter.html', friends=friends, status_map=STATUS_MAP, all_countries=all_countries)
 
 @app.route("/trend")
 def trend():

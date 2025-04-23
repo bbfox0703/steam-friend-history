@@ -12,8 +12,11 @@
                     <strong><a href="https://steamcommunity.com/profiles/{{ sid }}" target="_blank">{{ sid }}</a></strong>
                     <ul>
                     {% for record in logs %}
-                        <li>{{ record.time }}：{{ record.old }} → {{ record.new }}</li>
-                    {% endfor %}
+					<li>
+						<time class="datetime-auto" data-timestamp="{{ record.time }}">{{ record.time }}</time>
+						：{{ record.old }} → {{ record.new }}
+					</li>               
+                   {% endfor %}
                     </ul>
                 </li>
             {% endfor %}
@@ -36,7 +39,7 @@
         <ul>
         {% for timestamp, change in changes|dictsort(reverse=true) %}
             <li>
-                <strong>{{ timestamp }}</strong>
+                <strong><time class="datetime-auto" data-timestamp="{{ timestamp }}">{{ timestamp }}</time></strong>
 
                 {% if change.added_info %}
                     <p>➕ 新增好友：</p>

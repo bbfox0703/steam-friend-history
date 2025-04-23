@@ -1,26 +1,25 @@
 {% extends "base.html" %}
 
-{% block title %}成就達成趨勢圖{% endblock %}
+{% block title %}AppID: {{ appid }} 成就趨勢圖{% endblock %}
 
 {% block content %}
-<div class="container">
-    <h1>AppID: {{ appid }} 的成就達成趨勢圖</h1>
+<h1>AppID: {{ appid }} 的成就達成趨勢圖</h1>
 
-    {% if error %}
-        <p style="color:red">{{ error }}</p>
-    {% else %}
-        <canvas id="achieveChart" width="1000" height="400"></canvas>
-    {% endif %}
-</div>
+{% if error %}
+    <p style="color:red">{{ error }}</p>
+{% else %}
+    <canvas id="achieveChart" width="1000" height="400"></canvas>
+{% endif %}
 {% endblock %}
 
 {% block extra_script %}
 {{ super() }}
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 {% if data %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
     const ctx = document.getElementById('achieveChart').getContext('2d');
     const data = {{ data | tojson }};
+
     const labels = data.map(d => d.date);
     const values = data.map(d => d.count);
 
@@ -55,8 +54,7 @@
                     }
                 }
             }
-        }
-    });
+        });
 </script>
 {% endif %}
 {% endblock %}

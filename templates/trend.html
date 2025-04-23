@@ -4,25 +4,50 @@
 
 {% block extra_head %}
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+.chart-wrapper {
+    width: 100%;
+    overflow-x: auto;
+    margin-bottom: 1em;
+}
+.chart-wrapper canvas {
+    min-width: 600px;
+    max-width: 100%;
+}
+.toggle-buttons a {
+    display: inline-block;
+    padding: 6px 12px;
+    margin: 0 2px;
+    border: 1px solid #007bff;
+    background-color: white;
+    color: #007bff;
+    text-decoration: none;
+    border-radius: 4px;
+    font-weight: bold;
+}
+.toggle-buttons a.active {
+    background-color: #007bff;
+    color: white;
+}
+</style>
 {% endblock %}
 
 {% block content %}
 <div class="container">
     <h1>Steam 好友追蹤系統 - 好友新增/移除趨勢</h1>
-    <p>
-        顯示單位：
-        {% if mode == 'day' %}
-            <b>日</b> | <a href="/trend?mode=month">月</a> | <a href="/trend?mode=year">年</a>
-        {% elif mode == 'year' %}
-            <a href="/trend?mode=day">日</a> | <a href="/trend?mode=month">月</a> | <b>年</b>
-        {% else %}
-            <a href="/trend?mode=day">日</a> | <b>月</b> | <a href="/trend?mode=year">年</a>
-        {% endif %}
-    </p>
+
+    <div class="toggle-buttons">
+        <span>顯示單位：</span>
+        <a href="/trend?mode=day" class="{{ 'active' if mode == 'day' else '' }}">日</a>
+        <a href="/trend?mode=month" class="{{ 'active' if mode == 'month' else '' }}">月</a>
+        <a href="/trend?mode=year" class="{{ 'active' if mode == 'year' else '' }}">年</a>
+    </div>
 
     {% if stats %}
-	    <button id="exportCsvBtn" style="margin-bottom: 1em;">⬇ 匯出 CSV</button>
-        <canvas id="trendChart" width="1000" height="400"></canvas>
+        <button id="exportCsvBtn">⬇ 匯出 CSV</button>
+        <div class="chart-wrapper">
+            <canvas id="trendChart" height="400"></canvas>
+        </div>
     {% else %}
         <p>尚無統計資料。</p>
     {% endif %}
@@ -32,51 +57,29 @@
 {% block extra_script %}
 {% if stats %}
 <script>
-	document.getElementById('exportCsvBtn').addEventListener('click', () => {
-		const headers = ['時間區間', '新增好友數', '移除好友數'];
-		const rows = stats.map(s => [s.group, s.added, s.removed]);
-
-		const csvContent = [headers, ...rows]
-			.map(row => row.join(','))
-			.join('\n');
-
-		const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-		const url = URL.createObjectURL(blob);
-
-		const link = document.createElement('a');
-		link.setAttribute('href', url);
-		link.setAttribute('download', `steam_friend_trend_${Date.now()}.csv`);
-		link.click();
-	});
-
-    const ctx = document.getElementById('trendChart').getContext('2d');
     const stats = {{ stats | tojson }};
     const rawLabels = stats.map(s => s.group);
-	const labels = rawLabels.map(label => {
-		// 根據 mode 判斷格式
-		let date;
-		if (label.length === 4) {
-			// 年，例如 "2025"
-			date = new Date(`${label}-01-01`);
-		} else if (label.length === 7) {
-			// 月份，例如 "2025-04"
-			date = new Date(`${label}-01`);
-		} else {
-			// 日期，例如 "2025-04-23"
-			date = new Date(label);
-		}
+    const labels = rawLabels.map(label => {
+        let date;
+        if (label.length === 4) {
+            date = new Date(`${label}-01-01`);
+        } else if (label.length === 7) {
+            date = new Date(`${label}-01`);
+        } else {
+            date = new Date(label);
+        }
+        return date.toLocaleDateString('zh-TW', {
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+            timeZone: 'Asia/Taipei'
+        });
+    });
 
-		return date.toLocaleDateString('zh-TW', {
-			year: 'numeric',
-			month: '2-digit',
-			day: '2-digit',
-			timeZone: 'Asia/Taipei'
-		});
-	});
     const addedData = stats.map(s => s.added);
     const removedData = stats.map(s => s.removed);
 
-    new Chart(ctx, {
+    new Chart(document.getElementById('trendChart').getContext('2d'), {
         type: 'line',
         data: {
             labels: labels,
@@ -89,8 +92,7 @@
                     borderWidth: 2,
                     tension: 0.3,
                     fill: true,
-                    pointRadius: 3,
-                    pointHoverRadius: 5
+                    pointRadius: 3
                 },
                 {
                     label: '移除好友數',
@@ -100,8 +102,7 @@
                     borderWidth: 2,
                     tension: 0.3,
                     fill: true,
-                    pointRadius: 3,
-                    pointHoverRadius: 5
+                    pointRadius: 3
                 }
             ]
         },
@@ -136,6 +137,20 @@
                 }
             }
         }
+    });
+
+    document.getElementById('exportCsvBtn').addEventListener('click', () => {
+        const headers = ['時間區間', '新增好友數', '移除好友數'];
+        const rows = stats.map(s => [s.group, s.added, s.removed]);
+        const csvContent = [headers, ...rows].map(row => row.join(',')).join('\n');
+
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+
+        const link = document.createElement('a');
+        link.setAttribute('href', url);
+        link.setAttribute('download', `steam_friend_trend_${Date.now()}.csv`);
+        link.click();
     });
 </script>
 {% endif %}

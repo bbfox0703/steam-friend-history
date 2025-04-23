@@ -495,6 +495,12 @@ def achievement_trend(appid):
     steam_lang = lang_map.get(lang, "english")
     game_name = fetch_game_title(appid, steam_lang)
 
+    mode = request.args.get("mode", "day")
+    if mode == "month":
+        timeline.append(dt.strftime("%Y-%m"))  # 月份統一為 "2025-04"
+    else:
+        timeline.append(dt.strftime("%Y-%m-%d"))  # 仍以日為單位
+
     try:
         achievements = steam_api.fetch_achievements(appid)
     except Exception as e:
@@ -504,8 +510,11 @@ def achievement_trend(appid):
     for a in achievements:
         if a.get("achieved") == 1 and a.get("unlocktime"):
             dt = datetime.fromtimestamp(a["unlocktime"])
-            timeline.append(dt.date())
-
+            if mode == "month":
+                timeline.append(dt.strftime("%Y-%m"))
+            else:
+                timeline.append(dt.strftime("%Y-%m-%d"))
+                
     if not timeline:
         return render_template("achievement_trend.html", appid=appid, error="無達成成就資料", game_name=game_name)
 
@@ -518,7 +527,15 @@ def achievement_trend(appid):
 
     data = [{"date": d, "count": c} for d, c in zip(dates, counts)]
 
-    return render_template("achievement_trend.html", appid=appid, dates=dates, counts=counts, data=data, game_name=game_name, total=total, unlocked=unlocked)
+    return render_template("achievement_trend.html",
+                           appid=appid,
+                           game_name=game_name,
+                           dates=dates,
+                           counts=counts,
+                           data=data,
+                           total=total,
+                           unlocked=unlocked,
+                           mode=mode)
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=3000)

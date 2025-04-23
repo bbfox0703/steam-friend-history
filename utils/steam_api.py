@@ -46,7 +46,7 @@ def fetch_friend_profiles(steam_ids):
                     'personastate': p.get('personastate', 0)  # 0=offline
                 }
         else:
-            print(f"⚠️ Failed batch {i} - Status {response.status_code}")
+            print(f"⚠️ Failed batch {i} - Status {response.status_code} {response.text}")
 
         time.sleep(0.5)
 
@@ -137,3 +137,12 @@ def update_friend_list():
     save_json(CHANGELOG_PATH, changes)
     backup_friend_data(enriched_friends)
     return len(enriched_friends)
+    
+def fetch_achievements(appid, steam_id=None):
+    if steam_id is None:
+        steam_id = STEAM_ID
+    url = f"https://api.steampowered.com/ISteamUserStats/GetPlayerAchievements/v1/?key={API_KEY}&steamid={steam_id}&appid={appid}"
+    response = requests.get(url)
+    if response.status_code != 200:
+        raise Exception(f"Steam API Error: {response.status_code} {response.text}")
+    return response.json().get("playerstats", {}).get("achievements", [])    

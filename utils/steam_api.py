@@ -121,7 +121,7 @@ def update_friend_list():
                 'new': new_name
             })
 
-        enriched_friends.append({
+        enriched = {
             'steamid': sid,
             'friend_since': f['friend_since'],
             'persona_name': new_name,
@@ -130,7 +130,13 @@ def update_friend_list():
             'country_code': profile.get('loccountrycode', '??'),
             'lastlogoff': profile.get('lastlogoff'),
             'personastate': profile.get('personastate')
-        })
+        }
+
+        # 標記資料不完整
+        if enriched['persona_name'] == '' or enriched['avatar'] == '':
+            enriched['incomplete'] = True
+
+        enriched_friends.append(enriched)
 
     save_friend_data(enriched_friends)
     save_json(HISTORY_PATH, name_history)

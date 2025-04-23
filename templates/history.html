@@ -53,18 +53,18 @@
                 </ul>
             {% endif %}
 
-            {% if change.removed %}
-                <p>➖ 移除好友：</p>
-                <ul>
-                {% for sid in change.removed %}
-                    <li>
-                        <a href="https://steamcommunity.com/profiles/{{ sid }}" target="_blank">
-                            {{ sid }}
-                        </a>
-                    </li>
-                {% endfor %}
-                </ul>
-            {% endif %}
+			{% if change.removed_info %}
+				<p>➖ 移除好友：</p>
+				<ul>
+				{% for friend in change.removed_info %}
+					<li>
+						<a href="{{ friend.profile_url }}" target="_blank">
+							{{ friend.persona_name or friend.steamid }}
+						</a> 加入於 {{ friend.friend_since | datetimeformat }}
+					</li>
+				{% endfor %}
+				</ul>
+			{% endif %}
         </li>
     {% endfor %}
     </ul>

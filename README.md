@@ -64,3 +64,9 @@ git pull
 COMPOSE_BAKE=true docker compose build
 docker compose up -d
 ```
+
+## 連線網址
+http://伺服器ip:3000
+
+例如ip是192.168.1.100的話：
+http://192.168.1.100:3000

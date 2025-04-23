@@ -1,8 +1,11 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <meta charset="utf-8">
     <title>{% block title %}Steam 好友工具{% endblock %}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
+    {% block extra_head %}{% endblock %}
 </head>
 <body>
     <!-- 🔗 功能導航區 -->
@@ -19,5 +22,7 @@
     </div>
 
     {% block content %}{% endblock %}
+
+    {% block extra_script %}{% endblock %}
 </body>
 </html>

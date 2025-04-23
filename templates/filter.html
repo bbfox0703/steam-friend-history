@@ -1,62 +1,9 @@
-<!DOCTYPE html>
-<html lang="zh-Hant">
-<head>
-    <meta charset="utf-8">
-    <title>好友篩選清單</title>
-    <link rel="stylesheet" href="/static/style.css">
-    <style>
-    .friend-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-        gap: 12px;
-        padding: 0;
-        margin: 0;
-        list-style: none;
-    }
-    .friend-item {
-        display: flex;
-        background: #fff;
-        border-radius: 12px;
-        padding: 10px;
-        box-shadow: 0 1px 4px rgba(0,0,0,0.1);
-        align-items: center;
-        text-decoration: none;
-        color: inherit;
-    }
-    .friend-item img {
-        width: 32px;
-        height: 32px;
-        border-radius: 8px;
-        margin-right: 10px;
-    }
-    .friend-info {
-        display: flex;
-        flex-direction: column;
-    }
-    .friend-info strong {
-        font-size: 15px;
-        margin-bottom: 2px;
-    }
-    .friend-info small {
-        font-size: 13px;
-        color: #555;
-    }
-    </style>
-</head>
-<body>
+{% extends "base.html" %}
+
+{% block title %}篩選模式{% endblock %}
+
+{% block content %}
     <h1>Steam Friend Tracker - 篩選模式</h1>
-        <!-- 🔗 功能導航區 -->
-        <div style="margin-bottom: 1em;">
-            <strong>功能選單：</strong>
-            <a href="/">好友清單</a> |
-            <a href="/history">變更紀錄</a> |
-            <a href="/country">國別分析</a> |
-            <a href="/country-chart">國別統計圖</a> |
-            <a href="/trend">好友趨勢圖</a> |
-            <a href="/status-board">好友狀態看板</a> |
-            條件篩選 |
-            <a href="/update">更新好友資料 (非必要)</a> |
-        </div>
     <div>
         <strong>篩選選項：</strong>
         <a href="/filter?mode=all">全部</a> |
@@ -87,5 +34,4 @@
     {% else %}
         <p>目前無符合條件的好友。</p>
     {% endif %}
-</body>
-</html>
+{% endblock %}

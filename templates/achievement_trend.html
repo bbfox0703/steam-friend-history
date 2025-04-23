@@ -5,21 +5,25 @@
 {% block content %}
 <h1>AppID: {{ appid }} 的成就達成趨勢圖</h1>
 
-{% if error %}
-    <p style="color:red">{{ error }}</p>
-{% else %}
-    <canvas id="achieveChart" width="1000" height="400"></canvas>
-{% endif %}
+<p>已達成 {{ achieved }} / {{ total }} 個成就</p>
+
+<p>
+    顯示方式：
+    {% if mode == 'day' %}
+        <b>日</b> | <a href="?mode=month">月</a>
+    {% else %}
+        <a href="?mode=day">日</a> | <b>月</b>
+    {% endif %}
+</p>
+
+<canvas id="achieveChart" width="1000" height="400"></canvas>
 {% endblock %}
 
 {% block extra_script %}
-{{ super() }}
-{% if data %}
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
     const ctx = document.getElementById('achieveChart').getContext('2d');
     const data = {{ data | tojson }};
-
     const labels = data.map(d => d.date);
     const values = data.map(d => d.count);
 
@@ -28,7 +32,7 @@
         data: {
             labels: labels,
             datasets: [{
-                label: '累積達成數',
+                label: '每日達成數',
                 data: values,
                 fill: true,
                 borderColor: 'rgba(54, 162, 235, 1)',
@@ -42,20 +46,13 @@
             scales: {
                 y: {
                     beginAtZero: true,
-                    title: {
-                        display: true,
-                        text: '累積成就數'
-                    }
+                    title: { display: true, text: '達成數' }
                 },
                 x: {
-                    title: {
-                        display: true,
-                        text: '日期'
-                    }
+                    title: { display: true, text: '{{ "月份" if mode == "month" else "日期" }}' }
                 }
             }
         }
     });
 </script>
-{% endif %}
 {% endblock %}

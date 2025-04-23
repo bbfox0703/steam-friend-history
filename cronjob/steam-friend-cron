@@ -1,2 +1,2 @@
-* * * * * root /app/cronjob/update.sh >> /var/log/cron_exec.log 2>&1
-* * * * * root echo "✅ Cron Ran at $(date)" >> /var/log/cron_exec.log
+*/5 * * * * root /app/cronjob/update.sh >> /var/log/cron_exec.log 2>&1
+*/5 * * * * root echo "✅ Cron Ran at $(date)" >> /var/log/cron_exec.log

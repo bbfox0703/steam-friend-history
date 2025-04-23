@@ -63,6 +63,25 @@
 const form = document.getElementById('filter-form');
 const list = document.getElementById('friend-list');
 
+const statusMap = {
+    0: '離線',
+    1: '在線上',
+    2: '忙碌',
+    3: '離開',
+    4: '請勿打擾',
+    5: '想交易',
+    6: '想玩遊戲'
+};
+
+// ✅ 單一綁定 change（適用全部欄位）
+form.addEventListener('change', fetchFiltered);
+
+// ✅ submit 攔截也走同一條路
+form.addEventListener('submit', e => {
+    e.preventDefault();
+    fetchFiltered();
+});
+
 function formatLocalTime(ts) {
     const date = new Date(ts * 1000);
     return date.toLocaleString('zh-TW', {
@@ -95,9 +114,7 @@ function updateAllTimestamps() {
 function fetchFiltered() {
     const params = new URLSearchParams(new FormData(form));
     fetch('/filter?' + params.toString(), {
-        headers: {
-            'X-Requested-With': 'XMLHttpRequest'
-        }
+        headers: { 'X-Requested-With': 'XMLHttpRequest' }
     })
     .then(res => res.json())
     .then(data => {
@@ -115,7 +132,7 @@ function fetchFiltered() {
                         <strong>${f.persona_name || '[未知名稱]'}</strong>
                         <small>
                             加入於 <time class="datetime-auto" data-timestamp="${f.friend_since}">${formatLocalTime(f.friend_since)}（${formatDaysAgo(f.friend_since)}）</time><br>
-                            狀態：${f.personastate}<br>
+                            狀態：${statusMap[f.personastate] || '未知'}<br>
                             ${f.lastlogoff ? '上次離線：' + new Date(f.lastlogoff * 1000).toLocaleString() + '<br>' : ''}
                             ${f.country_code ? '國別：' + f.country_code : ''}
                         </small>
@@ -124,19 +141,8 @@ function fetchFiltered() {
             `;
             list.appendChild(li);
         }
+        updateAllTimestamps();
     });
 }
-
-// 自動偵測變更
-form.querySelectorAll('input, select').forEach(el => {
-    el.addEventListener('change', fetchFiltered);
-});
-
-// submit 也攔截
-form.addEventListener('submit', e => {
-    e.preventDefault();
-    fetchFiltered();
-	updateAllTimestamps(); 
-});
 </script>
 {% endblock %}

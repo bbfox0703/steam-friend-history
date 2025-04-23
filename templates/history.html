@@ -1,72 +1,76 @@
 <!DOCTYPE html>
-<html>
+<html lang="zh-Hant">
 <head>
     <meta charset="utf-8">
-    <title>歷史變更紀錄</title>
+    <title>歷史變更紀錄 - Steam 好友追蹤系統</title>
     <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
-    <h2>好友暱稱變更紀錄</h2>
-    {% if name_history %}
+    <div class="container">
+        <h1>好友暱稱變更紀錄</h1>
+        {% if name_history %}
+            <ul>
+            {% for sid, logs in name_history.items() %}
+                <li>
+                    <strong><a href="https://steamcommunity.com/profiles/{{ sid }}" target="_blank">{{ sid }}</a></strong>
+                    <ul>
+                    {% for record in logs %}
+                        <li>{{ record.time }}：{{ record.old }} → {{ record.new }}</li>
+                    {% endfor %}
+                    </ul>
+                </li>
+            {% endfor %}
+            </ul>
+        {% else %}
+            <p>暫無暱稱變更紀錄。</p>
+        {% endif %}
+
+        <h1>好友增減紀錄</h1>
+
+        <p>
+            加入時間排序：
+            {% if join_sort == 'new' %}
+                <b>由新到舊</b> | <a href="?join_sort=old">由舊到新</a>
+            {% else %}
+                <a href="?join_sort=new">由新到舊</a> | <b>由舊到新</b>
+            {% endif %}
+        </p>
+
         <ul>
-        {% for sid, logs in name_history.items() %}
+        {% for timestamp, change in changes|dictsort(reverse=true) %}
             <li>
-                <strong><a href="https://steamcommunity.com/profiles/{{ sid }}" target="_blank">{{ sid }}</a></strong>
-                <ul>
-                {% for record in logs %}
-                    <li>{{ record.time }}：{{ record.old }} → {{ record.new }}</li>
-                {% endfor %}
-                </ul>
+                <strong>{{ timestamp }}</strong>
+
+                {% if change.added_info %}
+                    <p>➕ 新增好友：</p>
+                    <ul>
+                    {% for f in change.added_info %}
+                        <li>
+                            <a href="{{ f.profile_url or 'https://steamcommunity.com/profiles/' ~ f.steamid }}" target="_blank">
+                                {{ f.persona_name or f.steamid }}
+                            </a>
+                            <small>加入於 {{ f.friend_since | datetimeformat }}</small>
+                        </li>
+                    {% endfor %}
+                    </ul>
+                {% endif %}
+
+                {% if change.removed_info %}
+                    <p>➖ 移除好友：</p>
+                    <ul>
+                    {% for f in change.removed_info %}
+                        <li>
+                            <a href="{{ f.profile_url or 'https://steamcommunity.com/profiles/' ~ f.steamid }}" target="_blank">
+                                {{ f.persona_name or f.steamid }}
+                            </a>
+                            <small>加入於 {{ f.friend_since | datetimeformat }}</small>
+                        </li>
+                    {% endfor %}
+                    </ul>
+                {% endif %}
             </li>
         {% endfor %}
         </ul>
-    {% else %}
-        <p>暫無暱稱變更紀錄。</p>
-    {% endif %}
-
-    <h2>好友增減紀錄</h2>
-	<div>
-		加入時間排序：
-		{% if join_sort == 'new' %}
-			<b>由新到舊</b> |
-			<a href="/history?join_sort=old">由舊到新</a>
-		{% else %}
-			<a href="/history?join_sort=new">由新到舊</a> |
-			<b>由舊到新</b>
-		{% endif %}
-	</div>	
-    <ul>
-    {% for timestamp, change in changes|dictsort(reverse=true) %}
-        <li>
-            <strong>{{ timestamp }}</strong>
-            {% if change.added_info %}
-                <p>➕ 新增好友：</p>
-                <ul>
-                {% for friend in change.added_info %}
-                    <li>
-                        <a href="{{ friend.profile_url }}" target="_blank">
-                            {{ friend.persona_name }}
-                        </a>
-                        <small>加入於 {{ friend.friend_since | datetimeformat }}</small>
-                    </li>
-                {% endfor %}
-                </ul>
-            {% endif %}
-
-			{% if change.removed_info %}
-				<p>➖ 移除好友：</p>
-				<ul>
-				{% for friend in change.removed_info %}
-					<li>
-						<a href="{{ friend.profile_url }}" target="_blank">
-							{{ friend.persona_name or friend.steamid }}
-						</a> 加入於 {{ friend.friend_since | datetimeformat }}
-					</li>
-				{% endfor %}
-				</ul>
-			{% endif %}
-        </li>
-    {% endfor %}
-    </ul>
+    </div>
 </body>
 </html>

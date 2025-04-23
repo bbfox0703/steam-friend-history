@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <title>好友增減趨勢圖 - Steam 好友追蹤系統</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<div class="container">
+    <h1>Steam 好友追蹤系統 - 趨勢分析</h1>
+
+    <p>
+        統計方式：
+        {% if mode == 'day' %}
+            <b>日</b> | <a href="/trend?mode=month">月</a> | <a href="/trend?mode=year">年</a>
+        {% elif mode == 'year' %}
+            <a href="/trend?mode=day">日</a> | <a href="/trend?mode=month">月</a> | <b>年</b>
+        {% else %}
+            <a href="/trend?mode=day">日</a> | <b>月</b> | <a href="/trend?mode=year">年</a>
+        {% endif %}
+    </p>
+
+    <canvas id="trendChart" width="1000" height="400"></canvas>
+
+    <script>
+        const ctx = document.getElementById('trendChart').getContext('2d');
+        const data = {
+            labels: {{ stats | map(attribute='group') | list | tojson }},
+            datasets: [
+                {
+                    label: '新增好友',
+                    data: {{ stats | map(attribute='added') | list | tojson }},
+                    backgroundColor: 'rgba(75, 192, 192, 0.6)'
+                },
+                {
+                    label: '移除好友',
+                    data: {{ stats | map(attribute='removed') | list | tojson }},
+                    backgroundColor: 'rgba(255, 99, 132, 0.6)'
+                }
+            ]
+        };
+
+        const config = {
+            type: 'bar',
+            data: data,
+            options: {
+                responsive: true,
+                scales: {
+                    x: { stacked: true },
+                    y: { stacked: true, beginAtZero: true }
+                }
+            }
+        };
+
+        new Chart(ctx, config);
+    </script>
+</div>
+</body>
+</html>

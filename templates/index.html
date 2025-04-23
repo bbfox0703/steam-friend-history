@@ -6,24 +6,38 @@
     <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
-    <h1>Steam 好友追蹤系統</h1>
+    <div class="container">
+        <h1>Steam 好友追蹤系統</h1>
 
-    {% if data %}
-    <ul class="friend-list">
-        {% for friend in data %}
-		<li class="friend-item">
-			<a href="{{ friend.profile_url }}" target="_blank" style="display:flex; text-decoration:none; color:inherit;">
-				<img src="{{ friend.avatar if friend.avatar else '/static/default-avatar.png' }}" alt="avatar">
-				<div class="friend-info">
-					<strong>{{ friend.persona_name or '[未知名稱]' }}</strong><br>
-					<small>加入於 {{ friend.friend_since | datetimeformat }}</small>
-				</div>
-			</a>
-		</li>
-        {% endfor %}
-    </ul>
-    {% else %}
-    <p>目前尚無好友資料，請先前往 <code>/update</code> 更新。</p>
-    {% endif %}
+        <!-- 🔗 功能導航區 -->
+        <div style="margin-bottom: 1em;">
+            <strong>功能選單：</strong>
+            <a href="/">好友清單</a> |
+            <a href="/update">更新好友資料</a> |
+            <a href="/history">變更紀錄</a> |
+            <a href="/country">國別分析</a> |
+            <a href="/country-chart">國別統計圖</a> |
+            <a href="/trend">好友趨勢圖</a> |
+            <a href="/filter">條件篩選</a>
+        </div>
+
+        {% if data %}
+        <ul class="friend-list">
+            {% for friend in data %}
+            <li class="friend-item">
+                <a href="{{ friend.profile_url }}" target="_blank" style="display:flex; text-decoration:none; color:inherit;">
+                    <img src="{{ friend.avatar if friend.avatar else '/static/default-avatar.png' }}" alt="avatar">
+                    <div class="friend-info">
+                        <strong>{{ friend.persona_name or '[未知名稱]' }}</strong><br>
+                        <small>加入於 {{ friend.friend_since | datetimeformat }}</small>
+                    </div>
+                </a>
+            </li>
+            {% endfor %}
+        </ul>
+        {% else %}
+        <p>目前尚無好友資料，請先前往 <code>/update</code> 更新。</p>
+        {% endif %}
+    </div>
 </body>
 </html>

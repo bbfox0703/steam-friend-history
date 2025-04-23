@@ -101,13 +101,13 @@ def load_data():
 def filter_friend_list(args):
     friends = get_friend_data()
 
-    # 取得查詢參數
-    online_only = args.get('online_only') == 'true'
-    has_avatar = args.get('has_avatar') == 'true'
-    has_country = args.get('has_country') == 'true'
+    # 判斷是否有勾選條件（只看 key 是否存在）
+    online_only = 'online_only' in args
+    has_avatar = 'has_avatar' in args
+    has_country = 'has_country' in args
     recent_days = args.get('recent_days')
     country_filter = args.get('country_code', '')
-    sort_order = args.get('sort', 'newest')  # 新增：排序參數
+    sort_order = args.get('sort', 'newest')
 
     now = datetime.utcnow()
     filtered = []
@@ -132,7 +132,7 @@ def filter_friend_list(args):
             continue
         filtered.append(f)
 
-    # 根據排序條件排列
+    # 排序
     if sort_order == 'newest':
         filtered.sort(key=lambda f: f.get('friend_since', 0), reverse=True)
     elif sort_order == 'oldest':
@@ -303,15 +303,26 @@ def country_chart():
 
     return render_template("country_chart.html", stats=stats)
 
-@app.route('/filter', methods=['GET'])
+@app.route('/filter')
 def filter_friends():
     friends = filter_friend_list(request.args)
-    all_countries = sorted(set(f['country_code'] for f in get_friend_data() if f.get('country_code') and f['country_code'] != '??'))
 
+    all_countries = sorted(set(
+        f['country_code'] for f in get_friend_data()
+        if f.get('country_code') and f['country_code'] != '??'
+    ))
+
+    # 若為 AJAX 呼叫，回傳 JSON 給 JS 使用
     if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
         return jsonify(friends)
 
-    return render_template('filter.html', friends=friends, status_map=STATUS_MAP, all_countries=all_countries)
+    # 一般頁面渲染
+    return render_template(
+        'filter.html',
+        friends=friends,
+        status_map=STATUS_MAP,
+        all_countries=all_countries
+    )
 
 @app.route("/trend")
 def trend():

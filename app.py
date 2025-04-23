@@ -11,14 +11,14 @@ app = Flask(__name__)
 import os
 # print("=== API_KEY Loaded ===", os.getenv('STEAM_API_KEY'))
 # print("=== STEAM_USER_ID Loaded ===", os.getenv('STEAM_USER_ID'))
+
 @app.template_filter('datetimeformat')
-def datetimeformat(value):
-    if not value:
-        return ""
+def datetimeformat(ts):
     try:
-        return datetime.utcfromtimestamp(int(value)).strftime('%Y-%m-%d')
-    except Exception:
-        return value
+        return datetime.fromtimestamp(int(ts)).strftime('%Y-%m-%d')
+    except:
+        return ts
+
 
 @app.route('/')
 def index():

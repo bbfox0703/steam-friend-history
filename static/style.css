@@ -9,6 +9,11 @@ h1 {
     margin-bottom: 1em;
 }
 
+table { border-collapse: collapse; width: 100%; }
+th, td { padding: 8px; border: 1px solid #ccc; }
+.online { background-color: #e0ffe0; }
+.offline { background-color: #f8f8f8; }
+
 a:link,
 a:visited {
   color: #558888; 

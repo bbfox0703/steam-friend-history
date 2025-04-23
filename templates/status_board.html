@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>好友狀態看板</title>
+    <style>
+        table { border-collapse: collapse; width: 100%; }
+        th, td { padding: 8px; border: 1px solid #ccc; }
+        .online { background-color: #e0ffe0; }
+        .offline { background-color: #f8f8f8; }
+    </style>
+</head>
+<body>
+    <h1>好友狀態看板</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>暱稱</th>
+                <th>國家</th>
+                <th>目前狀態</th>
+                <th>最後上線</th>
+                <th>Steam 頭像</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for f in friends %}
+            <tr class="{{ 'online' if f.personastate != 0 else 'offline' }}">
+                <td><a href="{{ f.profile_url }}" target="_blank">{{ f.persona_name }}</a></td>
+                <td>{{ f.country_code }}</td>
+                <td>{{ status_map.get(f.personastate, '未知') }}</td>
+                <td>
+                    {% if f.lastlogoff %}
+                        {{ f.lastlogoff | datetimeformat }}
+                    {% else %}
+                        -
+                    {% endif %}
+                </td>
+                <td><img src="{{ f.avatar }}" width="40"></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>

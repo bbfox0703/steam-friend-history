@@ -3,33 +3,77 @@
 {% block title %}好友狀態看板{% endblock %}
 
 {% block content %}
-    <h1>好友狀態看板</h1>
-    <table>
-        <thead>
-            <tr>
-                <th>暱稱</th>
-                <th>國家</th>
-                <th>目前狀態</th>
-                <th>最後上線</th>
-                <th>Steam 頭像</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for f in friends %}
-            <tr class="{{ 'online' if f.personastate != 0 else 'offline' }}">
-                <td><a href="{{ f.profile_url }}" target="_blank">{{ f.persona_name }}</a></td>
-                <td>{{ f.country_code }}</td>
-                <td>{{ status_map.get(f.personastate, '未知') }}</td>
-                <td>
-                    {% if f.lastlogoff %}
-                        {{ f.lastlogoff | datetimeformat }}
-                    {% else %}
-                        -
-                    {% endif %}
-                </td>
-                <td><img src="{{ f.avatar }}" width="40"></td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+<h1>好友狀態看板</h1>
+
+<form method="get" style="margin-bottom: 1em;">
+    <label>
+        <input type="checkbox" name="online_only" value="on" onchange="this.form.submit()" {% if show_online_only %}checked{% endif %}>
+        只顯示在線好友
+    </label>
+</form>
+
+<div class="status-grid">
+    {% for f in friends %}
+    <div class="status-card {{ 'online' if f.personastate != 0 else 'offline' }}">
+        <a href="{{ f.profile_url }}" target="_blank">
+            <img class="avatar" src="{{ f.avatar }}" alt="avatar">
+        </a>
+        <div class="info">
+            <div class="name">
+                <strong>{{ f.persona_name }}</strong>
+                <span class="status-tag">{{ status_map.get(f.personastate, '未知') }}</span>
+            </div>
+            <div class="meta">
+                {% if f.lastlogoff %}
+                    最後上線：{{ f.lastlogoff | datetimeformat }}<br>
+                {% endif %}
+                國別：{{ f.country_code or '??' }}
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}
+
+{% block extra_head %}
+<style>
+.status-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1em;
+}
+.status-card {
+    border: 1px solid #ccc;
+    border-radius: 12px;
+    padding: 10px;
+    background: #fdfdfd;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    box-shadow: 2px 2px 6px rgba(0,0,0,0.05);
+    transition: background 0.3s ease;
+}
+.status-card.online { border-left: 5px solid #4caf50; background-color: #f0fff0; }
+.status-card.offline { border-left: 5px solid #ccc; background-color: #f9f9f9; }
+.status-card .avatar {
+    width: 64px;
+    height: 64px;
+    border-radius: 8px;
+}
+.status-card .info {
+    flex: 1;
+}
+.status-card .name {
+    font-size: 1.1em;
+    margin-bottom: 4px;
+}
+.status-tag {
+    background: #eee;
+    color: #333;
+    font-size: 0.8em;
+    padding: 2px 6px;
+    border-radius: 4px;
+    margin-left: 6px;
+}
+</style>
 {% endblock %}

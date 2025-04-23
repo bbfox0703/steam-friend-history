@@ -476,22 +476,27 @@ def achievement_trend(appid):
     try:
         achievements = steam_api.fetch_achievements(appid)
     except Exception as e:
-        return render_template("achievement_trend.html", appid=appid, error=str(e))
+        return str(e)
 
     timeline = []
     for a in achievements:
         if a.get("achieved") == 1 and a.get("unlocktime"):
-            dt = datetime.fromtimestamp(a["unlocktime"])
-            timeline.append(dt.date())
+            dt = datetime.fromtimestamp(a["unlocktime"]).date()
+            timeline.append(dt)
 
     if not timeline:
-        return render_template("achievement_trend.html", appid=appid, error="無達成成就資料")
+        return "無達成成就資料"
 
     counter = Counter(timeline)
-    sorted_dates = sorted(counter.items())
-    data = [{"date": str(d[0]), "count": d[1]} for d in sorted_dates]
 
-    return render_template("achievement_trend.html", appid=appid, data=data)
+    # ✅ 補上所有日期
+    start_date = min(counter)
+    end_date = max(counter)
+    full_dates = [start_date + timedelta(days=i) for i in range((end_date - start_date).days + 1)]
+
+    stats = [{"date": str(d), "count": counter.get(d, 0)} for d in full_dates]
+
+    return render_template("achievement_trend.html", appid=appid, data=stats)
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=3000)

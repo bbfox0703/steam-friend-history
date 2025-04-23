@@ -1,9 +1,47 @@
 <!DOCTYPE html>
-<html>
+<html lang="zh-Hant">
 <head>
     <meta charset="utf-8">
     <title>好友篩選清單</title>
     <link rel="stylesheet" href="/static/style.css">
+    <style>
+    .friend-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+        gap: 12px;
+        padding: 0;
+        margin: 0;
+        list-style: none;
+    }
+    .friend-item {
+        display: flex;
+        background: #fff;
+        border-radius: 12px;
+        padding: 10px;
+        box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+        align-items: center;
+        text-decoration: none;
+        color: inherit;
+    }
+    .friend-item img {
+        width: 48px;
+        height: 48px;
+        border-radius: 8px;
+        margin-right: 10px;
+    }
+    .friend-info {
+        display: flex;
+        flex-direction: column;
+    }
+    .friend-info strong {
+        font-size: 15px;
+        margin-bottom: 2px;
+    }
+    .friend-info small {
+        font-size: 13px;
+        color: #555;
+    }
+    </style>
 </head>
 <body>
     <h1>Steam Friend Tracker - 篩選模式</h1>
@@ -18,17 +56,18 @@
     <hr>
 
     {% if friends %}
-        <ul>
+        <ul class="friend-grid">
         {% for friend in friends %}
-            <li class="friend-item">
-                <a href="{{ friend.profile_url }}" target="_blank">
-                    <img src="{{ friend.avatar if friend.avatar else '/static/default-avatar.png' }}" alt="avatar" width="48" height="48">
+            <li>
+                <a class="friend-item" href="{{ friend.profile_url }}" target="_blank">
+                    <img src="{{ friend.avatar if friend.avatar else '/static/default-avatar.png' }}" alt="avatar">
                     <div class="friend-info">
-                        <strong>{{ friend.persona_name if friend.persona_name else '[未知名稱]' }}</strong><br>
-                        <small>加入於 {{ friend.friend_since | datetimeformat }}</small>
-                        {% if friend.country_code %}
-                            <small>（{{ friend.country_code if friend.country_code != '??' else '未知' }}）</small>
-                        {% endif %}
+                        <strong>{{ friend.persona_name if friend.persona_name else '[未知名稱]' }}</strong>
+                        <small>加入於 {{ friend.friend_since | datetimeformat }}
+                            {% if friend.country_code %}
+                                （{{ friend.country_code if friend.country_code != '??' else '未知' }}）
+                            {% endif %}
+                        </small>
                     </div>
                 </a>
             </li>

@@ -1,114 +1,103 @@
-<!DOCTYPE html>
-<html lang="zh-Hant">
-<head>
-    <meta charset="utf-8">
-    <title>好友趨勢圖 - Steam 好友追蹤系統</title>
-    <link rel="stylesheet" href="/static/style.css">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-</head>
-<body>
-	<!-- 🔗 功能導航區 -->
-	<div style="margin-bottom: 1em;">
-		<strong>功能選單：</strong>
-		<a href="/">好友清單</a> |
-		<a href="/history">變更紀錄</a> |
-		<a href="/country">國別分析</a> |
-		<a href="/country-chart">國別統計圖</a> |
-		好友趨勢圖 |
-		<a href="/status-board">好友狀態看板</a> |
-		<a href="/filter">條件篩選</a> |
-		<a href="/update">更新好友資料 (非必要)</a> |
-	</div>
-    <div class="container">
-        <h1>Steam 好友追蹤系統 - 好友新增/移除趨勢</h1>
-        <p>
-            顯示單位：
-            {% if mode == 'day' %}
-                <b>日</b> | <a href="/trend?mode=month">月</a> | <a href="/trend?mode=year">年</a>
-            {% elif mode == 'year' %}
-                <a href="/trend?mode=day">日</a> | <a href="/trend?mode=month">月</a> | <b>年</b>
-            {% else %}
-                <a href="/trend?mode=day">日</a> | <b>月</b> | <a href="/trend?mode=year">年</a>
-            {% endif %}
-        </p>
+{% extends "base.html" %}
 
-        {% if stats %}
-            <canvas id="trendChart" width="1000" height="400"></canvas>
+{% block title %}好友趨勢圖 - Steam 好友追蹤系統{% endblock %}
+
+{% block extra_head %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1>Steam 好友追蹤系統 - 好友新增/移除趨勢</h1>
+    <p>
+        顯示單位：
+        {% if mode == 'day' %}
+            <b>日</b> | <a href="/trend?mode=month">月</a> | <a href="/trend?mode=year">年</a>
+        {% elif mode == 'year' %}
+            <a href="/trend?mode=day">日</a> | <a href="/trend?mode=month">月</a> | <b>年</b>
         {% else %}
-            <p>尚無統計資料。</p>
+            <a href="/trend?mode=day">日</a> | <b>月</b> | <a href="/trend?mode=year">年</a>
         {% endif %}
-    </div>
+    </p>
 
     {% if stats %}
-    <script>
-        const ctx = document.getElementById('trendChart').getContext('2d');
-        const stats = {{ stats | tojson }};
-        const labels = stats.map(s => s.group);
-        const addedData = stats.map(s => s.added);
-        const removedData = stats.map(s => s.removed);
+        <canvas id="trendChart" width="1000" height="400"></canvas>
+    {% else %}
+        <p>尚無統計資料。</p>
+    {% endif %}
+</div>
+{% endblock %}
 
-        const chart = new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: labels,
-                datasets: [
-                    {
-                        label: '新增好友數',
-                        data: addedData,
-                        borderColor: 'rgba(75, 192, 192, 1)',
-                        backgroundColor: 'rgba(75, 192, 192, 0.2)',
-                        borderWidth: 2,
-                        tension: 0.3,
-                        fill: true,
-                        pointRadius: 3,
-                        pointHoverRadius: 5
-                    },
-                    {
-                        label: '移除好友數',
-                        data: removedData,
-                        borderColor: 'rgba(255, 99, 132, 1)',
-                        backgroundColor: 'rgba(255, 99, 132, 0.2)',
-                        borderWidth: 2,
-                        tension: 0.3,
-                        fill: true,
-                        pointRadius: 3,
-                        pointHoverRadius: 5
-                    }
-                ]
+{% block extra_script %}
+{% if stats %}
+<script>
+    const ctx = document.getElementById('trendChart').getContext('2d');
+    const stats = {{ stats | tojson }};
+    const labels = stats.map(s => s.group);
+    const addedData = stats.map(s => s.added);
+    const removedData = stats.map(s => s.removed);
+
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [
+                {
+                    label: '新增好友數',
+                    data: addedData,
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                    borderWidth: 2,
+                    tension: 0.3,
+                    fill: true,
+                    pointRadius: 3,
+                    pointHoverRadius: 5
+                },
+                {
+                    label: '移除好友數',
+                    data: removedData,
+                    borderColor: 'rgba(255, 99, 132, 1)',
+                    backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                    borderWidth: 2,
+                    tension: 0.3,
+                    fill: true,
+                    pointRadius: 3,
+                    pointHoverRadius: 5
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            interaction: {
+                mode: 'index',
+                intersect: false
             },
-            options: {
-                responsive: true,
-                interaction: {
-                    mode: 'index',
-                    intersect: false
-                },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        title: {
-                            display: true,
-                            text: '人數'
-                        }
-                    },
-                    x: {
-                        title: {
-                            display: true,
-                            text: '時間區間'
-                        }
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: '人數'
                     }
                 },
-                plugins: {
-                    legend: {
-                        position: 'top'
-                    },
-                    tooltip: {
-                        mode: 'index',
-                        intersect: false
+                x: {
+                    title: {
+                        display: true,
+                        text: '時間區間'
                     }
                 }
+            },
+            plugins: {
+                legend: {
+                    position: 'top'
+                },
+                tooltip: {
+                    mode: 'index',
+                    intersect: false
+                }
             }
-        });
-    </script>
-    {% endif %}
-</body>
-</html>
+        }
+    });
+</script>
+{% endif %}
+{% endblock %}

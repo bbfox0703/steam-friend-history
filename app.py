@@ -145,35 +145,42 @@ def filter():
 
 @app.route("/trend")
 def trend():
-    mode = request.args.get("mode", "month")  # 支援 day/month/year
-    path = "database/friends.json"
+    mode = request.args.get("mode", "month")  # 預設為月份
+    path = "database/friend_changes.json"
 
     if not os.path.exists(path):
         return "尚無統計資料"
 
     with open(path, "r", encoding="utf-8") as f:
-        friends = json.load(f)
+        raw = json.load(f)
 
     records = []
-    for f in friends:
+    for ts, change in raw.items():
         try:
-            dt = datetime.fromtimestamp(int(f.get("friend_since", 0)))
-            records.append({"date": dt})
+            date = datetime.strptime(ts, "%Y-%m-%d %H:%M:%S")
+            added = len(change.get("added", []))
+            removed = len(change.get("removed", []))
+            records.append({"date": date, "added": added, "removed": removed})
         except:
             continue
 
-    if not records:
-        return "尚無統計資料"
-
     df = pd.DataFrame(records)
+    if df.empty:
+        return "尚無可視覺化的統計資料"
+
     if mode == "day":
         df["group"] = df["date"].dt.to_period("D")
+        full_range = pd.period_range(start=df["group"].min(), end=df["group"].max(), freq="D")
     elif mode == "year":
-        df["group"] = df["date"].dt.year
+        df["group"] = df["date"].dt.to_period("Y")
+        full_range = pd.period_range(start=df["group"].min(), end=df["group"].max(), freq="Y")
     else:
         df["group"] = df["date"].dt.to_period("M")
+        full_range = pd.period_range(start=df["group"].min(), end=df["group"].max(), freq="M")
 
-    stat = df.groupby("group").size().reset_index(name="count")
+    stat = df.groupby("group")[["added", "removed"]].sum()
+    stat = stat.reindex(full_range, fill_value=0).reset_index()
+    stat.rename(columns={"index": "group"}, inplace=True)
     stat["group"] = stat["group"].astype(str)
 
     return render_template("trend.html", stats=stat.to_dict(orient="records"), mode=mode)

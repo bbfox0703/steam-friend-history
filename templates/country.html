@@ -25,7 +25,8 @@
                 <li>
                     <details>
                         <summary>
-                            <strong>{{ code }}</strong>：{{ count }} 人
+                            <strong>{{ code }}</strong>
+							({{ country_name_map[code] if code in country_name_map else 'Unknown' }})：{{ count }} 人
                         </summary>
                         <ul class="friend-list">
                             {% for friend in country_members[code] %}

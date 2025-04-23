@@ -21,6 +21,7 @@
     </p>
 
     {% if stats %}
+	    <button id="exportCsvBtn" style="margin-bottom: 1em;">⬇ 匯出 CSV</button>
         <canvas id="trendChart" width="1000" height="400"></canvas>
     {% else %}
         <p>尚無統計資料。</p>
@@ -31,6 +32,23 @@
 {% block extra_script %}
 {% if stats %}
 <script>
+	document.getElementById('exportCsvBtn').addEventListener('click', () => {
+		const headers = ['時間區間', '新增好友數', '移除好友數'];
+		const rows = stats.map(s => [s.group, s.added, s.removed]);
+
+		const csvContent = [headers, ...rows]
+			.map(row => row.join(','))
+			.join('\n');
+
+		const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+		const url = URL.createObjectURL(blob);
+
+		const link = document.createElement('a');
+		link.setAttribute('href', url);
+		link.setAttribute('download', `steam_friend_trend_${Date.now()}.csv`);
+		link.click();
+	});
+
     const ctx = document.getElementById('trendChart').getContext('2d');
     const stats = {{ stats | tojson }};
     const rawLabels = stats.map(s => s.group);

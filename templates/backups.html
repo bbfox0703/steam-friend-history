@@ -12,31 +12,41 @@
     <a href="?sort=mtime&order={{ 'asc' if sort_by != 'mtime' else toggle_order }}">時間</a>
 </p>
 
-<table>
-    <thead>
-        <tr>
-            <th>檔名</th>
-            <th>大小 (KB)</th>
-            <th>建立時間</th>
-            <th>操作</th>
-        </tr>
-    </thead>
-    <tbody>
-    {% for file in files %}
-        <tr>
-            <td>{{ file.name }}</td>
-            <td>{{ file.size_kb }}</td>
-            <td><time class="datetime-auto" data-timestamp="{{ file.mtime }}">{{ file.mtime | datetimeformat }}</time></td>
-            <td>
-                <a href="/backups/download/{{ file.name }}">下載</a> |
-                <a href="#" onclick="deleteBackup('{{ file.name }}')">刪除</a>
-            </td>
-        </tr>
-    {% endfor %}
-    </tbody>
-</table>
+<form id="zip-form" method="post" action="/backups/zip">
+    <table>
+        <thead>
+            <tr>
+                <th><input type="checkbox" id="select-all"></th>
+                <th>檔名</th>
+                <th>大小 (KB)</th>
+                <th>建立時間</th>
+                <th>操作</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for file in files %}
+            <tr>
+                <td><input type="checkbox" name="files" value="{{ file.name }}"></td>
+                <td>{{ file.name }}</td>
+                <td>{{ file.size_kb }}</td>
+                <td><time class="datetime-auto" data-timestamp="{{ file.mtime }}">{{ file.mtime | datetimeformat }}</time></td>
+                <td>
+                    <a href="/backups/download/{{ file.name }}">下載</a> |
+                    <a href="#" onclick="deleteBackup('{{ file.name }}'); return false;">刪除</a>
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
 
-{% if files|length == 0 %}<p>尚無備份檔案。</p>{% endif %}
+    {% if files|length > 0 %}
+    <p>
+        <button type="submit">📦 匯出選取為 ZIP</button>
+    </p>
+    {% else %}
+    <p>尚無備份檔案。</p>
+    {% endif %}
+</form>
 {% endblock %}
 
 {% block extra_script %}
@@ -54,21 +64,9 @@ function deleteBackup(filename) {
         });
 }
 
-// 轉換時間顯示
-function formatLocalTime(ts) {
-    const date = new Date(ts * 1000);
-    return date.toLocaleString('zh-TW', {
-        year: 'numeric', month: '2-digit', day: '2-digit',
-        hour: '2-digit', minute: '2-digit', second: '2-digit',
-        hourCycle: 'h23'
-    });
-}
-function updateAllTimestamps() {
-    document.querySelectorAll('.datetime-auto').forEach(el => {
-        const ts = parseInt(el.dataset.timestamp, 10);
-        if (!isNaN(ts)) el.innerText = formatLocalTime(ts);
-    });
-}
-document.addEventListener('DOMContentLoaded', updateAllTimestamps);
+document.getElementById('select-all').addEventListener('change', function() {
+    const checkboxes = document.querySelectorAll('input[name="files"]');
+    for (const cb of checkboxes) cb.checked = this.checked;
+});
 </script>
 {% endblock %}

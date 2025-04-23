@@ -11,15 +11,15 @@
     {% if data %}
     <ul class="friend-list">
         {% for friend in data %}
-        <li class="friend-item">
-            <a href="{{ friend.profile_url }}" target="_blank">
-                <img src="{{ friend.avatar if friend.avatar else '/static/default-avatar.png' }}" alt="avatar">
-                <div class="friend-info">
-                    <strong>{{ friend.persona_name if friend.persona_name else '[未知名稱]' }}</strong>
-                    <small>加入於 {{ friend.friend_since | datetimeformat }}</small>
-                </div>
-            </a>
-        </li>
+		<li class="friend-item">
+			<a href="{{ friend.profile_url }}" target="_blank" style="display:flex; text-decoration:none; color:inherit;">
+				<img src="{{ friend.avatar if friend.avatar else '/static/default-avatar.png' }}" alt="avatar">
+				<div class="friend-info">
+					<strong>{{ friend.persona_name or '[未知名稱]' }}</strong><br>
+					<small>加入於 {{ friend.friend_since | datetimeformat }}</small>
+				</div>
+			</a>
+		</li>
         {% endfor %}
     </ul>
     {% else %}

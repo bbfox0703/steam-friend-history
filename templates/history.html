@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>歷史變更紀錄</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <h1>好友暱稱變更紀錄</h1>
+    {% if name_history %}
+        <ul>
+        {% for sid, logs in name_history.items() %}
+            <li>
+                <strong><a href="https://steamcommunity.com/profiles/{{ sid }}" target="_blank">{{ sid }}</a></strong>
+                <ul>
+                {% for record in logs %}
+                    <li>{{ record.time }}：{{ record.old }} → {{ record.new }}</li>
+                {% endfor %}
+                </ul>
+            </li>
+        {% endfor %}
+        </ul>
+    {% else %}
+        <p>暫無暱稱變更紀錄。</p>
+    {% endif %}
+
+    <h1>好友增減紀錄</h1>
+    {% if changes %}
+        <ul>
+        {% for timestamp, change in changes.items()|dictsort(reverse=true) %}
+            <li>
+                <strong>{{ timestamp }}</strong><br>
+                {% if change.added %}
+                    ➕ 新增好友：{{ change.added | join(', ') }}<br>
+                {% endif %}
+                {% if change.removed %}
+                    ➖ 移除好友：{{ change.removed | join(', ') }}<br>
+                {% endif %}
+            </li>
+        {% endfor %}
+        </ul>
+    {% else %}
+        <p>暫無好友增減紀錄。</p>
+    {% endif %}
+</body>
+</html>

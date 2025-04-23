@@ -48,7 +48,7 @@ def fetch_friend_profiles(steam_ids):
         else:
             print(f"⚠️ Failed batch {i} - Status {response.status_code}")
 
-        time.sleep(0.3)
+        time.sleep(0.4)
 
     return result
 

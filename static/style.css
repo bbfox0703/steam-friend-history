@@ -9,6 +9,10 @@ h1 {
     margin-bottom: 1em;
 }
 
+a:visited {
+  color: inherit;
+}
+
 .friend-list {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));

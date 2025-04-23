@@ -105,7 +105,8 @@ def update_friend_list():
             'friend_since': f['friend_since'],
             'persona_name': new_name,
             'avatar': profile.get('avatar', ''),
-            'profile_url': profile.get('profileurl', f'https://steamcommunity.com/profiles/{sid}')
+            'profile_url': profile.get('profileurl', f'https://steamcommunity.com/profiles/{sid}'),
+            'country_code': profile.get('loccountrycode', '??')
         })
 
     save_friend_data(enriched_friends)

@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>好友國別分析</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <script>
+        function toggleList(id) {
+            const el = document.getElementById(id);
+            el.style.display = el.style.display === 'none' ? 'block' : 'none';
+        }
+    </script>
+</head>
+<body>
+    <h1>好友國別分析</h1>
+    {% if stats %}
+        <ul>
+        {% for code, friends in stats %}
+            <li>
+                <strong onclick="toggleList('list_{{ code }}')">
+                    {{ code }}：{{ friends | length }} 人
+                </strong>
+                <ul id="list_{{ code }}" style="display: none;">
+                    {% for friend in friends %}
+                        <li>
+                            <a href="{{ friend.profile_url }}" target="_blank">
+                                <img src="{{ friend.avatar }}" width="24" height="24">
+                                {{ friend.persona_name }}
+                            </a>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </li>
+        {% endfor %}
+        </ul>
+    {% else %}
+        <p>目前無國別資料。</p>
+    {% endif %}
+</body>
+</html>

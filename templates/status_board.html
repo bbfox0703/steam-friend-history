@@ -27,7 +27,10 @@
 				{% if f.personastate != 0 %}
 					✅ 上線中 🟢<br>
 				{% elif f.lastlogoff %}
-					最後上線：{{ f.lastlogoff | datetimeformat }}（{{ f.lastlogoff | timeago }}）<br>
+					最後上線：
+					<time data-timestamp="{{ f.lastlogoff }}" class="datetime-auto">
+						{{ f.lastlogoff | datetimeformat }}（{{ f.lastlogoff | timeago }}）
+					</time><br>
 				{% endif %}
 				國別：{{ f.country_code or '??' }}
 			</div>

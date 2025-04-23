@@ -1,25 +1,10 @@
-<!DOCTYPE html>
-<html lang="zh-Hant">
-<head>
-    <meta charset="utf-8">
-    <title>歷史變更紀錄 - Steam 好友追蹤系統</title>
-    <link rel="stylesheet" href="/static/style.css">
-</head>
-<body>
+{% extends "base.html" %}
+
+{% block title %}好友暱稱變更紀錄{% endblock %}
+
+{% block content %}
     <div class="container">
         <h1>好友暱稱變更紀錄</h1>
-        <!-- 🔗 功能導航區 -->
-        <div style="margin-bottom: 1em;">
-            <strong>功能選單：</strong>
-            <a href="/">好友清單</a> |
-            變更紀錄 |
-            <a href="/country">國別分析</a> |
-            <a href="/country-chart">國別統計圖</a> |
-            <a href="/trend">好友趨勢圖</a> |
-            <a href="/status-board">好友狀態看板</a> |
-            <a href="/filter">條件篩選</a> |
-            <a href="/update">更新好友資料 (非必要)</a> |
-        </div>
         {% if name_history %}
             <ul>
             {% for sid, logs in name_history.items() %}
@@ -84,5 +69,4 @@
         {% endfor %}
         </ul>
     </div>
-</body>
-</html>
+{% endblock %}

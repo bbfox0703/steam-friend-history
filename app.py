@@ -496,10 +496,6 @@ def achievement_trend(appid):
     game_name = fetch_game_title(appid, steam_lang)
 
     mode = request.args.get("mode", "day")
-    if mode == "month":
-        timeline.append(dt.strftime("%Y-%m"))  # 月份統一為 "2025-04"
-    else:
-        timeline.append(dt.strftime("%Y-%m-%d"))  # 仍以日為單位
 
     try:
         achievements = steam_api.fetch_achievements(appid)

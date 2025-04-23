@@ -1,5 +1,7 @@
 #!/bin/bash
 
+echo "🔍 Working dir: $(pwd)" >> /var/log/cron_exec.log
+
 # Flask 更新資料
 curl -s http://localhost:3000/update
 

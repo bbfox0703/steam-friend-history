@@ -9,8 +9,10 @@ h1 {
     margin-bottom: 1em;
 }
 
+a:link,
 a:visited {
-  color: inherit;
+  color: #558888; 
+  text-decoration: none;
 }
 
 .friend-list {

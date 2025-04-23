@@ -10,6 +10,7 @@ API_KEY = os.getenv('STEAM_API_KEY')
 STEAM_ID = os.getenv('STEAM_USER_ID')
 DB_PATH = './database/friends.json'
 HISTORY_PATH = './database/name_history.json'
+CHANGELOG_PATH = './database/friend_changes.json'
 BACKUP_DIR = './backups'
 
 def fetch_friend_list():
@@ -48,34 +49,48 @@ def backup_friend_data(friend_list):
     with open(path, 'w') as f:
         json.dump(friend_list, f, indent=2)
 
-def load_name_history():
-    if not os.path.exists(HISTORY_PATH):
+def load_json(path):
+    if not os.path.exists(path):
         return {}
-    with open(HISTORY_PATH, 'r') as f:
+    with open(path, 'r') as f:
         return json.load(f)
 
-def save_name_history(history):
-    os.makedirs(os.path.dirname(HISTORY_PATH), exist_ok=True)
-    with open(HISTORY_PATH, 'w') as f:
-        json.dump(history, f, indent=2)
+def save_json(path, data):
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    with open(path, 'w') as f:
+        json.dump(data, f, indent=2)
 
 def update_friend_list():
     friend_list = fetch_friend_list()
     steam_ids = [f['steamid'] for f in friend_list]
     profiles = fetch_friend_profiles(steam_ids)
 
-    old_data = {f['steamid']: f for f in get_friend_data()}
-    name_history = load_name_history()
+    old_friends = get_friend_data()
+    old_dict = {f['steamid']: f for f in old_friends}
+    old_ids = set(old_dict.keys())
+    new_ids = set(steam_ids)
+
     now = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
+    # 比對名字變更
+    name_history = load_json(HISTORY_PATH)
+
+    # 比對好友增減
+    changes = load_json(CHANGELOG_PATH)
+    added = sorted(list(new_ids - old_ids))
+    removed = sorted(list(old_ids - new_ids))
+    if added or removed:
+        changes[now] = {"added": added, "removed": removed}
+
+    # 建立 enriched_friends 資料
     enriched_friends = []
     for f in friend_list:
         sid = f['steamid']
         profile = profiles.get(sid, {})
         new_name = profile.get('personaname', '')
-        old_name = old_data.get(sid, {}).get('persona_name', '')
-        
-        # 檢查名字變更
+        old_name = old_dict.get(sid, {}).get('persona_name', '')
+
+        # 記錄暱稱變更
         if old_name and new_name and old_name != new_name:
             if sid not in name_history:
                 name_history[sid] = []
@@ -94,6 +109,7 @@ def update_friend_list():
         })
 
     save_friend_data(enriched_friends)
-    save_name_history(name_history)
+    save_json(HISTORY_PATH, name_history)
+    save_json(CHANGELOG_PATH, changes)
     backup_friend_data(enriched_friends)
     return len(enriched_friends)

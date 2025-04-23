@@ -8,7 +8,7 @@
 <form id="filter-form" style="margin-bottom: 1em;">
 	<label>加入時間排序：
 		<select name="sort">
-			<option value="newest" {% if request.args.get('sort') == 'newest' %}selected{% endif %}>最新優先</option>
+			<option value="newest" {% if request.args.get('sort') == 'newest' %}selected{% endif %}>最近優先</option>
 			<option value="oldest" {% if request.args.get('sort') == 'oldest' %}selected{% endif %}>最早優先</option>
 		</select>
 	</label>

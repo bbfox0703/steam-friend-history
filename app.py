@@ -42,6 +42,7 @@ def update():
     return {'status': 'ok', 'updated': result}
 
 @app.route("/history")
+@app.route("/history")
 def history():
     try:
         with open("database/name_history.json", "r") as f:
@@ -55,23 +56,30 @@ def history():
     except:
         changes = {}
 
-    # 補充 steamid 對應的名稱與加入時間
-    friend_data = steam_api.get_friend_data()
-    id_map = {f['steamid']: f for f in friend_data}
+    # 🔄 取得排序方式，預設是 new（新→舊）
+    join_sort = request.args.get("join_sort", "new")
 
-    for timestamp, change in changes.items():
-        if "added" in change:
-            change["added_info"] = []
-            for sid in change["added"]:
-                info = id_map.get(sid, {})
-                change["added_info"].append({
-                    "steamid": sid,
-                    "persona_name": info.get("persona_name", "[未知名稱]"),
-                    "profile_url": info.get("profile_url", f"https://steamcommunity.com/profiles/{sid}"),
-                    "friend_since": info.get("friend_since", 0)
-                })
+    # 載入目前好友資料
+    all_friends = steam_api.get_friend_data()
+    friend_map = {f["steamid"]: f for f in all_friends}
 
-    return render_template("history.html", name_history=name_history, changes=changes)
+    # 擴充並排序新增好友資料
+    for ts, change in changes.items():
+        added_info = []
+        for sid in change.get("added", []):
+            f = friend_map.get(sid)
+            if f:
+                added_info.append(f)
+
+        reverse = (join_sort == "new")
+        added_info.sort(key=lambda f: int(f.get("friend_since", 0)), reverse=reverse)
+        change["added_info"] = added_info
+
+    return render_template("history.html",
+                           name_history=name_history,
+                           changes=changes,
+                           friend_map=friend_map,
+                           join_sort=join_sort)
 
 @app.route("/country")
 def country():

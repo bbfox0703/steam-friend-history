@@ -49,6 +49,7 @@ vi .env
 
 ### 修改 .env的API KEY及ID，填入Steam API KEY、和帳號的64位元ID 76561xxxxxxxxxxxx
 Steam api key: https://steamcommunity.com/dev/apikey
+**好友列表如未公開，則無法取得資料**
 
 ### 建立docker映像檔：
 ```bash

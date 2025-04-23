@@ -30,5 +30,21 @@ def update():
     backup.backup_today()
     return {'status': 'ok', 'updated': result}
 
+@app.route("/history")
+def history():
+    try:
+        with open("database/name_history.json", "r") as f:
+            name_history = json.load(f)
+    except:
+        name_history = {}
+
+    try:
+        with open("database/friend_changes.json", "r") as f:
+            changes = json.load(f)
+    except:
+        changes = {}
+
+    return render_template("history.html", name_history=name_history, changes=changes)
+
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=3000)

@@ -5,16 +5,19 @@ WORKDIR /app
 COPY requirements.txt ./
 RUN pip install -r requirements.txt
 
-# 安裝 cron + curl + supervisor
+# 安裝 cron + curl + supervisor + logrotate
 RUN apt-get update && \
-    apt-get install -y cron curl supervisor && \
-    rm -rf /var/lib/apt/lists/*
+    apt-get install -y cron curl supervisor logrotate && \
+    rm -rf /var/lib/apt/lists/*	
 
 # 複製專案
 COPY . .
 
 # 複製 cronjob 目錄（內含 shell script 與排程設定）
 COPY cronjob /app/cronjob
+
+# 複製 logrotate 設定檔
+COPY logrotate/steam-friend-logs /etc/logrotate.d/steam-friend-logs
 
 # 複製 cronjob 設定檔與 script
 RUN chmod 0644 /app/cronjob/steam-friend-cron && \

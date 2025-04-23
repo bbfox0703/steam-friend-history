@@ -146,3 +146,13 @@ def fetch_achievements(appid, steam_id=None):
     if response.status_code != 200:
         raise Exception(f"Steam API Error: {response.status_code} {response.text}")
     return response.json().get("playerstats", {}).get("achievements", [])    
+    
+def fetch_achievement_data(appid, steam_id=None):
+    if steam_id is None:
+        steam_id = STEAM_ID
+    url = f"https://api.steampowered.com/ISteamUserStats/GetPlayerAchievements/v1/?key={API_KEY}&steamid={steam_id}&appid={appid}"
+    response = requests.get(url)
+    if response.status_code != 200:
+        raise Exception(f"Steam API Error: {response.status_code} {response.text}")
+    return response.json().get("playerstats", {})
+    

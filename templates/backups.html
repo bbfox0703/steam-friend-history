@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+
+{% block title %}備份管理{% endblock %}
+
+{% block content %}
+<h1>備份管理</h1>
+
+<p>排序：
+    {% set toggle_order = 'asc' if order == 'desc' else 'desc' %}
+    <a href="?sort=name&order={{ 'asc' if sort_by != 'name' else toggle_order }}">名稱</a> |
+    <a href="?sort=size_kb&order={{ 'asc' if sort_by != 'size_kb' else toggle_order }}">大小</a> |
+    <a href="?sort=mtime&order={{ 'asc' if sort_by != 'mtime' else toggle_order }}">時間</a>
+</p>
+
+<table>
+    <thead>
+        <tr>
+            <th>檔名</th>
+            <th>大小 (KB)</th>
+            <th>建立時間</th>
+            <th>操作</th>
+        </tr>
+    </thead>
+    <tbody>
+    {% for file in files %}
+        <tr>
+            <td>{{ file.name }}</td>
+            <td>{{ file.size_kb }}</td>
+            <td><time class="datetime-auto" data-timestamp="{{ file.mtime }}">{{ file.mtime | datetimeformat }}</time></td>
+            <td>
+                <a href="/backups/download/{{ file.name }}">下載</a> |
+                <a href="#" onclick="deleteBackup('{{ file.name }}')">刪除</a>
+            </td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+
+{% if files|length == 0 %}<p>尚無備份檔案。</p>{% endif %}
+{% endblock %}
+
+{% block extra_script %}
+<script>
+function deleteBackup(filename) {
+    if (!confirm('確定要刪除 ' + filename + ' 嗎？')) return;
+    fetch('/backups/delete/' + filename, { method: 'POST' })
+        .then(res => res.json())
+        .then(result => {
+            if (result.status === 'deleted') {
+                location.reload();
+            } else {
+                alert('找不到檔案或刪除失敗');
+            }
+        });
+}
+
+// 轉換時間顯示
+function formatLocalTime(ts) {
+    const date = new Date(ts * 1000);
+    return date.toLocaleString('zh-TW', {
+        year: 'numeric', month: '2-digit', day: '2-digit',
+        hour: '2-digit', minute: '2-digit', second: '2-digit',
+        hourCycle: 'h23'
+    });
+}
+function updateAllTimestamps() {
+    document.querySelectorAll('.datetime-auto').forEach(el => {
+        const ts = parseInt(el.dataset.timestamp, 10);
+        if (!isNaN(ts)) el.innerText = formatLocalTime(ts);
+    });
+}
+document.addEventListener('DOMContentLoaded', updateAllTimestamps);
+</script>
+{% endblock %}

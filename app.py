@@ -42,7 +42,6 @@ def update():
     return {'status': 'ok', 'updated': result}
 
 @app.route("/history")
-@app.route("/history")
 def history():
     try:
         with open("database/name_history.json", "r") as f:
@@ -56,24 +55,47 @@ def history():
     except:
         changes = {}
 
-    # 🔄 取得排序方式，預設是 new（新→舊）
+    # 加入時間排序參數（new = 新→舊, old = 舊→新）
     join_sort = request.args.get("join_sort", "new")
+    reverse = (join_sort == "new")
 
-    # 載入目前好友資料
+    # 載入目前所有已知好友資料
     all_friends = steam_api.get_friend_data()
     friend_map = {f["steamid"]: f for f in all_friends}
 
-    # 擴充並排序新增好友資料
+    # 嘗試補上曾被移除的使用者
+    # 把歷史好友列表也加進 friend_map（避免找不到資料）
+    backup_dir = "./backups"
+    if os.path.exists(backup_dir):
+        for file in os.listdir(backup_dir):
+            if file.startswith("friends_") and file.endswith(".json"):
+                with open(os.path.join(backup_dir, file), "r") as bf:
+                    try:
+                        data = json.load(bf)
+                        for f in data:
+                            friend_map[f["steamid"]] = f
+                    except:
+                        pass
+
+    # 排序新增/移除資訊
     for ts, change in changes.items():
+        # 新增好友排序
         added_info = []
         for sid in change.get("added", []):
             f = friend_map.get(sid)
             if f:
                 added_info.append(f)
-
-        reverse = (join_sort == "new")
         added_info.sort(key=lambda f: int(f.get("friend_since", 0)), reverse=reverse)
         change["added_info"] = added_info
+
+        # 移除好友排序
+        removed_info = []
+        for sid in change.get("removed", []):
+            f = friend_map.get(sid)
+            if f:
+                removed_info.append(f)
+        removed_info.sort(key=lambda f: int(f.get("friend_since", 0)), reverse=reverse)
+        change["removed_info"] = removed_info
 
     return render_template("history.html",
                            name_history=name_history,

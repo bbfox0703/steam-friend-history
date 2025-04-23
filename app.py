@@ -130,6 +130,18 @@ def filter_friend_list(args):
 
     return filtered    
 
+app = Flask(__name__)
+import os
+# print("=== API_KEY Loaded ===", os.getenv('STEAM_API_KEY'))
+# print("=== STEAM_USER_ID Loaded ===", os.getenv('STEAM_USER_ID'))
+
+@app.template_filter('datetimeformat')
+def datetimeformat(ts):
+    try:
+        return datetime.fromtimestamp(int(ts)).strftime('%Y-%m-%d %H:%M:%S')
+    except:
+        return ts
+
 @app.template_filter('timeago')
 def timeago(timestamp):
     try:
@@ -152,18 +164,6 @@ def timeago(timestamp):
             return f"{days} 天前"
     except:
         return "時間未知"
-
-app = Flask(__name__)
-import os
-# print("=== API_KEY Loaded ===", os.getenv('STEAM_API_KEY'))
-# print("=== STEAM_USER_ID Loaded ===", os.getenv('STEAM_USER_ID'))
-
-@app.template_filter('datetimeformat')
-def datetimeformat(ts):
-    try:
-        return datetime.fromtimestamp(int(ts)).strftime('%Y-%m-%d %H:%M:%S')
-    except:
-        return ts
 
 @app.route('/')
 def index():

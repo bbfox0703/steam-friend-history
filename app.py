@@ -191,6 +191,25 @@ def country():
                            sort_mode=sort_mode,
                            country_name_map=country_name_map)
 
+@app.route("/country-chart")
+def country_chart():
+    from collections import defaultdict
+    import operator
+
+    friends = steam_api.get_friend_data()
+    country_counts = defaultdict(int)
+
+    for f in friends:
+        code = f.get("country_code", "??")
+        country_counts[code] += 1
+
+    country_name_map = steam_api.country_name_map  # 假設已在 steam_api.py 定義
+    stats = []
+    for code, count in sorted(country_counts.items(), key=lambda x: x[1], reverse=True):
+        name = country_name_map.get(code, "Unknown")
+        stats.append({"code": code, "name": name, "count": count})
+
+    return render_template("country_chart.html", stats=stats)
 
 @app.route("/filter")
 def filter():

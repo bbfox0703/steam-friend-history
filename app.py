@@ -1,7 +1,7 @@
 from dotenv import load_dotenv
 load_dotenv()
 
-from flask import Flask, render_template, request, redirect, url_for, jsonify
+from flask import Flask, render_template, request, redirect, url_for, jsonify, send_from_directory
 import utils.steam_api as steam_api
 from utils.steam_api import get_friend_data
 import utils.backup as backup
@@ -402,6 +402,45 @@ def status_board():
     sorted_friends = sorted(filtered, key=sort_key)
 
     return render_template('status_board.html', friends=sorted_friends, status_map=STATUS_MAP, show_online_only=show_online_only)
+
+@app.route('/backups')
+def backups():
+    sort_by = request.args.get('sort', 'mtime')
+    order = request.args.get('order', 'desc')
+    base = 'backups'
+    files = []
+
+    for f in os.listdir(base):
+        path = os.path.join(base, f)
+        if os.path.isfile(path):
+            stat = os.stat(path)
+            files.append({
+                'name': f,
+                'size_kb': int(stat.st_size / 1024),
+                'mtime': int(stat.st_mtime)
+            })
+
+    reverse = (order == 'desc')
+    if sort_by == 'name':
+        files.sort(key=lambda f: f['name'], reverse=reverse)
+    elif sort_by == 'size_kb':
+        files.sort(key=lambda f: f['size_kb'], reverse=reverse)
+    else:
+        files.sort(key=lambda f: f['mtime'], reverse=reverse)
+
+    return render_template('backups.html', files=files, sort_by=sort_by, order=order)
+
+@app.route('/backups/download/<filename>')
+def download_backup(filename):
+    return send_from_directory('backups', filename, as_attachment=True)
+
+@app.route('/backups/delete/<filename>', methods=['POST'])
+def delete_backup(filename):
+    path = os.path.join('backups', filename)
+    if os.path.exists(path):
+        os.remove(path)
+        return jsonify({'status': 'deleted'})
+    return jsonify({'status': 'not_found'})
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=3000)

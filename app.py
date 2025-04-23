@@ -10,7 +10,10 @@ import json
 import os
 import operator
 from datetime import datetime, timedelta
+from zoneinfo import ZoneInfo
 from collections import defaultdict, Counter
+
+tz = ZoneInfo("Asia/Taipei")
 
 # 國碼對照英文名稱表（完整）
 country_name_map = {
@@ -138,15 +141,16 @@ import os
 @app.template_filter('datetimeformat')
 def datetimeformat(ts):
     try:
-        return datetime.fromtimestamp(int(ts)).strftime('%Y-%m-%d %H:%M:%S')
+        dt = datetime.fromtimestamp(int(ts), tz)
+        return dt.strftime('%Y-%m-%d %H:%M:%S')
     except:
         return ts
 
 @app.template_filter('timeago')
-def timeago(timestamp):
+def timeago(ts):
     try:
-        now = datetime.utcnow()
-        dt = datetime.utcfromtimestamp(int(timestamp))
+        now = datetime.now(tz=tz)
+        dt = datetime.fromtimestamp(int(ts), tz)
         diff = now - dt
 
         seconds = int(diff.total_seconds())

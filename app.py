@@ -293,16 +293,5 @@ def trend():
 
     return render_template("trend.html", stats=stat.to_dict(orient="records"), mode=mode)
 
-@app.route("/country_chart")
-def country_chart():
-    from collections import Counter
-    import utils.steam_api as steam_api
-
-    data = steam_api.get_friend_data()
-    counter = Counter([f.get("country_code", "??") for f in data])
-    stats = [{"country": k if k != "??" else "未知", "count": v} for k, v in sorted(counter.items(), key=lambda x: -x[1])]
-
-    return render_template("country_chart.html", stats=stats)
-
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=3000)

@@ -44,28 +44,28 @@
                 {% if change.added_info %}
                     <p>➕ 新增好友：</p>
                     <ul>
-                    {% for f in change.added_info %}
-                        <li>
-                            <a href="{{ f.profile_url or 'https://steamcommunity.com/profiles/' ~ f.steamid }}" target="_blank">
-                                {{ friend.persona_name if friend and friend.persona_name else sid }}
-                            </a>
-                            <small>加入於 {{ f.friend_since | datetimeformat }}</small>
-                        </li>
-                    {% endfor %}
+					{% for f in change.added_info %}
+						<li>
+							<a href="{{ f.profile_url or 'https://steamcommunity.com/profiles/' ~ f.steamid }}" target="_blank">
+								{{ f.persona_name or f.steamid }}
+							</a>
+							<small>加入於 {{ f.friend_since | datetimeformat }}</small>
+						</li>
+					{% endfor %}
                     </ul>
                 {% endif %}
 
                 {% if change.removed_info %}
                     <p>➖ 移除好友：</p>
                     <ul>
-                    {% for f in change.removed_info %}
-                        <li>
-                            <a href="{{ f.profile_url or 'https://steamcommunity.com/profiles/' ~ f.steamid }}" target="_blank">
-                                {{ friend.persona_name if friend and friend.persona_name else sid }}
-                            </a>
-                            <small>加入於 {{ f.friend_since | datetimeformat }}</small>
-                        </li>
-                    {% endfor %}
+					{% for f in change.removed_info %}
+						<li>
+							<a href="{{ f.profile_url or 'https://steamcommunity.com/profiles/' ~ f.steamid }}" target="_blank">
+								{{ f.persona_name or f.steamid }}
+							</a>
+							<small>加入於 {{ f.friend_since | datetimeformat }}</small>
+						</li>
+					{% endfor %}
                     </ul>
                 {% endif %}
             </li>

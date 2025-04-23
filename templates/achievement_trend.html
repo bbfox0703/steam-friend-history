@@ -3,31 +3,55 @@
 {% block title %}成就達成趨勢圖{% endblock %}
 
 {% block content %}
-<h2>{{ game_name }}（AppID: {{ appid }}）的成就達成趨勢圖</h2>
-{% if header_image %}
-    <div style="margin-bottom: 1em;">
-        <img src="{{ header_image }}" alt="{{ game_name }} header" style="transform: scale(0.5); transform-origin: top left; display: inline-block;">
-    </div>
-{% endif %}
-<p>已達成 {{ unlocked }} / {{ total }} 個成就</p>
-
 <style>
-.toggle-buttons a {
-    display: inline-block;
-    padding: 6px 12px;
-    margin: 0 2px;
-    border: 1px solid #007bff;
-    background-color: white;
-    color: #007bff;
-    text-decoration: none;
-    border-radius: 4px;
-    font-weight: bold;
+.header-wrapper {
+    display: flex;
+    align-items: center;
+    margin-bottom: 1em;
+    flex-wrap: wrap;
 }
-.toggle-buttons a.active {
-    background-color: #007bff;
-    color: white;
+.header-wrapper img {
+    transform: scale(0.5);
+    transform-origin: left center;
+    display: inline-block;
+    margin-right: 1em;
+}
+.header-wrapper h2 {
+    margin: 0;
+    font-size: 1.4em;
+}
+
+/* 響應式設計：小螢幕直排 + 調整圖片大小 */
+@media (max-width: 600px) {
+    .header-wrapper {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    .header-wrapper img {
+        transform: scale(0.8);
+        margin-right: 0;
+        margin-bottom: 0.5em;
+    }
+}
+
+/* 響應式圖表容器 */
+.chart-wrapper {
+    width: 100%;
+    overflow-x: auto;
+}
+.chart-wrapper canvas {
+    min-width: 600px;  /* 可滾動，避免太小 */
 }
 </style>
+
+<div class="header-wrapper">
+    {% if header_image %}
+    <img src="{{ header_image }}" alt="{{ game_name }} header">
+    {% endif %}
+    <h2>{{ game_name }}（AppID: {{ appid }}）的成就達成趨勢圖</h2>
+</div>
+
+<p>已達成 {{ unlocked }} / {{ total }} 個成就</p>
 
 <div class="toggle-buttons">
     <span>顯示方式：</span>
@@ -35,8 +59,9 @@
     <a href="?mode=month" class="{{ 'active' if mode == 'month' else '' }}">月</a>
 </div>
 
-<canvas id="achieveChart" width="1000" height="400"></canvas>
-
+<div class="chart-wrapper">
+    <canvas id="achieveChart" width="1000" height="400"></canvas>
+</div>
 {% endblock %}
 
 {% block extra_script %}
@@ -44,7 +69,6 @@
 <script>
     const ctx = document.getElementById('achieveChart').getContext('2d');
     const data = {{ data | tojson }};
-
     const labels = data.map(d => d.date);
     const values = data.map(d => d.count);
 
@@ -64,6 +88,7 @@
         },
         options: {
             responsive: true,
+            maintainAspectRatio: false,
             scales: {
                 y: {
                     beginAtZero: true,

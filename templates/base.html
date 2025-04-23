@@ -27,7 +27,15 @@
 	<script>
 	function formatLocalTime(ts) {
 		const date = new Date(ts * 1000);
-		return date.toLocaleString();
+		return date.toLocaleString('zh-TW', {
+			year: 'numeric',
+			month: 'numeric',
+			day: 'numeric',
+			hour: '2-digit',
+			minute: '2-digit',
+			second: '2-digit',
+			hourCycle: 'h23'
+		});
 	}
 	function formatAgo(ts) {
 		const now = new Date();

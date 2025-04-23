@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+
+{% block title %}成就查詢{% endblock %}
+
+{% block content %}
+<h2>查詢 Steam 遊戲成就趨勢</h2>
+<form method="get" action="/achievement">
+    <label for="appid">請輸入 AppID：</label>
+    <input type="text" name="appid" id="appid" required placeholder="例如 3123410">
+    <button type="submit">查詢</button>
+</form>
+{% endblock %}

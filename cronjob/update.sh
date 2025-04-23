@@ -1,8 +1,16 @@
 #!/bin/bash
-# curl 指令請使用完整形式
-# 跑 Flask 更新
-curl http://localhost:3000/update
 
-# 保存快照（只留最近 30 份）
-cp ../database/friends.json ../backups/friends_$(date +'%Y%m%d_%H%M%S').json
-ls -1t ../backups/friends_*.json | tail -n +31 | xargs rm -f
+# Flask 更新資料
+curl -s http://localhost:3000/update
+
+# 快照儲存路徑
+DB_PATH="/app/database/friends.json"
+BACKUP_DIR="/app/backups"
+
+# 檢查檔案是否存在再進行備份
+if [ -f "$DB_PATH" ]; then
+  cp "$DB_PATH" "$BACKUP_DIR/friends_$(date +'%Y%m%d_%H%M%S').json"
+fi
+
+# 清除多餘快照，僅保留最新 30 份
+ls -1t "$BACKUP_DIR"/friends_*.json 2>/dev/null | tail -n +31 | xargs -r rm -f

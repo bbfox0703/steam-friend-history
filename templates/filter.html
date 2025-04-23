@@ -5,7 +5,7 @@
 {% block content %}
 <h1>Steam 好友條件篩選</h1>
 
-<form method="get" style="margin-bottom: 1em;">
+<form id="filter-form" style="margin-bottom: 1em;">
     <label><input type="checkbox" name="online_only" {% if request.args.get('online_only') %}checked{% endif %}> 只顯示在線上</label>
     <label><input type="checkbox" name="has_avatar" {% if request.args.get('has_avatar') %}checked{% endif %}> 有頭像</label>
     <label><input type="checkbox" name="has_country" {% if request.args.get('has_country') %}checked{% endif %}> 有國別</label>
@@ -25,30 +25,79 @@
 
 <hr>
 
-{% if friends %}
-    <ul class="friend-grid">
+<ul class="friend-grid" id="friend-list">
     {% for friend in friends %}
-        <li>
-            <a class="friend-item" href="{{ friend.profile_url }}" target="_blank">
-                <img src="{{ friend.avatar if friend.avatar else '/static/default-avatar.png' }}" alt="avatar">
-                <div class="friend-info">
-                    <strong>{{ friend.persona_name if friend.persona_name else '[未知名稱]' }}</strong>
-                    <small>
-                        加入於 {{ friend.friend_since | datetimeformat }}<br>
-                        狀態：{{ status_map.get(friend.personastate, '未知') }}<br>
-                        {% if friend.lastlogoff %}
-                            上次離線：{{ friend.lastlogoff | datetimeformat }}
-                        {% endif %}
-                        {% if friend.country_code %}
-                            <br>國別：{{ friend.country_code }}
-                        {% endif %}
-                    </small>
-                </div>
-            </a>
-        </li>
+    <li>
+        <a class="friend-item" href="{{ friend.profile_url }}" target="_blank">
+            <img src="{{ friend.avatar if friend.avatar else '/static/default-avatar.png' }}" alt="avatar">
+            <div class="friend-info">
+                <strong>{{ friend.persona_name if friend.persona_name else '[未知名稱]' }}</strong>
+                <small>
+                    加入於 {{ friend.friend_since | datetimeformat }}<br>
+                    狀態：{{ status_map.get(friend.personastate, '未知') }}<br>
+                    {% if friend.lastlogoff %}
+                        上次離線：{{ friend.lastlogoff | datetimeformat }}
+                    {% endif %}
+                    {% if friend.country_code %}
+                        <br>國別：{{ friend.country_code }}
+                    {% endif %}
+                </small>
+            </div>
+        </a>
+    </li>
     {% endfor %}
-    </ul>
-{% else %}
-    <p>目前無符合條件的好友。</p>
-{% endif %}
+</ul>
+{% endblock %}
+
+{% block extra_script %}
+<script>
+const form = document.getElementById('filter-form');
+const list = document.getElementById('friend-list');
+
+function fetchFiltered() {
+    const params = new URLSearchParams(new FormData(form));
+    fetch('/filter?' + params.toString(), {
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+    .then(res => res.json())
+    .then(data => {
+        list.innerHTML = '';
+        if (data.length === 0) {
+            list.innerHTML = '<p>目前無符合條件的好友。</p>';
+            return;
+        }
+        for (const f of data) {
+            const li = document.createElement('li');
+            li.innerHTML = `
+                <a class="friend-item" href="${f.profile_url}" target="_blank">
+                    <img src="${f.avatar || '/static/default-avatar.png'}" alt="avatar">
+                    <div class="friend-info">
+                        <strong>${f.persona_name || '[未知名稱]'}</strong>
+                        <small>
+                            加入於 ${f.friend_since}<br>
+                            狀態：${f.personastate}<br>
+                            ${f.lastlogoff ? '上次離線：' + new Date(f.lastlogoff * 1000).toLocaleString() + '<br>' : ''}
+                            ${f.country_code ? '國別：' + f.country_code : ''}
+                        </small>
+                    </div>
+                </a>
+            `;
+            list.appendChild(li);
+        }
+    });
+}
+
+// 自動偵測變更
+form.querySelectorAll('input, select').forEach(el => {
+    el.addEventListener('change', fetchFiltered);
+});
+
+// submit 也攔截
+form.addEventListener('submit', e => {
+    e.preventDefault();
+    fetchFiltered();
+});
+</script>
 {% endblock %}

@@ -4,9 +4,7 @@
 {% block title %}Steam 好友追蹤系統{% endblock %}
 
 {% block extra_head %}
-<time class="datetime-auto" data-timestamp="{{ friend.friend_since }}" title="{{ friend.friend_since | datetimeformat }}">
-    {{ friend.friend_since | datetimeformat }}
-</time>
+
 {% endblock %}
 
 {% block content %}	
@@ -21,7 +19,7 @@
                     <div class="friend-info">
                         <strong>{{ friend.persona_name or '[未知名稱]' }}</strong><br>
                         <small>加入於 
-							<time class="datetime-auto" data-timestamp="{{ friend.friend_since }}">
+							<time class="datetime-auto" data-timestamp="{{ friend.friend_since }}" title="{{ friend.friend_since | datetimeformat }}">
 								{{ friend.friend_since | datetimeformat }}
 							</time>
 						</small>

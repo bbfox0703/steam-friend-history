@@ -1,16 +1,11 @@
 <!DOCTYPE html>
-<html>
-<head>
-    <meta charset="utf-8">
-    <title>Steam 好友清單</title>
-    <link rel="stylesheet" href="/static/style.css">
-</head>
-<body>
+{% extends "base.html" %}
+
+{% block title %}Steam 好友追蹤系統{% endblock %}
+
+{% block content %}	
     <div class="container">
         <h1>Steam 好友追蹤系統</h1>
-
-		{% extends "base.html" %}
-
         {% if data %}
         <ul class="friend-list">
             {% for friend in data %}
@@ -29,5 +24,4 @@
         <p>目前尚無好友資料，請先前往 <code>/update</code> 更新。</p>
         {% endif %}
     </div>
-</body>
-</html>
+{% endblock %}

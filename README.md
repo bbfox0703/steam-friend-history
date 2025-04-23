@@ -7,9 +7,9 @@ Steam api key可不外流，自己用就好。
 好友列表要公開，不然api抓不到會變空值。  
 
 ## 📦 目前功能
-- 定時自動抓取 Steam 好友清單
-- 網頁界面顯示好友新增與刪除資料；刪除資料要定時抓取才較準
-- 好友暱稱變更記錄
+- 定時自動抓取Steam好友清單
+- 網頁界面顯示好友新增與刪除資料 (刪除資料要定時抓取才較準)
+- 從App開始定期執行後，記錄好友暱稱變更歷程
 - 國別統計與國別分類
 - 好友加入趨勢圖
 - 好友狀態看板
@@ -29,7 +29,7 @@ Steam api key可不外流，自己用就好。
 
 ---
 
-## 🛠️ 安裝方法 (Raspberry Pi 5)
+## 🛠️ 安裝方法 (使用Raspberry Pi 5)
 
 ### 1. 安裝 Docker
 ```bash
@@ -47,16 +47,16 @@ cp .env.example .env
 vi .env
 ```
 
-修改 .env的API KEY及ID，填入Steam API KEY、和帳號的64位元ID 76561xxxxxxxxxxxx
+### 修改 .env的API KEY及ID，填入Steam API KEY、和帳號的64位元ID 76561xxxxxxxxxxxx
 Steam api key: https://steamcommunity.com/dev/apikey
 
-建立docker映像檔：
+### 建立docker映像檔：
 ```bash
 COMPOSE_BAKE=true docker compose build
 docker compose up -d
 ```
 
-如要更新repos
+### 如要更新repos
 ```bash
 docker compose down
 git pull

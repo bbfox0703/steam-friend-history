@@ -9,7 +9,7 @@ import pandas as pd
 import json
 import os
 import operator
-from datetime import datetime
+from datetime import datetime, timedelta
 from collections import defaultdict, Counter
 
 # 國碼對照英文名稱表（完整）
@@ -221,23 +221,44 @@ def country_chart():
 
     return render_template("country_chart.html", stats=stats)
 
-@app.route("/filter")
-def filter():
-    import flask
-    try:
-        with open("database/friends.json", "r") as f:
-            friends = json.load(f)
-    except:
-        friends = []
+@app.route('/filter', methods=['GET'])
+def filter_friends():
+    friends = get_friend_data()
 
-    mode = flask.request.args.get("mode", "all")
+    # 取得查詢參數
+    online_only = request.args.get('online_only') == 'on'
+    has_avatar = request.args.get('has_avatar') == 'on'
+    has_country = request.args.get('has_country') == 'on'
+    recent_days = request.args.get('recent_days')
+    country_filter = request.args.get('country_code', '')
 
-    if mode == "named":
-        friends = [f for f in friends if f.get("persona_name") and f.get("avatar")]
-    elif mode == "with_country":
-        friends = [f for f in friends if f.get("country_code") and f.get("country_code") != "??"]
+    now = datetime.utcnow()
+    filtered = []
 
-    return render_template("filter.html", friends=friends, mode=mode)
+    for f in friends:
+        if online_only and f.get('personastate', 0) == 0:
+            continue
+        if has_avatar and not f.get('avatar'):
+            continue
+        if has_country and (not f.get('country_code') or f['country_code'] == '??'):
+            continue
+        if recent_days:
+            try:
+                days = int(recent_days)
+                last = int(f.get('lastlogoff', 0))
+                last_time = datetime.utcfromtimestamp(last)
+                if now - last_time > timedelta(days=days):
+                    continue
+            except:
+                pass
+        if country_filter and f.get('country_code', '').lower() != country_filter.lower():
+            continue
+        filtered.append(f)
+
+    # 取得所有國家代碼
+    all_countries = sorted(set(f['country_code'] for f in friends if f.get('country_code') and f['country_code'] != '??'))
+
+    return render_template('filter.html', friends=filtered, status_map=STATUS_MAP, all_countries=all_countries)
 
 @app.route("/trend")
 def trend():

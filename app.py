@@ -107,6 +107,7 @@ def filter_friend_list(args):
     has_country = args.get('has_country') == 'true'
     recent_days = args.get('recent_days')
     country_filter = args.get('country_code', '')
+    sort_order = args.get('sort', 'newest')  # 新增：排序參數
 
     now = datetime.utcnow()
     filtered = []
@@ -131,8 +132,14 @@ def filter_friend_list(args):
             continue
         filtered.append(f)
 
-    return filtered    
+    # 根據排序條件排列
+    if sort_order == 'newest':
+        filtered.sort(key=lambda f: f.get('friend_since', 0), reverse=True)
+    elif sort_order == 'oldest':
+        filtered.sort(key=lambda f: f.get('friend_since', 0))
 
+    return filtered
+    
 app = Flask(__name__)
 import os
 # print("=== API_KEY Loaded ===", os.getenv('STEAM_API_KEY'))

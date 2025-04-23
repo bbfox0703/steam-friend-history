@@ -1,3 +1,3 @@
 #!/bin/bash
-# chmod +x ~/steam-friend-history/cronjob/update.sh
+# curl 指令請使用完整形式
 curl http://localhost:3000/update

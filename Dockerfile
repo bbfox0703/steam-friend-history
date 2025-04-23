@@ -14,11 +14,11 @@ RUN apt-get update && \
 COPY . .
 
 # 複製 cronjob 目錄（內含 shell script 與排程設定）
-COPY cronjob /cronjob
+COPY cronjob /app/cronjob
 
 # 複製 cronjob 設定檔與 script
-RUN chmod 0644 /cronjob/steam-friend-cron && \
-    cp /cronjob/steam-friend-cron /etc/cron.d/steam-friend-cron && \
+RUN chmod 0644 /app/cronjob/steam-friend-cron && \
+    cp /app/cronjob/steam-friend-cron /etc/cron.d/steam-friend-cron && \
     chmod +x /app/cronjob/update.sh
 
 # 複製 supervisor 設定

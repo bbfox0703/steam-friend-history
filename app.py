@@ -542,12 +542,10 @@ def achievement_trend(appid):
                            appid=appid,
                            game_name=game_name,
                            header_image=header_image,
-                           dates=dates,
-                           counts=counts,
                            data=data,
                            total=total,
                            unlocked=unlocked,
                            mode=mode)
-
+                       
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=3000)

@@ -13,6 +13,7 @@
 .chart-wrapper canvas {
     min-width: 600px;
     max-width: 100%;
+    height: 300px;
 }
 .toggle-buttons a {
     display: inline-block;
@@ -29,6 +30,7 @@
     background-color: #007bff;
     color: white;
 }
+
 </style>
 {% endblock %}
 
@@ -46,7 +48,7 @@
     {% if stats %}
         <button id="exportCsvBtn">⬇ 匯出 CSV</button>
         <div class="chart-wrapper">
-            <canvas id="trendChart" height="400"></canvas>
+            <canvas id="trendChart"></canvas>
         </div>
     {% else %}
         <p>尚無統計資料。</p>

@@ -11,34 +11,70 @@ import operator
 from datetime import datetime
 from collections import defaultdict, Counter
 
+# 國碼對照英文名稱表（完整）
 country_name_map = {
+    # 亞洲
     "TW": "Taiwan", "CN": "China", "HK": "Hong Kong", "MO": "Macau",
-    "AU": "Australia", "BH": "Bahrain", "BT": "Bhutan", "BN": "Brunei Darussalam",
-    "KH": "Cambodia", "FJ": "Fiji", "GU": "Guam", "IN": "India", "ID": "Indonesia",
-    "IR": "Iran", "IL": "Israel", "JP": "Japan", "JO": "Jordan", "KW": "Kuwait",
-    "KR": "Korea", "LA": "Lao", "MY": "Malaysia", "NR": "Nauru", "NZ": "New Zealand",
-    "OM": "Oman", "PK": "Pakistan", "PG": "Papua New Guinea", "PH": "Philippines",
-    "QA": "Qatar", "SG": "Singapore", "SA": "Saudi Arabia", "SB": "Solomon Islands",
-    "LK": "Sri Lanka", "SY": "Syrian Arab Republic", "TH": "Thailand", "TR": "Turkey",
-    "AE": "United Arab Emirates", "VN": "Viet Nam", "YE": "Yemen", "AM": "Armenia",
-    "AT": "Austria", "AZ": "Azerbaijan", "BY": "Belarus", "BE": "Belgium", "BG": "Bulgaria",
-    "CY": "Cyprus", "CZ": "Czech", "DK": "Denmark", "EE": "Estonia", "FI": "Finland",
-    "FR": "France", "GE": "Georgia", "DE": "Germany", "GB": "United Kingdom", "GR": "Greece",
-    "HU": "Hungary", "IE": "Ireland", "IT": "Italy", "KZ": "Kazakhstan", "KG": "Kyrgyzstan",
-    "LV": "Latvia", "LT": "Lithuania", "LU": "Luxembourg", "MT": "Malta", "MD": "Moldova",
-    "NL": "Netherlands", "NO": "Norway", "PL": "Poland", "PT": "Portugal", "RO": "Romania",
-    "RU": "Russian Federation", "SK": "Slovakia", "SI": "Slovenia", "ES": "Spain", "CH": "Switzerland",
-    "SE": "Sweden", "TJ": "Tajikistan", "TM": "Turkmenistan", "UA": "Ukraine", "UZ": "Uzbekistan",
-    "CA": "Canada", "US": "United States", "AR": "Argentina", "BB": "Barbados", "BO": "Bolivia",
-    "BR": "Brazil", "CL": "Chile", "CO": "Colombia", "CR": "Costa Rica", "EC": "Ecuador",
-    "SV": "El Salvador", "GT": "Guatemala", "HN": "Honduras", "JM": "Jamaica", "MX": "Mexico",
-    "PA": "Panama", "PY": "Paraguay", "PE": "Peru", "PR": "Puerto Rico", "UY": "Uruguay",
-    "VE": "Venezuela", "BJ": "Benin", "CI": "Ivory Coast (Cote D'Ivoire)", "DJ": "Djibouti",
-    "EG": "Egypt", "ET": "Ethiopia", "GH": "Ghana", "KE": "Kenya", "LS": "Lesotho",
-    "MG": "Madagascar", "MW": "Malawi", "ML": "Mali", "MU": "Mauritius", "MZ": "Mozambique",
-    "NE": "Niger", "NG": "Nigeria", "SN": "Senegal", "SL": "Sierra Leone", "ZA": "South Africa",
-    "SD": "Sudan", "TZ": "Tanzania", "TG": "Togo", "SM": "San Marino", 
-    "BA": "Bosnia and Herzegovina", "FR": "France", "??": "Unknown"
+    "JP": "Japan", "KR": "South Korea", "KP": "North Korea",
+    "SG": "Singapore", "MY": "Malaysia", "ID": "Indonesia", "TH": "Thailand",
+    "VN": "Vietnam", "PH": "Philippines", "IN": "India", "PK": "Pakistan",
+    "BD": "Bangladesh", "NP": "Nepal", "LK": "Sri Lanka", "KH": "Cambodia",
+    "LA": "Laos", "MM": "Myanmar", "AF": "Afghanistan", "IR": "Iran",
+    "IQ": "Iraq", "SA": "Saudi Arabia", "SY": "Syria", "IL": "Israel",
+    "AE": "United Arab Emirates", "QA": "Qatar", "KW": "Kuwait", "OM": "Oman",
+    "BH": "Bahrain", "JO": "Jordan", "YE": "Yemen", "GE": "Georgia",
+    "AM": "Armenia", "AZ": "Azerbaijan", "TJ": "Tajikistan", "TM": "Turkmenistan",
+    "UZ": "Uzbekistan", "KZ": "Kazakhstan", "KG": "Kyrgyzstan", "MN": "Mongolia",
+    "BT": "Bhutan", "BN": "Brunei", "MV": "Maldives", "PS": "Palestine",
+
+    # 歐洲
+    "GB": "United Kingdom", "IE": "Ireland", "FR": "France", "DE": "Germany",
+    "IT": "Italy", "ES": "Spain", "PT": "Portugal", "BE": "Belgium",
+    "NL": "Netherlands", "CH": "Switzerland", "AT": "Austria", "SE": "Sweden",
+    "NO": "Norway", "DK": "Denmark", "FI": "Finland", "IS": "Iceland",
+    "CZ": "Czech Republic", "SK": "Slovakia", "HU": "Hungary", "PL": "Poland",
+    "RO": "Romania", "BG": "Bulgaria", "GR": "Greece", "SI": "Slovenia",
+    "HR": "Croatia", "BA": "Bosnia and Herzegovina", "RS": "Serbia", "ME": "Montenegro",
+    "MK": "North Macedonia", "AL": "Albania", "XK": "Kosovo", "BY": "Belarus",
+    "UA": "Ukraine", "RU": "Russia", "MD": "Moldova", "EE": "Estonia",
+    "LV": "Latvia", "LT": "Lithuania", "LU": "Luxembourg", "MT": "Malta",
+    "CY": "Cyprus", "LI": "Liechtenstein", "MC": "Monaco", "SM": "San Marino",
+    "VA": "Vatican City",
+
+    # 美洲
+    "US": "United States", "CA": "Canada", "MX": "Mexico",
+    "AR": "Argentina", "BR": "Brazil", "CL": "Chile", "CO": "Colombia",
+    "PE": "Peru", "VE": "Venezuela", "UY": "Uruguay", "PY": "Paraguay",
+    "BO": "Bolivia", "EC": "Ecuador", "GT": "Guatemala", "HN": "Honduras",
+    "SV": "El Salvador", "NI": "Nicaragua", "CR": "Costa Rica", "PA": "Panama",
+    "CU": "Cuba", "DO": "Dominican Republic", "HT": "Haiti", "JM": "Jamaica",
+    "TT": "Trinidad and Tobago", "PR": "Puerto Rico", "BS": "Bahamas",
+    "BB": "Barbados", "GD": "Grenada", "AG": "Antigua and Barbuda",
+    "LC": "Saint Lucia", "KN": "Saint Kitts and Nevis",
+
+    # 非洲
+    "EG": "Egypt", "DZ": "Algeria", "MA": "Morocco", "TN": "Tunisia",
+    "LY": "Libya", "SD": "Sudan", "SS": "South Sudan", "ET": "Ethiopia",
+    "KE": "Kenya", "UG": "Uganda", "TZ": "Tanzania", "GH": "Ghana",
+    "NG": "Nigeria", "CM": "Cameroon", "SN": "Senegal", "CI": "Ivory Coast",
+    "ZM": "Zambia", "ZW": "Zimbabwe", "AO": "Angola", "MW": "Malawi",
+    "MZ": "Mozambique", "NA": "Namibia", "BW": "Botswana", "LS": "Lesotho",
+    "SZ": "Eswatini", "RW": "Rwanda", "BI": "Burundi", "GA": "Gabon",
+    "CG": "Congo", "CD": "Democratic Republic of the Congo", "NE": "Niger",
+    "ML": "Mali", "BF": "Burkina Faso", "TG": "Togo", "GN": "Guinea",
+    "GM": "Gambia", "SL": "Sierra Leone", "LR": "Liberia", "MR": "Mauritania",
+    "DJ": "Djibouti", "SO": "Somalia", "MG": "Madagascar", "MU": "Mauritius",
+    "SC": "Seychelles", "RE": "Réunion",
+
+    # 大洋洲與其他地區
+    "AU": "Australia", "NZ": "New Zealand", "FJ": "Fiji", "PG": "Papua New Guinea",
+    "WS": "Samoa", "TO": "Tonga", "SB": "Solomon Islands", "FM": "Micronesia",
+    "MH": "Marshall Islands", "TV": "Tuvalu", "VU": "Vanuatu", "NC": "New Caledonia",
+    "PF": "French Polynesia", "GU": "Guam", "MP": "Northern Mariana Islands",
+    "CK": "Cook Islands", "NU": "Niue", "NR": "Nauru",
+
+    # 特殊與未知
+    "??": "Unknown", "ZZ": "Unknown"
 }
 
 def load_data():

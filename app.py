@@ -94,6 +94,12 @@ STATUS_MAP = {
     6: '想玩遊戲'
 }
 
+lang_map = {
+    "zh-tw": "tchinese",
+    "ja": "japanese",
+    "en": "english"
+}
+
 def load_data():
     path = os.path.join('database', 'friends.json')
     if os.path.exists(path):
@@ -486,7 +492,8 @@ def achievement_trend(appid):
 
     # 語言偵測
     lang = request.accept_languages.best_match(["zh-tw", "ja", "en"], default="en")
-    game_name = fetch_game_title(appid, lang)
+    steam_lang = lang_map.get(lang, "english")
+    game_name = fetch_game_title(appid, steam_lang)
 
     try:
         achievements = steam_api.fetch_achievements(appid)

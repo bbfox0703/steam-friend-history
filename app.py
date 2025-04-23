@@ -55,13 +55,23 @@ def history():
     except:
         changes = {}
 
-    # ⭐ 加這行來載入 steamid → 暱稱對照表
-    friend_map = {f['steamid']: f for f in steam_api.get_friend_data()}
+    # 補充 steamid 對應的名稱與加入時間
+    friend_data = steam_api.get_friend_data()
+    id_map = {f['steamid']: f for f in friend_data}
 
-    return render_template("history.html", 
-                           name_history=name_history, 
-                           changes=changes,
-                           friend_map=friend_map)
+    for timestamp, change in changes.items():
+        if "added" in change:
+            change["added_info"] = []
+            for sid in change["added"]:
+                info = id_map.get(sid, {})
+                change["added_info"].append({
+                    "steamid": sid,
+                    "persona_name": info.get("persona_name", "[未知名稱]"),
+                    "profile_url": info.get("profile_url", f"https://steamcommunity.com/profiles/{sid}"),
+                    "friend_since": info.get("friend_since", 0)
+                })
+
+    return render_template("history.html", name_history=name_history, changes=changes)
 
 @app.route("/country")
 def country():

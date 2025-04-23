@@ -242,6 +242,19 @@ def history():
         removed_info.sort(key=lambda f: int(f.get("friend_since", 0)), reverse=reverse)
         change["removed_info"] = removed_info
 
+    for logs in name_history.values():
+        for r in logs:
+            if isinstance(r.get("time"), str):
+                try:
+                    dt = datetime.strptime(r["time"], "%Y-%m-%d %H:%M:%S")
+                    r["ts"] = int(dt.timestamp())
+                except Exception as e:
+                    r["ts"] = 0  # fallback
+            elif isinstance(r.get("time"), (int, float)):
+                r["ts"] = int(r["time"])
+            else:
+                r["ts"] = 0
+
     return render_template("history.html",
                            name_history=name_history,
                            changes=changes,

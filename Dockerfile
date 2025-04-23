@@ -5,19 +5,20 @@ WORKDIR /app
 COPY requirements.txt ./
 RUN pip install -r requirements.txt
 
-# 安裝 curl + cron
+# 安裝 cron + curl + supervisor
 RUN apt-get update && \
-    apt-get install -y cron curl && \
+    apt-get install -y cron curl supervisor && \
     rm -rf /var/lib/apt/lists/*
 
-# 複製專案檔案
+# 複製專案
 COPY . .
 
-# 複製 crontab 設定檔
-COPY cronjob /etc/cron.d/steam-friend-cron
+# 複製 cronjob 設定檔與 script
+RUN chmod 0644 /cronjob/steam-friend-cron && \
+    cp /cronjob/steam-friend-cron /etc/cron.d/steam-friend-cron && \
+    chmod +x /app/cronjob/update.sh
 
-# 給予權限
-RUN chmod 0644 /etc/cron.d/steam-friend-cron
+# 複製 supervisor 設定
+COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
-# 設定 crontab 並啟動 cron + flask
-CMD cron && python app.py
+CMD ["/usr/bin/supervisord"]

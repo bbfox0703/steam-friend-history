@@ -473,59 +473,45 @@ def zip_backups():
 
 @app.route("/achievement/<appid>")
 def achievement_trend(appid):
-    mode = request.args.get("mode", "day")  # 新增切換模式參數
-    try:
-        playerstats = steam_api.fetch_achievement_data(appid)
-        achievements = playerstats.get("achievements", [])
-        game_name = playerstats.get("gameName", f"AppID {appid}")
-    except Exception as e:
-        return str(e)
+    def fetch_game_title(appid, lang="en"):
+        url = f"https://store.steampowered.com/api/appdetails?appids={appid}&l={lang}"
+        try:
+            r = requests.get(url)
+            if r.status_code == 200:
+                data = r.json().get(str(appid), {}).get("data", {})
+                return data.get("name", "")
+        except:
+            pass
+        return ""
 
-    # 整理成就時間線
+    # 語言偵測
+    lang = request.accept_languages.best_match(["zh-tw", "ja", "en"], default="en")
+    game_name = fetch_game_title(appid, lang)
+
+    try:
+        achievements = steam_api.fetch_achievements(appid)
+    except Exception as e:
+        return render_template("achievement_trend.html", appid=appid, error=str(e), game_name=game_name)
+
     timeline = []
     for a in achievements:
         if a.get("achieved") == 1 and a.get("unlocktime"):
             dt = datetime.fromtimestamp(a["unlocktime"])
-            timeline.append(dt)
+            timeline.append(dt.date())
 
     if not timeline:
-        return "無達成成就資料"
+        return render_template("achievement_trend.html", appid=appid, error="無達成成就資料", game_name=game_name)
 
-    # 分組依據：日 or 月
-    if mode == "month":
-        grouped = Counter([dt.strftime("%Y-%m") for dt in timeline])
-        date_format = "%Y-%m"
-        start = min(timeline).replace(day=1)
-        end = max(timeline).replace(day=1)
-        step = "month"
-    else:
-        grouped = Counter([dt.strftime("%Y-%m-%d") for dt in timeline])
-        date_format = "%Y-%m-%d"
-        start = min(timeline).date()
-        end = max(timeline).date()
-        step = "day"
+    counter = Counter(timeline)
+    sorted_dates = sorted(counter.items())
+    dates = [str(d[0]) for d in sorted_dates]
+    counts = [d[1] for d in sorted_dates]
+    total = len(achievements)
+    unlocked = sum(a.get("achieved", 0) for a in achievements)
 
-    # 填補缺失日期
-    stats = []
-    current = start
-    while current <= end:
-        label = current.strftime(date_format)
-        stats.append({"date": label, "count": grouped.get(label, 0)})
-        if step == "month":
-            if current.month == 12:
-                current = current.replace(year=current.year + 1, month=1)
-            else:
-                current = current.replace(month=current.month + 1)
-        else:
-            current += timedelta(days=1)
+    data = [{"date": d, "count": c} for d, c in zip(dates, counts)]
 
-    return render_template("achievement_trend.html",
-                           appid=appid,
-                           game_name=game_name,
-                           data=stats,
-                           mode=mode,
-                           achieved=len([a for a in achievements if a.get("achieved") == 1]),
-                           total=len(achievements))
+    return render_template("achievement_trend.html", appid=appid, dates=dates, counts=counts, data=data, game_name=game_name, total=total, unlocked=unlocked)
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=3000)

@@ -24,40 +24,39 @@
         <p>暫無暱稱變更紀錄。</p>
     {% endif %}
 
-	<h2>好友增減紀錄</h2>
-	<ul>
-	{% for timestamp, change in changes|dictsort(reverse=true) %}
-		<li>
-			<strong>{{ timestamp }}</strong>
-			{% if change.added %}
-				<p>➕ 新增好友：</p>
-				<ul>
-				{% for sid in change.added %}
-					{% set friend = friend_map.get(sid, {}) %}
-					<li>
-						<a href="https://steamcommunity.com/profiles/{{ sid }}" target="_blank">
-							{{ friend.get("persona_name", sid) }}
-						</a>
-					</li>
-				{% endfor %}
-				</ul>
-			{% endif %}
+    <h2>好友增減紀錄</h2>
+    <ul>
+    {% for timestamp, change in changes|dictsort(reverse=true) %}
+        <li>
+            <strong>{{ timestamp }}</strong>
+            {% if change.added_info %}
+                <p>➕ 新增好友：</p>
+                <ul>
+                {% for friend in change.added_info %}
+                    <li>
+                        <a href="{{ friend.profile_url }}" target="_blank">
+                            {{ friend.persona_name }}
+                        </a>
+                        <small>加入於 {{ friend.friend_since | datetimeformat }}</small>
+                    </li>
+                {% endfor %}
+                </ul>
+            {% endif %}
 
-			{% if change.removed %}
-				<p>➖ 移除好友：</p>
-				<ul>
-				{% for sid in change.removed %}
-					{% set friend = friend_map.get(sid, {}) %}
-					<li>
-						<a href="https://steamcommunity.com/profiles/{{ sid }}" target="_blank">
-							{{ friend.get("persona_name", sid) }}
-						</a>
-					</li>
-				{% endfor %}
-				</ul>
-			{% endif %}
-		</li>
-	{% endfor %}
-	</ul>
+            {% if change.removed %}
+                <p>➖ 移除好友：</p>
+                <ul>
+                {% for sid in change.removed %}
+                    <li>
+                        <a href="https://steamcommunity.com/profiles/{{ sid }}" target="_blank">
+                            {{ sid }}
+                        </a>
+                    </li>
+                {% endfor %}
+                </ul>
+            {% endif %}
+        </li>
+    {% endfor %}
+    </ul>
 </body>
 </html>

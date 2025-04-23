@@ -477,6 +477,13 @@ def zip_backups():
     now_str = datetime.now().strftime('%Y%m%d_%H%M%S')
     return send_file(memory_file, as_attachment=True, download_name=f"steam_backups_{now_str}.zip", mimetype='application/zip')
 
+@app.route("/achievement")
+def achievement_input():
+    appid = request.args.get("appid")
+    if appid:
+        return redirect(url_for("achievement_trend", appid=appid))
+    return render_template("achievement_search.html")
+
 @app.route("/achievement/<appid>")
 def achievement_trend(appid):
     def fetch_game_info(appid, lang="en"):

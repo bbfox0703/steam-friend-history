@@ -6,7 +6,7 @@
     <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
-    <h1>好友暱稱變更紀錄</h1>
+    <h2>好友暱稱變更紀錄</h2>
     {% if name_history %}
         <ul>
         {% for sid, logs in name_history.items() %}
@@ -24,23 +24,40 @@
         <p>暫無暱稱變更紀錄。</p>
     {% endif %}
 
-    <h1>好友增減紀錄</h1>
-    {% if changes %}
-        <ul>
-        {% for timestamp, change in changes|dictsort(reverse=true) %}
-            <li>
-                <strong>{{ timestamp }}</strong><br>
-                {% if change.added %}
-                    ➕ 新增好友：{{ change.added | join(', ') }}<br>
-                {% endif %}
-                {% if change.removed %}
-                    ➖ 移除好友：{{ change.removed | join(', ') }}<br>
-                {% endif %}
-            </li>
-        {% endfor %}
-        </ul>
-    {% else %}
-        <p>暫無好友增減紀錄。</p>
-    {% endif %}
+	<h2>好友增減紀錄</h2>
+	<ul>
+	{% for timestamp, change in changes|dictsort(reverse=true) %}
+		<li>
+			<strong>{{ timestamp }}</strong>
+			{% if change.added %}
+				<p>➕ 新增好友：</p>
+				<ul>
+				{% for sid in change.added %}
+					{% set friend = friend_map.get(sid, {}) %}
+					<li>
+						<a href="https://steamcommunity.com/profiles/{{ sid }}" target="_blank">
+							{{ friend.get("persona_name", sid) }}
+						</a>
+					</li>
+				{% endfor %}
+				</ul>
+			{% endif %}
+
+			{% if change.removed %}
+				<p>➖ 移除好友：</p>
+				<ul>
+				{% for sid in change.removed %}
+					{% set friend = friend_map.get(sid, {}) %}
+					<li>
+						<a href="https://steamcommunity.com/profiles/{{ sid }}" target="_blank">
+							{{ friend.get("persona_name", sid) }}
+						</a>
+					</li>
+				{% endfor %}
+				</ul>
+			{% endif %}
+		</li>
+	{% endfor %}
+	</ul>
 </body>
 </html>

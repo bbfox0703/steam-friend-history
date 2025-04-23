@@ -124,5 +124,23 @@ def country():
                            country_members=country_members,
                            sort_mode=sort_mode)
 
+@app.route("/filter")
+def filter():
+    import flask
+    try:
+        with open("database/friends.json", "r") as f:
+            friends = json.load(f)
+    except:
+        friends = []
+
+    mode = flask.request.args.get("mode", "all")
+
+    if mode == "named":
+        friends = [f for f in friends if f.get("persona_name") and f.get("avatar")]
+    elif mode == "with_country":
+        friends = [f for f in friends if f.get("country_code") and f.get("country_code") != "??"]
+
+    return render_template("filter.html", friends=friends, mode=mode)
+
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=3000)

@@ -146,21 +146,42 @@ def filter():
 @app.route("/trend")
 def trend():
     mode = request.args.get("mode", "month")  # 預設為月份
-    path = "database/friend_changes.json"
 
-    if not os.path.exists(path):
+    # 讀取 friends.json 作為新增好友依據
+    friends_path = "database/friends.json"
+    if not os.path.exists(friends_path):
         return "尚無統計資料"
 
-    with open(path, "r", encoding="utf-8") as f:
-        raw = json.load(f)
+    with open(friends_path, "r", encoding="utf-8") as f:
+        friends_raw = json.load(f)
+
+    # 讀取 friend_changes.json 來補上移除好友資訊
+    changes_path = "database/friend_changes.json"
+    changes_raw = {}
+    if os.path.exists(changes_path):
+        with open(changes_path, "r", encoding="utf-8") as f:
+            changes_raw = json.load(f)
 
     records = []
-    for ts, change in raw.items():
+
+    # 來自 friends.json 的新增好友（可能不完整，只是目前還在的）
+    for f in friends_raw:
+        try:
+            ts = int(f.get("friend_since", 0))
+            if ts == 0:
+                continue
+            date = datetime.fromtimestamp(ts)
+            records.append({"date": date, "added": 1, "removed": 0})
+        except:
+            continue
+
+    # 來自 friend_changes.json 的移除好友（歷史紀錄）
+    for ts, change in changes_raw.items():
         try:
             date = datetime.strptime(ts, "%Y-%m-%d %H:%M:%S")
-            added = len(change.get("added", []))
             removed = len(change.get("removed", []))
-            records.append({"date": date, "added": added, "removed": removed})
+            if removed > 0:
+                records.append({"date": date, "added": 0, "removed": removed})
         except:
             continue
 
@@ -168,6 +189,7 @@ def trend():
     if df.empty:
         return "尚無可視覺化的統計資料"
 
+    # 分群處理
     if mode == "day":
         df["group"] = df["date"].dt.to_period("D")
         full_range = pd.period_range(start=df["group"].min(), end=df["group"].max(), freq="D")
@@ -183,8 +205,6 @@ def trend():
     stat.rename(columns={"index": "group"}, inplace=True)
     stat["group"] = stat["group"].astype(str)
 
-    print(stat.head())
-  
     return render_template("trend.html", stats=stat.to_dict(orient="records"), mode=mode)
 
 if __name__ == '__main__':

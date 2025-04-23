@@ -515,18 +515,28 @@ def achievement_trend(appid):
                 timeline.append(dt.strftime("%Y-%m"))
             else:
                 timeline.append(dt.strftime("%Y-%m-%d"))
-                
+
     if not timeline:
         return render_template("achievement_trend.html", appid=appid, error="無達成成就資料", game_name=game_name)
 
-    counter = Counter(timeline)
-    sorted_dates = sorted(counter.items())
-    dates = [str(d[0]) for d in sorted_dates]
-    counts = [d[1] for d in sorted_dates]
-    total = len(achievements)
-    unlocked = sum(a.get("achieved", 0) for a in achievements)
+    # pandas 處理與補齊空白區間
+    df = pd.DataFrame({"date": timeline})
+    df["date"] = pd.to_datetime(df["date"])
 
-    data = [{"date": d, "count": c} for d, c in zip(dates, counts)]
+    if mode == "month":
+        df["period"] = df["date"].dt.to_period("M")
+        full_range = pd.period_range(df["period"].min(), df["period"].max(), freq="M")
+    else:
+        df["period"] = df["date"].dt.to_period("D")
+        full_range = pd.period_range(df["period"].min(), df["period"].max(), freq="D")
+
+    stat = df.groupby("period").size().reindex(full_range, fill_value=0).reset_index()
+    stat.columns = ["date", "count"]
+    stat["date"] = stat["date"].astype(str)
+
+    data = stat.to_dict(orient="records")
+    total = len(achievements)
+    unlocked = sum(a.get("achieved", 0) for a in achievements)  
 
     return render_template("achievement_trend.html",
                            appid=appid,

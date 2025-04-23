@@ -6,7 +6,8 @@ services:
     volumes:
       - ./backups:/app/backups
       - ./database:/app/database
-      - ./logs:/var/log      
+      - ./logs:/var/log     
+      - ./utils:/app/utils      
     env_file:
       - .env      
     restart: unless-stopped

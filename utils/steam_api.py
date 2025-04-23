@@ -156,3 +156,38 @@ def fetch_achievement_data(appid, steam_id=None):
         raise Exception(f"Steam API Error: {response.status_code} {response.text}")
     return response.json().get("playerstats", {})
     
+def load_game_title_cache():
+    path = "./database/game_titles.json"
+    if os.path.exists(path):
+        with open(path, "r", encoding="utf-8") as f:
+            return json.load(f)
+    return {}
+
+def fetch_owned_games():
+    url = f"https://api.steampowered.com/IPlayerService/GetOwnedGames/v1/?key={API_KEY}&steamid={STEAM_ID}&include_appinfo=true"
+    response = requests.get(url)
+    if response.status_code != 200:
+        raise Exception(f"Steam API Error: {response.status_code} {response.text}")
+    return response.json().get("response", {}).get("games", [])
+    
+_game_title_cache = None  # 快取記憶體變數（避免重複讀取檔案）
+
+def get_game_title(appid: str) -> str:
+    global _game_title_cache
+    if _game_title_cache is None:
+        _game_title_cache = load_game_title_cache()
+    return _game_title_cache.get(str(appid), f"[AppID: {appid}]")
+
+def fetch_game_info(appid, lang="en"):
+    url = f"https://store.steampowered.com/api/appdetails?appids={appid}&l={lang}"
+    try:
+        r = requests.get(url)
+        if r.status_code == 200:
+            data = r.json().get(str(appid), {}).get("data", {})
+            return {
+                "name": data.get("name", ""),
+                "header_image": data.get("header_image", "")
+            }
+    except:
+        pass
+    return {"name": "", "header_image": ""}

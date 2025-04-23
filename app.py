@@ -4,6 +4,7 @@ load_dotenv()
 from flask import Flask, render_template, request, redirect, url_for, jsonify, send_from_directory, send_file
 import utils.steam_api as steam_api
 from utils.steam_api import get_friend_data
+from utils.steam_api import fetch_game_info
 import requests
 import utils.backup as backup
 import pandas as pd
@@ -486,25 +487,16 @@ def achievement_input():
 
 @app.route("/achievement/<appid>")
 def achievement_trend(appid):
-    def fetch_game_info(appid, lang="en"):
-        url = f"https://store.steampowered.com/api/appdetails?appids={appid}&l={lang}"
-        try:
-            r = requests.get(url)
-            if r.status_code == 200:
-                data = r.json().get(str(appid), {}).get("data", {})
-                return {
-                    "name": data.get("name", ""),
-                    "header_image": data.get("header_image", "")
-                }
-        except:
-            pass
-        return {"name": "", "header_image": ""}
-
     # 語言偵測
-    lang = request.accept_languages.best_match(["zh-tw", "ja", "en"], default="en")
-    steam_lang = lang_map.get(lang, "english")
+    lang_override = request.args.get("lang")
+    if lang_override in lang_map:
+        steam_lang = lang_map[lang_override]
+    else:
+        lang = request.accept_languages.best_match(["zh-tw", "ja", "en"], default="en")
+        steam_lang = lang_map.get(lang, "english")
+    
     game_info = fetch_game_info(appid, steam_lang)
-    game_name = game_info["name"]
+    game_name = game_info["name"] or get_game_title(appid)
     header_image = game_info["header_image"]
 
 

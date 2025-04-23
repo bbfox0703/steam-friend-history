@@ -25,7 +25,7 @@
             </div>
 			<div class="meta">
 				{% if f.personastate != 0 %}
-					✅ 目前在線中 🟢<br>
+					✅ 上線中 🟢<br>
 				{% elif f.lastlogoff %}
 					最後上線：{{ f.lastlogoff | datetimeformat }}（{{ f.lastlogoff | timeago }}）<br>
 				{% endif %}

@@ -10,27 +10,30 @@ h1 {
 }
 
 .friend-list {
-    list-style: none;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 1rem;
     padding: 0;
+    list-style: none;
 }
 
 .friend-item {
     display: flex;
     align-items: center;
-    background-color: white;
+    background-color: #f9f9f9;
     padding: 10px;
-    margin-bottom: 8px;
-    border-radius: 6px;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    border-radius: 12px;
+    box-shadow: 0 0 3px rgba(0, 0, 0, 0.1);
 }
 
 .friend-item img {
-    width: 48px;
-    height: 48px;
-    border-radius: 4px;
-    margin-right: 10px;
+    width: 64px;
+    height: 64px;
+    border-radius: 8px;
+    margin-right: 12px;
 }
 
 .friend-info {
-    color: #333;
+    font-size: 0.95rem;
 }
+

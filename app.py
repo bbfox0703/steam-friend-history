@@ -1,13 +1,15 @@
 from dotenv import load_dotenv
 load_dotenv()
 
-from flask import Flask, render_template, request, redirect, url_for, jsonify, send_from_directory
+from flask import Flask, render_template, request, redirect, url_for, jsonify, send_from_directory, send_file
 import utils.steam_api as steam_api
 from utils.steam_api import get_friend_data
 import utils.backup as backup
 import pandas as pd
 import json
 import os
+import io
+import zipfile
 import operator
 from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
@@ -441,6 +443,23 @@ def delete_backup(filename):
         os.remove(path)
         return jsonify({'status': 'deleted'})
     return jsonify({'status': 'not_found'})
+
+@app.route('/backups/zip', methods=['POST'])
+def zip_backups():
+    filenames = request.form.getlist('files')
+    if not filenames:
+        return "未選取任何檔案", 400
+
+    memory_file = io.BytesIO()
+    with zipfile.ZipFile(memory_file, 'w') as zf:
+        for name in filenames:
+            path = os.path.join('backups', name)
+            if os.path.exists(path):
+                zf.write(path, arcname=name)
+    memory_file.seek(0)
+
+    now_str = datetime.now().strftime('%Y%m%d_%H%M%S')
+    return send_file(memory_file, as_attachment=True, download_name=f"steam_backups_{now_str}.zip", mimetype='application/zip')
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=3000)

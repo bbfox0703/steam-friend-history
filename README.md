@@ -24,6 +24,8 @@ Steam api key可不外流，自己用就好。
 ![好友趨勢圖](./docs/trend.png)
 ## 圖例：好友狀態看板 
 ![好友狀態看板 ](./docs/status_board.png)
+## 圖例：變更記錄 
+![變更記錄 ](./docs/history.png)
 
 ---
 

@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>好友篩選清單</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <h1>Steam Friend Tracker - 篩選模式</h1>
+
+    <div>
+        <strong>篩選選項：</strong>
+        <a href="/filter?mode=all">全部</a> |
+        <a href="/filter?mode=named">只顯示有暱稱與頭像的</a> |
+        <a href="/filter?mode=with_country">只顯示有國別的</a>
+    </div>
+
+    <hr>
+
+    {% if friends %}
+        <ul>
+        {% for friend in friends %}
+            <li class="friend-item">
+                <a href="{{ friend.profile_url }}" target="_blank">
+                    <img src="{{ friend.avatar if friend.avatar else '/static/default-avatar.png' }}" alt="avatar" width="48" height="48">
+                    <div class="friend-info">
+                        <strong>{{ friend.persona_name if friend.persona_name else '[未知名稱]' }}</strong><br>
+                        <small>加入於 {{ friend.friend_since | datetimeformat }}</small>
+                        {% if friend.country_code %}
+                            <small>（{{ friend.country_code if friend.country_code != '??' else '未知' }}）</small>
+                        {% endif %}
+                    </div>
+                </a>
+            </li>
+        {% endfor %}
+        </ul>
+    {% else %}
+        <p>目前無符合條件的好友。</p>
+    {% endif %}
+</body>
+</html>

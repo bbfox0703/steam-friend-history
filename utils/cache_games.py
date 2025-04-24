@@ -2,8 +2,10 @@ import os
 import json
 import time
 import argparse
+import functools
 from dotenv import load_dotenv
 
+print = functools.partial(print, flush=True)
 print(f"⏱ 開始於：{time.strftime('%Y-%m-%d %H:%M:%S')}")
 
 # 動態引入 steam_api，兼容模組與獨立執行
@@ -32,6 +34,12 @@ def fetch_and_cache_games(lang="en", sleep_interval=1):
     for i, game in enumerate(games):
         appid = str(game["appid"])
         name = game.get("name", "")
+
+        # 補充：嘗試從 Store 抓取多語系名稱
+        if not name and lang != "en":
+            store_info = steam_api.fetch_store_name(appid, lang)
+            name = store_info or ""
+
         if appid not in data:
             data[appid] = {}
         data[appid][lang] = name

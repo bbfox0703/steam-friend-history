@@ -16,9 +16,6 @@ COPY . .
 # 確保 utils 是模組（解決 ModuleNotFoundError）
 RUN touch /app/utils/__init__.py
 
-#
-RUN touch /app/database/empty.txt
-
 # 複製 cronjob 目錄（內含 shell script 與排程設定）
 COPY cronjob /app/cronjob
 RUN chmod +x /app/cronjob/*.sh
@@ -35,3 +32,5 @@ RUN chmod 0644 /app/cronjob/steam-friend-cron && \
 COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
 CMD ["/usr/bin/supervisord"]
+
+RUN mkdir /app/database

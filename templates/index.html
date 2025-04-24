@@ -22,14 +22,11 @@
                             {{ friend.friend_since | datetimeformat }}
                         </time><br>
                         {{ _('等級：') }}
-                        {% if friend.level is defined and friend.level is not none %}
-                            {{ friend.level }}
-                            {% if friend.level_fetched_at %}
-                                <span style="color: gray; font-size: 0.8em;" title="{{ friend.level_fetched_at | datetimeformat }}">⏳</span>
-                            {% endif %}
-                        {% else %}
-                            <span class="steam-level" data-steamid="{{ friend.steamid }}">⏳</span>
-                        {% endif %}
+							{% if friend.level is defined and friend.level is not none %}
+								{{ _('等級：') }}{{ friend.level }}
+							{% else %}
+								{{ _('等級：') }}<span class="steam-level" data-steamid="{{ friend.steamid }}">⏳</span>
+							{% endif %}
                     </small>
                 </div>
             </a>
@@ -44,31 +41,35 @@
 
 {% block extra_script %}
 <script>
-  document.addEventListener("DOMContentLoaded", () => {
-    document.querySelectorAll(".datetime-auto").forEach(el => {
-      const ts = el.dataset.timestamp;
-      if (ts) {
-        const d = new Date(parseInt(ts) * 1000);
-        el.textContent = d.toLocaleString();
-      }
-    });
+document.addEventListener("DOMContentLoaded", () => {
+    const nodes = document.querySelectorAll(".datetime-auto");
+    for (const el of nodes) {
+        const ts = el.getAttribute("data-timestamp");
+        if (ts) {
+            const d = new Date(parseInt(ts) * 1000);
+            el.textContent = d.toLocaleString();
+        }
+    }
 
-    document.querySelectorAll('.steam-level').forEach(span => {
-      const steamid = span.dataset.steamid;
-      if (!steamid) return;
-      fetch(`/steam-level/${steamid}`)
-        .then(res => res.json())
-        .then(data => {
-          if (data.level !== undefined && data.level !== null) {
-            span.innerHTML = `${data.level} <span style="color:gray; font-size: 0.8em;">⏳</span>`;
-          } else {
-            span.textContent = "-";
-          }
-        })
-        .catch(() => {
-          span.textContent = "?";
-        });
+    // 延遲查詢等級
+    document.querySelectorAll(".steam-level[data-steamid]").forEach(span => {
+        const steamid = span.dataset.steamid;
+        fetch(`/steam-level/${steamid}`)
+            .then(res => res.json())
+            .then(data => {
+                if (data.level !== undefined && data.cache_time !== undefined) {
+                    const time = new Date(data.cache_time * 1000);
+                    const timeStr = time.toLocaleString();
+                    span.innerHTML = `${data.level} <span style="color:gray;" title="快取時間">${timeStr}</span>`;
+                } else {
+                    span.textContent = "?";
+                }
+            })
+            .catch(err => {
+                console.error("查詢等級失敗", err);
+                span.textContent = "?";
+            });
     });
-  });
+});
 </script>
 {% endblock %}

@@ -53,17 +53,17 @@ cp .env.example .env
 vi .env
 ```
 
-### 修改 .env的API KEY及ID，填入Steam API KEY、和帳號的64位元ID 76561xxxxxxxxxxxx
+### 3. 修改 .env的API KEY及ID，填入Steam API KEY、和帳號的64位元ID 76561xxxxxxxxxxxx
 Steam api key: https://steamcommunity.com/dev/apikey
 **好友列表如未公開，則無法取得資料**
 
-### 建立docker映像檔：
+### 4. 建立docker映像檔：
 ```bash
 COMPOSE_BAKE=true docker compose build
 docker compose up -d
 ```
 
-### 如要更新repos
+### 5. 如要更新repos
 ```bash
 docker compose down
 git pull
@@ -71,7 +71,7 @@ COMPOSE_BAKE=true docker compose build
 docker compose up -d
 ```
 
-## 連線網址
+## 完成後、連線網址
 http://伺服器ip:3000
 
 例如ip是192.168.1.100的話：

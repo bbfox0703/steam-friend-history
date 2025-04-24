@@ -31,7 +31,7 @@ Steam api key可不用外流，自己用就好。
 ![變更記錄 ](./docs/history.png)
 ## 圖例：成就達成趨勢圖
 ![成就達成趨勢圖 ](./docs/achievement_trend.png)
-###需要輸入AppID
+### 需要輸入AppID
 ![appid ](./docs/appid.png)
 ---
 

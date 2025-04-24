@@ -29,56 +29,55 @@
 
 {% block extra_script %}
 <script>
-document.addEventListener("DOMContentLoaded", () => {
-    // 🧹 防止上一頁殘留 loading 狀態
+window.addEventListener("pageshow", () => {
     document.getElementById("loadingMessage").style.display = "none";
     document.getElementById("manualLoading").style.display = "none";
+});
 
-    fetch("/cached-games")
-        .then(res => res.json())
-        .then(games => {
-            const select = document.getElementById("selectAppid");
-            const search = document.getElementById("gameSearch");
-            const loadingMsg = document.getElementById("loadingMessage");
+fetch("/cached-games")
+    .then(res => res.json())
+    .then(games => {
+        const select = document.getElementById("selectAppid");
+        const search = document.getElementById("gameSearch");
+        const loadingMsg = document.getElementById("loadingMessage");
 
-            function renderOptions(keyword = "") {
-                select.innerHTML = '<option value="">-- 選擇一款遊戲 --</option>';
-                games.forEach(g => {
-                    if (g.name.toLowerCase().includes(keyword.toLowerCase())) {
-                        const opt = document.createElement("option");
-                        opt.value = g.appid;
-                        opt.textContent = `${g.name} (${g.appid})`;
-                        select.appendChild(opt);
-                    }
-                });
-            }
-
-            renderOptions();
-
-            search.addEventListener("input", e => {
-                renderOptions(e.target.value);
-            });
-
-            select.addEventListener("input", function () {
-                const selected = games.find(g => g.appid === this.value);
-                if (selected) {
-                    select.disabled = true;
-                    search.disabled = true;
-                    loadingMsg.style.display = "block";
-                    window.location.href = `/achievement/${this.value}?lang=zh-tw`;
+        function renderOptions(keyword = "") {
+            select.innerHTML = '<option value="">-- 選擇一款遊戲 --</option>';
+            games.forEach(g => {
+                if (g.name.toLowerCase().includes(keyword.toLowerCase())) {
+                    const opt = document.createElement("option");
+                    opt.value = g.appid;
+                    opt.textContent = `${g.name} (${g.appid})`;
+                    select.appendChild(opt);
                 }
             });
-        })
-        .catch(err => {
-            const select = document.getElementById("selectAppid");
-            select.innerHTML = '<option disabled selected>⚠️ 載入失敗，請稍後再試</option>';
-            console.error("載入 cached-games 失敗：", err);
+        }
+
+        renderOptions();
+
+        search.addEventListener("input", e => {
+            renderOptions(e.target.value);
         });
 
-    // 手動輸入 AppID 查詢時顯示載入提示
-    document.getElementById("appidForm").addEventListener("submit", function () {
-        document.getElementById("manualLoading").style.display = "block";
+        select.addEventListener("input", function () {
+            const selected = games.find(g => g.appid === this.value);
+            if (selected) {
+                select.disabled = true;
+                search.disabled = true;
+                loadingMsg.style.display = "block";
+                window.location.href = `/achievement/${this.value}?lang=zh-tw`;
+            }
+        });
+    })
+    .catch(err => {
+        const select = document.getElementById("selectAppid");
+        select.innerHTML = '<option disabled selected>⚠️ 載入失敗，請稍後再試</option>';
+        console.error("載入 cached-games 失敗：", err);
     });
+
+document.getElementById("appidForm").addEventListener("submit", function () {
+    document.getElementById("manualLoading").style.display = "block";
 });
 </script>
 {% endblock %}
+

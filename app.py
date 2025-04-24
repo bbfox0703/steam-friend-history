@@ -89,15 +89,16 @@ country_name_map = {
     "??": "Unknown", "ZZ": "Unknown"
 }
 
-STATUS_MAP = {
-    0: _('離線'),
-    1: _('在線上'),
-    2: _('忙碌'),
-    3: _('離開'),
-    4: _('請勿打擾'),
-    5: _('想交易'),
-    6: _('想玩遊戲')
-}
+def get_status_map():
+    return {
+        0: _('離線'),
+        1: _('在線上'),
+        2: _('忙碌'),
+        3: _('離開'),
+        4: _('請勿打擾'),
+        5: _('想交易'),
+        6: _('想玩遊戲')
+    }
 
 lang_map = {
     "zh-tw": "tchinese",
@@ -443,7 +444,7 @@ def status_board():
     filtered = [f for f in friends if not show_online_only or f.get('personastate', 0) != 0]
     sorted_friends = sorted(filtered, key=sort_key)
 
-    return render_template('status_board.html', friends=sorted_friends, status_map=STATUS_MAP, show_online_only=show_online_only)
+    return render_template('status_board.html', friends=sorted_friends, status_map=get_status_map(), show_online_only=show_online_only)
 
 @app.route('/backups')
 def backups():

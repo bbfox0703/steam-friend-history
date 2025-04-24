@@ -8,5 +8,32 @@
     <label for="appid">請輸入 AppID：</label>
     <input type="text" name="appid" id="appid" required placeholder="例如 3123410">
     <button type="submit">查詢</button>
+
+    <hr>
+
+    <label for="selectAppid">或從已擁有的遊戲選擇：</label>
+    <select id="selectAppid">
+        <option value="">-- 選擇一款遊戲 --</option>
+    </select>
 </form>
+
+<script>
+fetch("/cached-games")
+    .then(res => res.json())
+    .then(games => {
+        const select = document.getElementById("selectAppid");
+        games.forEach(g => {
+            const opt = document.createElement("option");
+            opt.value = g.appid;
+            opt.textContent = `${g.name} (${g.appid})`;
+            select.appendChild(opt);
+        });
+
+        select.addEventListener("change", function () {
+            if (this.value) {
+                location.href = `/achievement/${this.value}`;
+            }
+        });
+    });
+</script>
 {% endblock %}

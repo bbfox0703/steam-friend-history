@@ -21,7 +21,6 @@
                         <time class="datetime-auto" data-timestamp="{{ friend.friend_since }}" title="{{ friend.friend_since | datetimeformat }}">
                             {{ friend.friend_since | datetimeformat }}
                         </time><br>
-                        {{ _('等級：') }}
 							{% if friend.level is defined and friend.level is not none %}
 								{{ _('等級：') }}{{ friend.level }}
 							{% else %}

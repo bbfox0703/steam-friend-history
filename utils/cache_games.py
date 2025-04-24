@@ -21,7 +21,7 @@ load_dotenv()
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 CACHE_PATH = os.path.join(BASE_DIR, "database", "game_titles.json")
 
-SUPPORTED_LANGS = ["tchinese", "en", "japanese"]
+SUPPORTED_LANGS = ["tchinese", "english", "japanese"]
 
 def fetch_and_cache_games(lang="en", sleep_interval=1, existing_data=None):
     print(f"🌐 正在抓取語言：{lang}")
@@ -44,7 +44,10 @@ def fetch_and_cache_games(lang="en", sleep_interval=1, existing_data=None):
         #    store_info = steam_api.fetch_store_name(appid, lang)
         #    name = store_info or ""
 
-        name = game.get("name", "") or steam_api.fetch_store_name(appid, lang)
+        if lang != "english":
+          name = steam_api.fetch_store_name(appid, lang)
+        else:
+          name = game.get("name", "") or steam_api.fetch_store_name(appid, lang)
         if appid not in data:
             data[appid] = {}
         data[appid][lang] = name

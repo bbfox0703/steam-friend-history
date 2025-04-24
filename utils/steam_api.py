@@ -229,6 +229,7 @@ def fetch_game_info(appid, lang="en"):
 
 def fetch_store_name(appid: str, lang: str) -> str:
     url = f"https://store.steampowered.com/api/appdetails?appids={appid}&l={lang}"
+    print(f"{time.strftime('%Y-%m-%d %H:%M:%S')} URL: {url}")
     try:
         r = requests.get(url, timeout=10)
         if r.status_code == 200:

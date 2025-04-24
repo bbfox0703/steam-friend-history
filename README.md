@@ -82,8 +82,9 @@ http://伺服器ip:3000
 例如ip是192.168.1.100的話：
 http://192.168.1.100:3000
 
-## 🛠️ 安裝方法 (使用Windwos 11 Home)
+## 🛠️ 安裝方法 (大約步驟使用Windwos 11 Home)
 需要安裝：WSL2、Docker Desktop on Windows
+使用VMWare等直接開VM裝Docker問題最少，WSL要改的地方不少，例如cron jobs等。
 
 ### WSL2 安裝
 使用管理員模式開啟命令提示字元 (cmd.exe)
@@ -92,17 +93,46 @@ http://192.168.1.100:3000
 wsl --install
 ```
 ![wsl2 ](./docs/wsl2.png)
-
-### 安裝 Docker Desktop on Windows
-https://docs.docker.com/desktop/setup/install/windows-install/
+重開機
 
 ### Windows Store 安裝 Debian
+確認WSL版本是 v2
+```powershell
+wsl -l -v
+```
+
 #### 執行 Debian
+```powershell
+wsl
+```
+  
+Linux OS中：
 ```bash
 sudo apt update
 sudo apt upgrade -y
 sudo apt install git curl procps -y
+sudo apt install python3-venv -y
+sudo apt install cron -y
+sudo service cron start
+cd
+git clone https://github.com/bbfox0703/steam-friend-history.git
+cd steam-friend-history/
+cp .env.example .env
 ```
+
+修改 .env ，填入steam api key & steam id
+
+```bash
+python3 -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+python app.py
+```
+到此網頁應該會起來
+
+### 其它系統定
+背景 cronjobs ，請參考steam-friend-cron-wsl、update_wsl.sh、daily_wsl.sh
+如果沒設定背景程式，好友資料和遊戲名稱是不會抓取的，其本上就是整個沒有作用。
 
 ## 部份Docker指令
 

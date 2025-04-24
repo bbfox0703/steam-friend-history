@@ -82,6 +82,20 @@ http://伺服器ip:3000
 例如ip是192.168.1.100的話：
 http://192.168.1.100:3000
 
+## 🛠️ 安裝方法 (使用Windwos 11 Home)
+需要安裝：WSL2、Docker Desktop on Windows
+
+### WSL2 安裝
+使用管理員模式開啟命令提示字元 (cmd.exe)
+輸入：
+```powershell
+wsl --install
+```
+![wsl2 ](./docs/wsl2.png)
+
+### 安裝 Docker Desktop on Windows
+https://docs.docker.com/desktop/setup/install/windows-install/
+
 
 ## 部份Docker指令
 

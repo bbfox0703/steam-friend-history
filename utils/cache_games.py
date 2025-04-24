@@ -56,7 +56,7 @@ def fetch_and_cache_games(lang="en", sleep_interval=1, existing_data=None):
 
     return data
 
-def build_game_title_cache(langs=["en"], sleep_interval=1.05):
+def build_game_title_cache(langs=["en"], sleep_interval=1.7):
     print("🚀 開始建立遊戲名稱多語系快取...")
 
     # 載入現有快取

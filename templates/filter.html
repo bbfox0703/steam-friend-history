@@ -38,19 +38,22 @@
             <img src="{{ friend.avatar if friend.avatar else '/static/default-avatar.png' }}" alt="avatar">
             <div class="friend-info">
                 <strong>{{ friend.persona_name if friend.persona_name else _('【未知名稱】') }}</strong>
-                <small>
-                    {{ _('加入於') }} 
+				<small>
+					{{ _('加入於') }} 
 					<time class="datetime-auto" data-timestamp="{{ friend.friend_since }}">
 						{{ friend.friend_since | datetimeformat }}
 					</time><br>
-                    {{ _('狀態：') }}{{ status_map.get(friend.personastate, _('未知')) }}<br>
-                    {% if friend.lastlogoff %}
-                        {{ _('上次離線：') }}{{ friend.lastlogoff | datetimeformat }}
-                    {% endif %}
-                    {% if friend.country_code %}
-                        <br>{{ _('國別：') }}{{ friend.country_code }}
-                    {% endif %}
-                </small>
+					{{ _('狀態：') }}{{ status_map.get(friend.personastate, _('未知')) }}<br>
+					{% if friend.level is defined and friend.level is not none %}
+						{{ _('等級：') }}{{ friend.level }}<br>
+					{% endif %}
+					{% if friend.lastlogoff %}
+						{{ _('上次離線：') }}{{ friend.lastlogoff | datetimeformat }}
+					{% endif %}
+					{% if friend.country_code %}
+						<br>{{ _('國別：') }}{{ friend.country_code }}
+					{% endif %}
+				</small>
             </div>
         </a>
     </li>
@@ -139,6 +142,7 @@ function fetchFiltered() {
                         <small>
                             ${i18n.added_at} <time class="datetime-auto" data-timestamp="${f.friend_since}">${formatLocalTime(f.friend_since)}（${formatDaysAgo(f.friend_since)}）</time><br>
                             ${i18n.status}${statusMap[f.personastate] || '{{ _('未知') }}'}<br>
+							${typeof f.level !== 'undefined' ? '{{ _("等級：") }}' + f.level + '<br>' : ''}
                             ${f.lastlogoff ? i18n.last_seen + new Date(f.lastlogoff * 1000).toLocaleString() + '<br>' : ''}
                             ${f.country_code ? i18n.country + f.country_code : ''}
                         </small>

@@ -23,6 +23,20 @@ STORE_LANG_MAP = {
     "japanese": "japanese"
 }
 
+def get_steam_level(steamid):
+    url = f"https://api.steampowered.com/IPlayerService/GetSteamLevel/v1/"
+    params = {
+        "key": STEAM_API_KEY,
+        "steamid": steamid
+    }
+    try:
+        res = requests.get(url, params=params)
+        data = res.json()
+        return data.get("response", {}).get("player_level", None)
+    except Exception as e:
+        print(f"⚠️ 無法取得 {steamid} 的等級資訊：{e}")
+        return None
+
 def fetch_friend_list():
     url = f"https://api.steampowered.com/ISteamUser/GetFriendList/v1/?key={API_KEY}&steamid={STEAM_ID}&relationship=friend"
     response = requests.get(url)
@@ -157,7 +171,8 @@ def update_friend_list():
             'profile_url': profile.get('profileurl', f'https://steamcommunity.com/profiles/{sid}'),
             'country_code': profile.get('loccountrycode', '??'),
             'lastlogoff': profile.get('lastlogoff'),
-            'personastate': profile.get('personastate')
+            'personastate': profile.get('personastate'),
+            'level': get_steam_level(sid)  # ✅ 新增等級資訊
         }
 
         if enriched['persona_name'] == '' or enriched['avatar'] == '':
@@ -174,7 +189,6 @@ def update_friend_list():
     save_json(CHANGELOG_PATH, changes)
     backup_friend_data(enriched_friends)
     return len(enriched_friends)
-
 
 def fetch_achievements(appid, steam_id=None):
     if steam_id is None:

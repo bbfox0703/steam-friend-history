@@ -11,17 +11,21 @@
         <li class="friend-item" {% if friend.incomplete %}style="opacity: 0.5;" title="{{ _('資料不完整：可能缺少名稱或頭像') }}"{% endif %}>
             <a href="{{ friend.profile_url }}" target="_blank" style="display:flex; text-decoration:none; color:inherit;">
                 <img src="{{ friend.avatar if friend.avatar else '/static/default-avatar.png' }}" alt="avatar">
-                <div class="friend-info">
-                    <strong>
-                        {{ friend.persona_name or _('【未知名稱】') }}
-                        {% if friend.incomplete %}<span style="color: red;">（{{ _('不完整') }}）</span>{% endif %}
-                    </strong><br>
-                    <small>{{ _('加入於') }} 
-                        <time class="datetime-auto" data-timestamp="{{ friend.friend_since }}" title="{{ friend.friend_since | datetimeformat }}">
-                            {{ friend.friend_since | datetimeformat }}
-                        </time>
-                    </small>
-                </div>
+				<div class="friend-info">
+					<strong>
+						{{ friend.persona_name or _('【未知名稱】') }}
+						{% if friend.incomplete %}<span style="color: red;">（{{ _('不完整') }}）</span>{% endif %}
+					</strong><br>
+					<small>
+						{{ _('加入於') }} 
+						<time class="datetime-auto" data-timestamp="{{ friend.friend_since }}" title="{{ friend.friend_since | datetimeformat }}">
+							{{ friend.friend_since | datetimeformat }}
+						</time><br>
+						{% if friend.level is defined and friend.level is not none %}
+							{{ _('等級：') }}{{ friend.level }}
+						{% endif %}
+					</small>
+				</div>
             </a>
         </li>
         {% endfor %}

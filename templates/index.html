@@ -16,7 +16,8 @@
                         {{ friend.persona_name or _('【未知名稱】') }}
                         {% if friend.incomplete %}<span style="color: red;">（{{ _('不完整') }}）</span>{% endif %}
                     </strong><br>
-                    <small>{{ _('加入於') }} 
+                    <small>
+                        {{ _('加入於') }} 
                         <time class="datetime-auto" data-timestamp="{{ friend.friend_since }}" title="{{ friend.friend_since | datetimeformat }}">
                             {{ friend.friend_since | datetimeformat }}
                         </time>
@@ -34,16 +35,15 @@
 
 {% block extra_script %}
 <script>
-  // 自動轉換為地區語系時間格式
-  document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", () => {
     const nodes = document.querySelectorAll(".datetime-auto");
     for (const el of nodes) {
-      const ts = el.getAttribute("data-timestamp");
-      if (ts) {
-        const d = new Date(parseInt(ts) * 1000);
-        el.textContent = d.toLocaleString();
-      }
+        const ts = el.getAttribute("data-timestamp");
+        if (ts) {
+            const d = new Date(parseInt(ts) * 1000);
+            el.textContent = d.toLocaleString();
+        }
     }
-  });
+});
 </script>
 {% endblock %}

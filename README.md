@@ -45,7 +45,7 @@ sudo usermod -aG docker $USER
 newgrp docker
 ```
 
-### 2. Git Clone或下載專案
+### 2. Git Clone 或下載專案
 #### 此例為Git clone
 ```bash
 git clone https://github.com/bbfox0703/steam-friend-history.git
@@ -54,9 +54,9 @@ cp .env.example .env
 vi .env
 ```
 
-### 3.1 修改 .env 的API KEY及ID，填入Steam API KEY、和帳號的64位元ID 76561xxxxxxxxxxxx
+### 3.1 修改 .env 的API KEY及ID，填入Steam API KEY、和Steam帳號的64位元ID 76561xxxxxxxxxxxx
 Steam api key: https://steamcommunity.com/dev/apikey  
-**好友列表如未公開，則無法取得資料**
+**好友列表、遊戲資料如未公開，則無法取得資料且有可能報錯**
 
 ### 3.2 修改 docker-compose.yml 的 DNS 設定，請調整成自己環境的設置
 
@@ -83,8 +83,10 @@ http://伺服器ip:3000
 http://192.168.1.100:3000
 
 ## 🛠️ WSL安裝方法 (不完全步驟 使用Windwos 11 Home)
-需要安裝：WSL2、Docker Desktop on Windows  
-使用VMWare等直接開VM裝Docker問題最少，WSL要改的地方不少，例如cron jobs等。  
+使用例如VMWare等Hypervisor、直接開VM裝Docker問題最少! 裝個Debian、Ubuntu VM應該都沒問題。  
+  
+需要安裝：WSL2  
+WSL要改的地方不少，例如cron jobs等，還有Python venv問題。  
 
 ### WSL2 安裝
 使用管理員模式開啟命令提示字元 (cmd.exe)  

@@ -32,6 +32,3 @@ RUN chmod 0644 /app/cronjob/steam-friend-cron && \
 COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
 CMD ["/usr/bin/supervisord"]
-
-RUN mkdir -p /app/database
-RUN touch /app/database/empty.txt

@@ -20,8 +20,6 @@
     margin: 0;
     font-size: 1.4em;
 }
-
-/* 響應式設計：小螢幕直排 + 調整圖片大小 */
 @media (max-width: 600px) {
     .header-wrapper {
         flex-direction: column;
@@ -33,14 +31,17 @@
         margin-bottom: 0.5em;
     }
 }
-
-/* 響應式圖表容器 */
 .chart-wrapper {
     width: 100%;
     overflow-x: auto;
 }
 .chart-wrapper canvas {
-    min-width: 600px;  /* 可滾動，避免太小 */
+    min-width: 600px;
+}
+.error-message {
+    color: red;
+    font-weight: bold;
+    margin-bottom: 1em;
 }
 </style>
 
@@ -51,6 +52,9 @@
     <h2>{{ game_name }}（AppID: {{ appid }}）的成就達成趨勢圖</h2>
 </div>
 
+{% if error %}
+<p class="error-message">{{ error }}</p>
+{% else %}
 <p>已達成 {{ unlocked }} / {{ total }} 個成就</p>
 
 <div class="toggle-buttons">
@@ -62,9 +66,11 @@
 <div class="chart-wrapper">
     <canvas id="achieveChart" width="1000" height="400"></canvas>
 </div>
+{% endif %}
 {% endblock %}
 
 {% block extra_script %}
+{% if not error %}
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
     const ctx = document.getElementById('achieveChart').getContext('2d');
@@ -107,4 +113,5 @@
         }
     });
 </script>
+{% endif %}
 {% endblock %}

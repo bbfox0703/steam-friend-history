@@ -15,7 +15,7 @@
 
 <hr>
 
-<label for="selectAppid">或從已擁有的遊戲中設搜尋條件：</label>
+<label for="selectAppid">或從已擁有的遊戲中搜尋：</label>
 <p style="font-size: 0.9em; color: gray;">選擇後會自動跳轉至成就查詢頁面，請耐心等 Steam 回應</p>
 
 <input type="text" id="gameSearch" placeholder="輸入關鍵字搜尋遊戲..." style="width:100%; padding:5px; margin-bottom: 8px;">
@@ -30,64 +30,64 @@
 {% block extra_script %}
 <script>
 window.addEventListener("pageshow", () => {
-	const m = document.getElementById("manualLoading");
-	const l = document.getElementById("loadingMessage");
-	if (m) m.style.display = "none";
-	if (l) l.style.display = "none";
+    const m = document.getElementById("manualLoading");
+    const l = document.getElementById("loadingMessage");
+    if (m) m.style.display = "none";
+    if (l) l.style.display = "none";
 });
 
 document.addEventListener("visibilitychange", () => {
-	if (document.visibilityState === "visible") {
-		const m = document.getElementById("manualLoading");
-		const l = document.getElementById("loadingMessage");
-		if (m) m.style.display = "none";
-		if (l) l.style.display = "none";
-	}
+    if (document.visibilityState === "visible") {
+        const m = document.getElementById("manualLoading");
+        const l = document.getElementById("loadingMessage");
+        if (m) m.style.display = "none";
+        if (l) l.style.display = "none";
+    }
 });
 
 fetch("/cached-games")
-	.then(res => res.json())
-	.then(games => {
-		const select = document.getElementById("selectAppid");
-		const search = document.getElementById("gameSearch");
-		const loadingMsg = document.getElementById("loadingMessage");
+    .then(res => res.json())
+    .then(games => {
+        const select = document.getElementById("selectAppid");
+        const search = document.getElementById("gameSearch");
+        const loadingMsg = document.getElementById("loadingMessage");
 
-		function renderOptions(keyword = "") {
-			select.innerHTML = '<option value="">-- 選擇一款遊戲 --</option>';
-			games.forEach(g => {
-				if (g.name.toLowerCase().includes(keyword.toLowerCase())) {
-					const opt = document.createElement("option");
-					opt.value = g.appid;
-					opt.textContent = `${g.name} (${g.appid})`;
-					select.appendChild(opt);
-				}
-			});
-		}
+        function renderOptions(keyword = "") {
+            select.innerHTML = '<option value="">-- 選擇一款遊戲 --</option>';
+            games.forEach(g => {
+                if (g.name.toLowerCase().includes(keyword.toLowerCase())) {
+                    const opt = document.createElement("option");
+                    opt.value = g.appid;
+                    opt.textContent = `${g.name} (${g.appid})`;
+                    select.appendChild(opt);
+                }
+            });
+        }
 
-		renderOptions();
+        renderOptions();
 
-		search.addEventListener("input", e => {
-			renderOptions(e.target.value);
-		});
+        search.addEventListener("input", e => {
+            renderOptions(e.target.value);
+        });
 
-		select.addEventListener("input", function () {
-			const selected = games.find(g => g.appid === this.value);
-			if (selected) {
-				select.disabled = true;
-				search.disabled = true;
-				loadingMsg.style.display = "block";
-				window.location.href = `/achievement/${this.value}?lang=zh-tw`;
-			}
-		});
-	})
-	.catch(err => {
-		const select = document.getElementById("selectAppid");
-		select.innerHTML = '<option disabled selected>⚠️ 載入失敗，請稍後再試</option>';
-		console.error("載入 cached-games 失敗：", err);
-	});
+        select.addEventListener("input", function () {
+            const selected = games.find(g => g.appid === this.value);
+            if (selected) {
+                select.disabled = true;
+                search.disabled = true;
+                loadingMsg.style.display = "block";
+                window.location.href = `/achievement/${this.value}?lang=zh-tw`;
+            }
+        });
+    })
+    .catch(err => {
+        const select = document.getElementById("selectAppid");
+        select.innerHTML = '<option disabled selected>⚠️ 載入失敗，請稍後再試</option>';
+        console.error("載入 cached-games 失敗：", err);
+    });
 
 document.getElementById("appidForm").addEventListener("submit", function () {
-	document.getElementById("manualLoading").style.display = "block";
+    document.getElementById("manualLoading").style.display = "block";
 });
 </script>
 {% endblock %}

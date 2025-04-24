@@ -45,7 +45,7 @@ newgrp docker
 ```
 
 ### 2. Git Clone或下載專案
-
+#### 此例為Git clone
 ```bash
 git clone https://github.com/bbfox0703/steam-friend-history.git
 cd steam-friend-history

@@ -30,10 +30,11 @@ fetch("/cached-games")
         function renderOptions(keyword = "") {
             select.innerHTML = '<option value="">-- 選擇一款遊戲 --</option>';
             games.forEach(g => {
-                if (g.name.toLowerCase().includes(keyword.toLowerCase())) {
+                const allNames = Object.values(g.names || {}).join(" | ");
+                if (allNames.toLowerCase().includes(keyword.toLowerCase())) {
                     const opt = document.createElement("option");
                     opt.value = g.appid;
-                    opt.textContent = `${g.name} (${g.appid})`;
+                    opt.textContent = `${allNames} (${g.appid})`;
                     select.appendChild(opt);
                 }
             });
@@ -48,8 +49,10 @@ fetch("/cached-games")
         select.addEventListener("change", function () {
             const selected = games.find(g => g.appid === this.value);
             if (selected) {
-                fetch(`/achievement/${this.value}?lang=zh-tw`)
-                    .then(() => location.href = `/achievement/${this.value}?lang=zh-tw`);
+                preview.innerHTML = selected.header ? `<img src="${selected.header}" alt="封面圖" style="max-width:100%; border-radius:8px;">` : "";
+                location.href = `/achievement/${this.value}?lang=zh-tw`;
+            } else {
+                preview.innerHTML = "";
             }
         });
     });

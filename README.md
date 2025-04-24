@@ -54,7 +54,7 @@ vi .env
 ```
 
 ### 3.1 修改 .env 的API KEY及ID，填入Steam API KEY、和帳號的64位元ID 76561xxxxxxxxxxxx
-Steam api key: https://steamcommunity.com/dev/apikey
+Steam api key: https://steamcommunity.com/dev/apikey  
 **好友列表如未公開，則無法取得資料**
 
 ### 3.2 修改 docker-compose.yml 的 DNS 設定，請調整成自己環境的設置
@@ -82,7 +82,7 @@ http://伺服器ip:3000
 http://192.168.1.100:3000
 
 
-## Docker指令
+## 部份Docker指令
 
 ### 看container狀態
 ```bash

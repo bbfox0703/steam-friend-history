@@ -551,24 +551,41 @@ cached_games_bp = Blueprint("cached_games", __name__)
 
 @cached_games_bp.route("/cached-games")
 def cached_games():
-    cache_path = "./database/game_titles.json"
-    if not os.path.exists(cache_path):
+    path = "./database/game_titles.json"
+    if not os.path.exists(path):
         return jsonify([])
 
-    with open(cache_path, "r", encoding="utf-8") as f:
-        raw = json.load(f)
+    with open(path, "r", encoding="utf-8") as f:
+        data = json.load(f)
+
+    # 依據語系優先順序（從 querystring or Accept-Language）
+    lang_order = request.args.get("lang")
+    if lang_order:
+        preferred_langs = lang_order.split(",")
+    else:
+        preferred_langs = []
+        accept_langs = request.headers.get("Accept-Language", "")
+        if "zh-TW" in accept_langs:
+            preferred_langs.append("tchinese")
+        if "ja" in accept_langs:
+            preferred_langs.append("japanese")
+        preferred_langs.append("en")
 
     result = []
-    for appid, langs in raw.items():
-        item = {
-            "appid": appid,
-            "names": langs,
-            "header": f"https://cdn.akamai.steamstatic.com/steam/apps/{appid}/header.jpg"
-        }
-        result.append(item)
+    for appid, names in data.items():
+        name = ""
+        for lang in preferred_langs:
+            if lang in names:
+                name = names[lang]
+                break
+        name = name or names.get("en") or list(names.values())[0]
 
-    return jsonify(result)
-                        
+        result.append({
+            "appid": appid,
+            "name": name
+        })
+
+    return jsonify(result)                       
                        
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=3000)

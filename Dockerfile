@@ -2,8 +2,6 @@ FROM python:3.11-slim
 
 WORKDIR /app
 
-RUN chmod o+w /database
-
 COPY requirements.txt ./
 RUN pip install -r requirements.txt
 
@@ -17,6 +15,9 @@ COPY . .
 
 # 確保 utils 是模組（解決 ModuleNotFoundError）
 RUN touch /app/utils/__init__.py
+
+#
+RUN touch /app/database/empty.txt
 
 # 複製 cronjob 目錄（內含 shell script 與排程設定）
 COPY cronjob /app/cronjob

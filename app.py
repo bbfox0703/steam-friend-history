@@ -149,10 +149,9 @@ def filter_friend_list(args):
         filtered.sort(key=lambda f: f.get('friend_since', 0))
 
     return filtered
-    
+   
 app = Flask(__name__)
 cached_games_bp = Blueprint("cached_games", __name__)
-app.register_blueprint(cached_games_bp)
 
 import os
 
@@ -588,6 +587,8 @@ def cached_games():
         })
 
     return jsonify(result)                       
+
+app.register_blueprint(cached_games_bp)
                        
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=3000)

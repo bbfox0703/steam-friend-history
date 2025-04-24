@@ -200,6 +200,7 @@ def load_game_title_cache():
 
 def fetch_owned_games(lang="en"):
     url = f"https://api.steampowered.com/IPlayerService/GetOwnedGames/v1/?key={API_KEY}&steamid={STEAM_ID}&include_appinfo=true&l={lang}"
+    print(f"{time.strftime('%Y-%m-%d %H:%M:%S')} fetch_owned_games(): {url}")
     response = requests.get(url)
     if response.status_code != 200:
         raise Exception(f"Steam API Error: {response.status_code} {response.text}")

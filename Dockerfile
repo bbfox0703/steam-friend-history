@@ -33,4 +33,4 @@ COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
 CMD ["/usr/bin/supervisord"]
 
-RUN mkdir /app/database
+RUN mkdir -p /app/database

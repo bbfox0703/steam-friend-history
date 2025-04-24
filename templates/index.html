@@ -1,39 +1,35 @@
-<!DOCTYPE html>
 {% extends "base.html" %}
 
-{% block title %}Steam 好友系統{% endblock %}
-
-{% block extra_head %}
-{% endblock %}
+{% block title %}{{ _('Steam 好友系統') }}{% endblock %}
 
 {% block content %}    
-    <div class="container">
-        <h2>Steam 好友系統</h2>
-        {% if data %}
-        <ul class="friend-list">
-            {% for friend in data %}
-            <li class="friend-item" {% if friend.incomplete %}style="opacity: 0.5;" title="資料不完整：可能缺少名稱或頭像"{% endif %}>
-                <a href="{{ friend.profile_url }}" target="_blank" style="display:flex; text-decoration:none; color:inherit;">
-                    <img src="{{ friend.avatar if friend.avatar else '/static/default-avatar.png' }}" alt="avatar">
-                    <div class="friend-info">
-                        <strong>
-                            {{ friend.persona_name or '[未知名稱]' }}
-                            {% if friend.incomplete %}<span style="color: red;">（不完整）</span>{% endif %}
-                        </strong><br>
-                        <small>加入於 
-                            <time class="datetime-auto" data-timestamp="{{ friend.friend_since }}" title="{{ friend.friend_since | datetimeformat }}">
-                                {{ friend.friend_since | datetimeformat }}
-                            </time>
-                        </small>
-                    </div>
-                </a>
-            </li>
-            {% endfor %}
-        </ul>
-        {% else %}
-        <p>目前尚無好友資料，請先前往 <code>/update</code> 更新。</p>
-        {% endif %}
-    </div>
+<div class="container">
+    <h2>{{ _('Steam 好友系統') }}</h2>
+    {% if data %}
+    <ul class="friend-list">
+        {% for friend in data %}
+        <li class="friend-item" {% if friend.incomplete %}style="opacity: 0.5;" title="{{ _('資料不完整：可能缺少名稱或頭像') }}"{% endif %}>
+            <a href="{{ friend.profile_url }}" target="_blank" style="display:flex; text-decoration:none; color:inherit;">
+                <img src="{{ friend.avatar if friend.avatar else '/static/default-avatar.png' }}" alt="avatar">
+                <div class="friend-info">
+                    <strong>
+                        {{ friend.persona_name or _('【未知名稱】') }}
+                        {% if friend.incomplete %}<span style="color: red;">（{{ _('不完整') }}）</span>{% endif %}
+                    </strong><br>
+                    <small>{{ _('加入於') }} 
+                        <time class="datetime-auto" data-timestamp="{{ friend.friend_since }}" title="{{ friend.friend_since | datetimeformat }}">
+                            {{ friend.friend_since | datetimeformat }}
+                        </time>
+                    </small>
+                </div>
+            </a>
+        </li>
+        {% endfor %}
+    </ul>
+    {% else %}
+    <p>{{ _('目前尚無好友資料，請先前往') }} <code>/update</code> {{ _('更新。') }}</p>
+    {% endif %}
+</div>
 {% endblock %}
 
 {% block extra_script %}

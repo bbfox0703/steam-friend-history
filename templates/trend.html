@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}好友趨勢圖 - Steam 好友追蹤系統{% endblock %}
+{% block title %}{{ _('好友趨勢圖 - Steam 好友追蹤系統') }}{% endblock %}
 
 {% block extra_head %}
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -35,22 +35,22 @@
 
 {% block content %}
 <div class="container">
-    <h2>Steam 好友系統 - 好友新增/移除趨勢</h2>
+    <h2>{{ _('Steam 好友系統 - 好友新增/移除趨勢') }}</h2>
 
     <div class="toggle-buttons">
-        <span>顯示單位：</span>
-        <a href="/trend?mode=day" class="{{ 'active' if mode == 'day' else '' }}">日</a>
-        <a href="/trend?mode=month" class="{{ 'active' if mode == 'month' else '' }}">月</a>
-        <a href="/trend?mode=year" class="{{ 'active' if mode == 'year' else '' }}">年</a>
+        <span>{{ _('顯示單位：') }}</span>
+        <a href="/trend?mode=day" class="{{ 'active' if mode == 'day' else '' }}">{{ _('日') }}</a>
+        <a href="/trend?mode=month" class="{{ 'active' if mode == 'month' else '' }}">{{ _('月') }}</a>
+        <a href="/trend?mode=year" class="{{ 'active' if mode == 'year' else '' }}">{{ _('年') }}</a>
     </div>
 
     {% if stats %}
-        <button id="exportCsvBtn">⬇ 匯出 CSV</button>
+        <button id="exportCsvBtn">⬇ {{ _('匯出 CSV') }}</button>
         <div class="chart-wrapper">
             <canvas id="trendChart"></canvas>
         </div>
     {% else %}
-        <p>尚無統計資料。</p>
+        <p>{{ _('尚無統計資料。') }}</p>
     {% endif %}
 </div>
 {% endblock %}
@@ -86,7 +86,7 @@
             labels: labels,
             datasets: [
                 {
-                    label: '新增好友數',
+                    label: '{{ _("新增好友數") }}',
                     data: addedData,
                     borderColor: 'rgba(75, 192, 192, 1)',
                     backgroundColor: 'rgba(75, 192, 192, 0.2)',
@@ -96,7 +96,7 @@
                     pointRadius: 3
                 },
                 {
-                    label: '移除好友數',
+                    label: '{{ _("移除好友數") }}',
                     data: removedData,
                     borderColor: 'rgba(255, 99, 132, 1)',
                     backgroundColor: 'rgba(255, 99, 132, 0.2)',
@@ -119,13 +119,13 @@
                     beginAtZero: true,
                     title: {
                         display: true,
-                        text: '人數'
+                        text: '{{ _("人數") }}'
                     }
                 },
                 x: {
                     title: {
                         display: true,
-                        text: '時間區間'
+                        text: '{{ _("時間區間") }}'
                     }
                 }
             },
@@ -142,7 +142,7 @@
     });
 
     document.getElementById('exportCsvBtn').addEventListener('click', () => {
-        const headers = ['時間區間', '新增好友數', '移除好友數'];
+        const headers = ['{{ _("時間區間") }}', '{{ _("新增好友數") }}', '{{ _("移除好友數") }}'];
         const rows = stats.map(s => [s.group, s.added, s.removed]);
         const csvContent = [headers, ...rows].map(row => row.join(',')).join('\n');
 

@@ -1,15 +1,15 @@
 {% extends "base.html" %}
 
-{% block title %}備份管理{% endblock %}
+{% block title %}{{ _('備份管理') }}{% endblock %}
 
 {% block content %}
-<h2>備份管理</h2>
+<h2>{{ _('備份管理') }}</h2>
 
-<p>排序：
+<p>{{ _('排序：') }}
     {% set toggle_order = 'asc' if order == 'desc' else 'desc' %}
-    <a href="?sort=name&order={{ 'asc' if sort_by != 'name' else toggle_order }}">名稱</a> |
-    <a href="?sort=size_kb&order={{ 'asc' if sort_by != 'size_kb' else toggle_order }}">大小</a> |
-    <a href="?sort=mtime&order={{ 'asc' if sort_by != 'mtime' else toggle_order }}">時間</a>
+    <a href="?sort=name&order={{ 'asc' if sort_by != 'name' else toggle_order }}">{{ _('名稱') }}</a> |
+    <a href="?sort=size_kb&order={{ 'asc' if sort_by != 'size_kb' else toggle_order }}">{{ _('大小') }}</a> |
+    <a href="?sort=mtime&order={{ 'asc' if sort_by != 'mtime' else toggle_order }}">{{ _('時間') }}</a>
 </p>
 
 <form id="zip-form" method="post" action="/backups/zip">
@@ -17,10 +17,10 @@
         <thead>
             <tr>
                 <th><input type="checkbox" id="select-all"></th>
-                <th>檔名</th>
-                <th>大小 (KB)</th>
-                <th>建立時間</th>
-                <th>操作</th>
+                <th>{{ _('檔名') }}</th>
+                <th>{{ _('大小 (KB)') }}</th>
+                <th>{{ _('建立時間') }}</th>
+                <th>{{ _('操作') }}</th>
             </tr>
         </thead>
         <tbody>
@@ -31,8 +31,8 @@
                 <td>{{ file.size_kb }}</td>
                 <td><time class="datetime-auto" data-timestamp="{{ file.mtime }}">{{ file.mtime | datetimeformat }}</time></td>
                 <td>
-                    <a href="/backups/download/{{ file.name }}">下載</a> |
-                    <a href="#" onclick="deleteBackup('{{ file.name }}'); return false;">刪除</a>
+                    <a href="/backups/download/{{ file.name }}">{{ _('下載') }}</a> |
+                    <a href="#" onclick="deleteBackup('{{ file.name }}'); return false;">{{ _('刪除') }}</a>
                 </td>
             </tr>
         {% endfor %}
@@ -41,10 +41,10 @@
 
     {% if files|length > 0 %}
     <p>
-        <button type="submit">📦 匯出選取為 ZIP</button>
+        <button type="submit">📦 {{ _('匯出選取為 ZIP') }}</button>
     </p>
     {% else %}
-    <p>尚無備份檔案。</p>
+    <p>{{ _('尚無備份檔案。') }}</p>
     {% endif %}
 </form>
 {% endblock %}
@@ -52,14 +52,14 @@
 {% block extra_script %}
 <script>
 function deleteBackup(filename) {
-    if (!confirm('確定要刪除 ' + filename + ' 嗎？')) return;
+    if (!confirm('{{ _("確定要刪除") }} ' + filename + ' {{ _("嗎？") }}')) return;
     fetch('/backups/delete/' + filename, { method: 'POST' })
         .then(res => res.json())
         .then(result => {
             if (result.status === 'deleted') {
                 location.reload();
             } else {
-                alert('找不到檔案或刪除失敗');
+                alert('{{ _("找不到檔案或刪除失敗") }}');
             }
         });
 }
@@ -86,7 +86,7 @@ function formatDaysAgo(ts) {
     const now = new Date();
     const then = new Date(ts * 1000);
     const diffDays = Math.floor((now - then) / 86400000);
-    return `${diffDays} 天前`;
+    return `${diffDays} {{ _('天前') }}`;
 }
 
 function updateAllTimestamps() {

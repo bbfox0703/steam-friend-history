@@ -1,52 +1,52 @@
 {% extends "base.html" %}
 
-{% block title %}國別分析{% endblock %}
+{% block title %}{{ _('國別分析') }}{% endblock %}
 
 {% block content %}
-    <div class="container">
-        <h2>Steam 好友系統 - 國別分析</h2>
-        <div>
-            排序：
-            {% if sort_mode == 'count' %}
-                <b>人數</b> |
-                <a href="/country?sort=name">國名</a>
-            {% else %}
-                <a href="/country?sort=count">人數</a> |
-                <b>國名</b>
-            {% endif %}
-        </div>
-
-        <ul class="country-list">
-            {% for code, count in sorted_items %}
-                <li>
-                    <details>
-                        <summary>
-                            <strong>{{ code }}</strong>
-                            ({{ country_name_map[code] if code in country_name_map else 'Unknown' }})：{{ count }} 人
-                        </summary>
-                        <ul class="friend-list">
-                            {% for friend in country_members[code] %}
-                                <li class="friend-item">
-                                    <a href="{{ friend.profile_url }}" target="_blank" style="display: flex; text-decoration: none; color: inherit;">
-                                        <img src="{{ friend.avatar if friend.avatar else '/static/default-avatar.png' }}" alt="avatar">
-                                        <div class="friend-info">
-                                            <strong>{{ friend.persona_name or '[未知名稱]' }}</strong><br>
-                                            <small>
-                                                加入於 
-                                                <time class="datetime-auto" data-timestamp="{{ friend.friend_since }}">
-                                                    {{ friend.friend_since | datetimeformat }}
-                                                </time>
-                                            </small>
-                                        </div>
-                                    </a>
-                                </li>
-                            {% endfor %}
-                        </ul>
-                    </details>
-                </li>
-            {% endfor %}
-        </ul>
+<div class="container">
+    <h2>{{ _('Steam 好友系統 - 國別分析') }}</h2>
+    <div>
+        {{ _('排序：') }}
+        {% if sort_mode == 'count' %}
+            <b>{{ _('人數') }}</b> |
+            <a href="/country?sort=name">{{ _('國名') }}</a>
+        {% else %}
+            <a href="/country?sort=count">{{ _('人數') }}</a> |
+            <b>{{ _('國名') }}</b>
+        {% endif %}
     </div>
+
+    <ul class="country-list">
+        {% for code, count in sorted_items %}
+            <li>
+                <details>
+                    <summary>
+                        <strong>{{ code }}</strong>
+                        ({{ country_name_map[code] if code in country_name_map else _('Unknown') }})：{{ count }} {{ _('人') }}
+                    </summary>
+                    <ul class="friend-list">
+                        {% for friend in country_members[code] %}
+                            <li class="friend-item">
+                                <a href="{{ friend.profile_url }}" target="_blank" style="display: flex; text-decoration: none; color: inherit;">
+                                    <img src="{{ friend.avatar if friend.avatar else '/static/default-avatar.png' }}" alt="avatar">
+                                    <div class="friend-info">
+                                        <strong>{{ friend.persona_name or _('[未知名稱]') }}</strong><br>
+                                        <small>
+                                            {{ _('加入於') }} 
+                                            <time class="datetime-auto" data-timestamp="{{ friend.friend_since }}">
+                                                {{ friend.friend_since | datetimeformat }}
+                                            </time>
+                                        </small>
+                                    </div>
+                                </a>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </details>
+            </li>
+        {% endfor %}
+    </ul>
+</div>
 {% endblock %}
 
 {% block extra_script %}

@@ -1,14 +1,14 @@
 {% extends "base.html" %}
 
-{% block title %}好友狀態看板{% endblock %}
+{% block title %}{{ _('好友狀態看板') }}{% endblock %}
 
 {% block content %}
-<h2>好友狀態看板</h2>
+<h2>{{ _('好友狀態看板') }}</h2>
 
 <form method="get" style="margin-bottom: 1em;">
     <label>
         <input type="checkbox" name="online_only" value="on" onchange="this.form.submit()" {% if show_online_only %}checked{% endif %}>
-        只顯示線上好友
+        {{ _('只顯示線上好友') }}
     </label>
 </form>
 
@@ -21,19 +21,19 @@
         <div class="info">
             <div class="name">
                 <strong>{{ f.persona_name }}</strong>
-                <span class="status-tag">{{ status_map.get(f.personastate, '未知') }}</span>
+                <span class="status-tag">{{ status_map.get(f.personastate, _('未知')) }}</span>
             </div>
-			<div class="meta">
-				{% if f.personastate != 0 %}
-					✅ 上線中 🟢<br>
-				{% elif f.lastlogoff %}
-					最後上線：
-					<time data-timestamp="{{ f.lastlogoff }}" class="datetime-auto">
-						{{ f.lastlogoff | datetimeformat }}（{{ f.lastlogoff | timeago }}）
-					</time><br>
-				{% endif %}
-				國別：{{ f.country_code or '??' }}
-			</div>
+            <div class="meta">
+                {% if f.personastate != 0 %}
+                    ✅ {{ _('上線中') }} 🟢<br>
+                {% elif f.lastlogoff %}
+                    {{ _('最後上線：') }}
+                    <time data-timestamp="{{ f.lastlogoff }}" class="datetime-auto">
+                        {{ f.lastlogoff | datetimeformat }}（{{ f.lastlogoff | timeago }}）
+                    </time><br>
+                {% endif %}
+                {{ _('國別：') }}{{ f.country_code or '??' }}
+            </div>
         </div>
     </div>
     {% endfor %}
@@ -102,7 +102,7 @@ function formatDaysAgo(ts) {
     const now = new Date();
     const then = new Date(ts * 1000);
     const diffDays = Math.floor((now - then) / 86400000);
-    return `${diffDays} 天前`;
+    return `${diffDays} {{ _('天前') }}`;
 }
 
 function updateAllTimestamps() {

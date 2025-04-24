@@ -1,32 +1,32 @@
 {% extends "base.html" %}
 
-{% block title %}好友條件篩選{% endblock %}
+{% block title %}{{ _('好友條件篩選') }}{% endblock %}
 
 {% block content %}
-<h2>Steam 好友條件篩選</h2>
+<h2>{{ _('Steam 好友條件篩選') }}</h2>
 
 <form id="filter-form" style="margin-bottom: 1em;">
-	<label>加入時間排序：
+	<label>{{ _('加入時間排序：') }}
 		<select name="sort">
-			<option value="newest" {% if request.args.get('sort') == 'newest' %}selected{% endif %}>最近優先</option>
-			<option value="oldest" {% if request.args.get('sort') == 'oldest' %}selected{% endif %}>最早優先</option>
+			<option value="newest" {% if request.args.get('sort') == 'newest' %}selected{% endif %}>{{ _('最近優先') }}</option>
+			<option value="oldest" {% if request.args.get('sort') == 'oldest' %}selected{% endif %}>{{ _('最早優先') }}</option>
 		</select>
 	</label>
-    <label><input type="checkbox" name="online_only" {% if request.args.get('online_only') %}checked{% endif %}> 只顯示在線上</label>
-    <label><input type="checkbox" name="has_avatar" {% if request.args.get('has_avatar') %}checked{% endif %}> 有頭像</label>
-    <label><input type="checkbox" name="has_country" {% if request.args.get('has_country') %}checked{% endif %}> 有國別</label>
-    <label>最近幾天內有上線：
-        <input type="number" name="recent_days" value="{{ request.args.get('recent_days', '') }}" min="1" max="365" style="width: 60px;">
-    </label>
-    <label>指定國家：
-        <select name="country_code">
-            <option value="">（不限）</option>
-            {% for code in all_countries %}
-                <option value="{{ code }}" {% if request.args.get('country_code') == code %}selected{% endif %}>{{ code }}</option>
-            {% endfor %}
-        </select>
-    </label>
-    <button type="submit">套用篩選</button>
+	<label><input type="checkbox" name="online_only" {% if request.args.get('online_only') %}checked{% endif %}> {{ _('只顯示在線上') }}</label>
+	<label><input type="checkbox" name="has_avatar" {% if request.args.get('has_avatar') %}checked{% endif %}> {{ _('有頭像') }}</label>
+	<label><input type="checkbox" name="has_country" {% if request.args.get('has_country') %}checked{% endif %}> {{ _('有國別') }}</label>
+	<label>{{ _('最近幾天內有上線：') }}
+		<input type="number" name="recent_days" value="{{ request.args.get('recent_days', '') }}" min="1" max="365" style="width: 60px;">
+	</label>
+	<label>{{ _('指定國家：') }}
+		<select name="country_code">
+			<option value="">{{ _('（不限）') }}</option>
+			{% for code in all_countries %}
+				<option value="{{ code }}" {% if request.args.get('country_code') == code %}selected{% endif %}>{{ code }}</option>
+			{% endfor %}
+		</select>
+	</label>
+    <button type="submit">{{ _('套用篩選') }}</button>
 </form>
 
 <hr>
@@ -37,18 +37,18 @@
         <a class="friend-item" href="{{ friend.profile_url }}" target="_blank">
             <img src="{{ friend.avatar if friend.avatar else '/static/default-avatar.png' }}" alt="avatar">
             <div class="friend-info">
-                <strong>{{ friend.persona_name if friend.persona_name else '[未知名稱]' }}</strong>
+                <strong>{{ friend.persona_name if friend.persona_name else _('【未知名稱】') }}</strong>
                 <small>
-                    加入於 
+                    {{ _('加入於') }} 
 					<time class="datetime-auto" data-timestamp="{{ friend.friend_since }}">
 						{{ friend.friend_since | datetimeformat }}
 					</time><br>
-                    狀態：{{ status_map.get(friend.personastate, '未知') }}<br>
+                    {{ _('狀態：') }}{{ status_map.get(friend.personastate, _('未知')) }}<br>
                     {% if friend.lastlogoff %}
-                        上次離線：{{ friend.lastlogoff | datetimeformat }}
+                        {{ _('上次離線：') }}{{ friend.lastlogoff | datetimeformat }}
                     {% endif %}
                     {% if friend.country_code %}
-                        <br>國別：{{ friend.country_code }}
+                        <br>{{ _('國別：') }}{{ friend.country_code }}
                     {% endif %}
                 </small>
             </div>
@@ -63,14 +63,23 @@
 const form = document.getElementById('filter-form');
 const list = document.getElementById('friend-list');
 
+const i18n = {
+    unknown_name: "{{ _('【未知名稱】') }}",
+    added_at: "{{ _('加入於') }}",
+    status: "{{ _('狀態：') }}",
+    last_seen: "{{ _('上次離線：') }}",
+    country: "{{ _('國別：') }}",
+    no_match: "{{ _('目前無符合條件的好友。') }}"
+};
+
 const statusMap = {
-    0: '離線',
-    1: '在線上',
-    2: '忙碌',
-    3: '離開',
-    4: '請勿打擾',
-    5: '想交易',
-    6: '想玩遊戲'
+    0: '{{ _('離線') }}',
+    1: '{{ _('在線上') }}',
+    2: '{{ _('忙碌') }}',
+    3: '{{ _('離開') }}',
+    4: '{{ _('請勿打擾') }}',
+    5: '{{ _('想交易') }}',
+    6: '{{ _('想玩遊戲') }}'
 };
 
 form.addEventListener('change', fetchFiltered);
@@ -117,7 +126,7 @@ function fetchFiltered() {
     .then(data => {
         list.innerHTML = '';
         if (data.length === 0) {
-            list.innerHTML = '<p>目前無符合條件的好友。</p>';
+            list.innerHTML = `<p>${i18n.no_match}</p>`;
             return;
         }
         for (const f of data) {
@@ -126,12 +135,12 @@ function fetchFiltered() {
                 <a class="friend-item" href="${f.profile_url}" target="_blank">
                     <img src="${f.avatar || '/static/default-avatar.png'}" alt="avatar">
                     <div class="friend-info">
-                        <strong>${f.persona_name || '[未知名稱]'}</strong>
+                        <strong>${f.persona_name || i18n.unknown_name}</strong>
                         <small>
-                            加入於 <time class="datetime-auto" data-timestamp="${f.friend_since}">${formatLocalTime(f.friend_since)}（${formatDaysAgo(f.friend_since)}）</time><br>
-                            狀態：${statusMap[f.personastate] || '未知'}<br>
-                            ${f.lastlogoff ? '上次離線：' + new Date(f.lastlogoff * 1000).toLocaleString() + '<br>' : ''}
-                            ${f.country_code ? '國別：' + f.country_code : ''}
+                            ${i18n.added_at} <time class="datetime-auto" data-timestamp="${f.friend_since}">${formatLocalTime(f.friend_since)}（${formatDaysAgo(f.friend_since)}）</time><br>
+                            ${i18n.status}${statusMap[f.personastate] || '{{ _('未知') }}'}<br>
+                            ${f.lastlogoff ? i18n.last_seen + new Date(f.lastlogoff * 1000).toLocaleString() + '<br>' : ''}
+                            ${f.country_code ? i18n.country + f.country_code : ''}
                         </small>
                     </div>
                 </a>

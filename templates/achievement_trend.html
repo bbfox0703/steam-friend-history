@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}成就達成趨勢圖{% endblock %}
+{% block title %}{{ _('成就達成趨勢圖') }}{% endblock %}
 
 {% block content %}
 <style>
@@ -46,15 +46,15 @@
     {% if header_image %}
     <img src="{{ header_image }}" alt="{{ game_name }} header">
     {% endif %}
-    <h2>{{ game_name }}（AppID: {{ appid }}）的成就達成趨勢圖</h2>
+    <h2>{{ game_name }}（AppID: {{ appid }}）{{ _('的成就達成趨勢圖') }}</h2>
 </div>
 
-<p>已達成 {{ unlocked }} / {{ total }} 個成就</p>
+<p>{{ _('已達成') }} {{ unlocked }} / {{ total }} {{ _('個成就') }}</p>
 
 <div class="toggle-buttons">
-    <span>顯示方式：</span>
-    <a href="?mode=day" class="{{ 'active' if mode == 'day' else '' }}">日</a>
-    <a href="?mode=month" class="{{ 'active' if mode == 'month' else '' }}">月</a>
+    <span>{{ _('顯示方式：') }}</span>
+    <a href="?mode=day" class="{{ 'active' if mode == 'day' else '' }}">{{ _('日') }}</a>
+    <a href="?mode=month" class="{{ 'active' if mode == 'month' else '' }}">{{ _('月') }}</a>
 </div>
 
 <div class="chart-wrapper">
@@ -75,7 +75,7 @@
         data: {
             labels: labels,
             datasets: [{
-                label: '{{ "每日達成數" if mode == "day" else "每月達成數" }}',
+                label: '{{ _("每日達成數") if mode == "day" else _("每月達成數") }}',
                 data: values,
                 fill: true,
                 borderColor: 'rgba(54, 162, 235, 1)',
@@ -92,13 +92,13 @@
                     beginAtZero: true,
                     title: {
                         display: true,
-                        text: '達成數'
+                        text: '{{ _("達成數") }}'
                     }
                 },
                 x: {
                     title: {
                         display: true,
-                        text: '時間'
+                        text: '{{ _("時間") }}'
                     }
                 }
             }

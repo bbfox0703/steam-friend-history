@@ -174,6 +174,7 @@ def fetch_achievements(appid, steam_id=None):
     if steam_id is None:
         steam_id = STEAM_ID
     url = f"https://api.steampowered.com/ISteamUserStats/GetPlayerAchievements/v1/?key={API_KEY}&steamid={steam_id}&appid={appid}"
+    print(f"🔍 {time.strftime('%Y-%m-%d %H:%M:%S')} fetch_achievements()")
     response = requests.get(url)
     if response.status_code != 200:
         raise Exception(f"Steam API Error: {response.status_code} {response.text}")
@@ -184,6 +185,7 @@ def fetch_achievement_data(appid, steam_id=None):
     if steam_id is None:
         steam_id = STEAM_ID
     url = f"https://api.steampowered.com/ISteamUserStats/GetPlayerAchievements/v1/?key={API_KEY}&steamid={steam_id}&appid={appid}"
+    print(f"🔍 {time.strftime('%Y-%m-%d %H:%M:%S')} fetch_achievement_data()")
     response = requests.get(url)
     if response.status_code != 200:
         raise Exception(f"Steam API Error: {response.status_code} {response.text}")
@@ -200,7 +202,7 @@ def load_game_title_cache():
 
 def fetch_owned_games(lang="en"):
     url = f"https://api.steampowered.com/IPlayerService/GetOwnedGames/v1/?key={API_KEY}&steamid={STEAM_ID}&include_appinfo=true&l={lang}"
-    print(f"{time.strftime('%Y-%m-%d %H:%M:%S')} fetch_owned_games(): {url}")
+    print(f"🔍 {time.strftime('%Y-%m-%d %H:%M:%S')} fetch_owned_games()")
     response = requests.get(url)
     if response.status_code != 200:
         raise Exception(f"Steam API Error: {response.status_code} {response.text}")
@@ -217,6 +219,7 @@ def get_game_title(appid: str) -> str:
 
 def fetch_game_info(appid, lang="en"):
     url = f"https://store.steampowered.com/api/appdetails?appids={appid}&l={lang}"
+    print(f"🔍 {time.strftime('%Y-%m-%d %H:%M:%S')} fetch_game_info(): {url}")
     try:
         r = requests.get(url)
         if r.status_code == 200:
@@ -232,7 +235,7 @@ def fetch_game_info(appid, lang="en"):
 
 def fetch_store_name(appid: str, lang: str) -> str:
     url = f"https://store.steampowered.com/api/appdetails?appids={appid}&l={lang}"
-    print(f"{time.strftime('%Y-%m-%d %H:%M:%S')} URL: {url}")
+    print(f"🔍 {time.strftime('%Y-%m-%d %H:%M:%S')} fetch_store_name(): {url}")
     try:
         r = requests.get(url, timeout=10)
         if r.status_code == 200:

@@ -21,8 +21,6 @@ def fetch_friend_list():
         raise Exception(f"Steam API Error: {response.status_code} {response.text}")
     return response.json().get('friendslist', {}).get('friends', [])
 
-import time
-
 def fetch_friend_profiles(steam_ids):
     if not steam_ids:
         return {}
@@ -42,8 +40,8 @@ def fetch_friend_profiles(steam_ids):
                     'avatar': p.get('avatar', ''),
                     'profileurl': p.get('profileurl', ''),
                     'loccountrycode': p.get('loccountrycode', '??'),
-                    'lastlogoff': p.get('lastlogoff'),  # timestamp
-                    'personastate': p.get('personastate', 0)  # 0=offline
+                    'lastlogoff': p.get('lastlogoff'),
+                    'personastate': p.get('personastate', 0)
                 }
         else:
             print(f"⚠️ Failed batch {i} - Status {response.status_code} {response.text}")
@@ -51,6 +49,24 @@ def fetch_friend_profiles(steam_ids):
         time.sleep(0.5)
 
     return result
+
+def try_restore_from_backup(sid, fields=("persona_name", "avatar"), lookback=10):
+    files = sorted(
+        [f for f in os.listdir(BACKUP_DIR) if f.startswith("friends_") and f.endswith(".json")],
+        reverse=True
+    )
+    for filename in files[:lookback]:
+        path = os.path.join(BACKUP_DIR, filename)
+        try:
+            with open(path, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+                for entry in data:
+                    if entry.get("steamid") == sid:
+                        if all(entry.get(k) for k in fields):
+                            return {k: entry[k] for k in fields}
+        except:
+            pass
+    return {}
 
 def get_friend_data():
     if not os.path.exists(DB_PATH):
@@ -93,17 +109,13 @@ def update_friend_list():
 
     now = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
-    # 比對名字變更
     name_history = load_json(HISTORY_PATH)
-
-    # 比對好友增減
     changes = load_json(CHANGELOG_PATH)
     added = sorted(list(new_ids - old_ids))
     removed = sorted(list(old_ids - new_ids))
     if added or removed:
         changes[now] = {"added": added, "removed": removed}
 
-    # 建立 enriched_friends 資料
     enriched_friends = []
     for f in friend_list:
         sid = f['steamid']
@@ -111,7 +123,6 @@ def update_friend_list():
         new_name = profile.get('personaname', '')
         old_name = old_dict.get(sid, {}).get('persona_name', '')
 
-        # 記錄暱稱變更
         if old_name and new_name and old_name != new_name:
             if sid not in name_history:
                 name_history[sid] = []
@@ -132,9 +143,12 @@ def update_friend_list():
             'personastate': profile.get('personastate')
         }
 
-        # 標記資料不完整
         if enriched['persona_name'] == '' or enriched['avatar'] == '':
             enriched['incomplete'] = True
+            restored = try_restore_from_backup(sid)
+            if restored:
+                enriched.update(restored)
+                enriched['restored'] = True
 
         enriched_friends.append(enriched)
 
@@ -143,7 +157,7 @@ def update_friend_list():
     save_json(CHANGELOG_PATH, changes)
     backup_friend_data(enriched_friends)
     return len(enriched_friends)
-    
+
 def fetch_achievements(appid, steam_id=None):
     if steam_id is None:
         steam_id = STEAM_ID
@@ -151,8 +165,8 @@ def fetch_achievements(appid, steam_id=None):
     response = requests.get(url)
     if response.status_code != 200:
         raise Exception(f"Steam API Error: {response.status_code} {response.text}")
-    return response.json().get("playerstats", {}).get("achievements", [])    
-    
+    return response.json().get("playerstats", {}).get("achievements", [])
+
 def fetch_achievement_data(appid, steam_id=None):
     if steam_id is None:
         steam_id = STEAM_ID
@@ -161,7 +175,7 @@ def fetch_achievement_data(appid, steam_id=None):
     if response.status_code != 200:
         raise Exception(f"Steam API Error: {response.status_code} {response.text}")
     return response.json().get("playerstats", {})
-    
+
 def load_game_title_cache():
     path = "./database/game_titles.json"
     if os.path.exists(path):
@@ -175,8 +189,8 @@ def fetch_owned_games(lang="en"):
     if response.status_code != 200:
         raise Exception(f"Steam API Error: {response.status_code} {response.text}")
     return response.json().get("response", {}).get("games", [])
-    
-_game_title_cache = None  # 快取記憶體變數（避免重複讀取檔案）
+
+_game_title_cache = None
 
 def get_game_title(appid: str) -> str:
     global _game_title_cache

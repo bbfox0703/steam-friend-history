@@ -547,24 +547,25 @@ def achievement_trend(appid):
                            unlocked=unlocked,
                            mode=mode)
                            
-@app.route("/cached-games")
-def cached_games():
-    lang_order = ["tchinese", "japanese", "en"]
-    path = "./database/game_titles.json"
+cached_games_bp = Blueprint("cached_games", __name__)
 
-    with open(path, encoding="utf-8") as f:
-        data = json.load(f)
+@cached_games_bp.route("/cached-games")
+def cached_games():
+    cache_path = "./database/game_titles.json"
+    if not os.path.exists(cache_path):
+        return jsonify([])
+
+    with open(cache_path, "r", encoding="utf-8") as f:
+        raw = json.load(f)
 
     result = []
-    for appid, names in data.items():
-        if isinstance(names, dict):
-            for lang in lang_order:
-                if lang in names:
-                    result.append({"appid": appid, "name": names[lang]})
-                    break
-        elif isinstance(names, str):
-            # 兼容舊格式：僅有英文名稱
-            result.append({"appid": appid, "name": names})
+    for appid, langs in raw.items():
+        item = {
+            "appid": appid,
+            "names": langs,
+            "header": f"https://cdn.akamai.steamstatic.com/steam/apps/{appid}/header.jpg"
+        }
+        result.append(item)
 
     return jsonify(result)
                         

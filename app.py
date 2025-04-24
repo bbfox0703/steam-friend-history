@@ -215,10 +215,26 @@ def index():
     data = steam_api.get_friend_data()
     return render_template('index.html', data=data)
 
-@app.route('/steam-level/<steamid>')
+@app.route("/steam-level/<steamid>")
 def steam_level(steamid):
-    level = get_steam_level(steamid)
-    return jsonify({'steamid': steamid, 'level': level})
+    now = int(datetime.utcnow().timestamp())
+    friends = steam_api.get_friend_data()
+    friend = next((f for f in friends if f["steamid"] == steamid), None)
+
+    # 檢查快取是否夠新（例如 48 小時內）
+    if friend and "level" in friend and "level_fetched_at" in friend:
+        age = now - friend["level_fetched_at"]
+        if age < 48 * 3600:
+            return jsonify({"steamid": steamid, "level": friend["level"], "cached": True})
+
+    # 重新查詢
+    level = steam_api.get_steam_level(steamid)
+    if level is not None:
+        if friend:
+            friend["level"] = level
+            friend["level_fetched_at"] = now
+            steam_api.save_friend_data(friends)
+    return jsonify({"steamid": steamid, "level": level, "cached": False})
 
 @app.route('/update')
 def update():

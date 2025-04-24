@@ -122,5 +122,7 @@
   "新增好友數": "Friends Added",
   "移除好友數": "Friends Removed",
   "人數": "Count",
-  "時間區間": "Time Period"  
+  "時間區間": "Time Period",
+  "-- 選擇一款遊戲 --": "Select a game",
+  "載入失敗，請稍後再試": "Failed to load. Please try again later."  
 }

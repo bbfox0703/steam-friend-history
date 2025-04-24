@@ -215,6 +215,11 @@ def index():
     data = steam_api.get_friend_data()
     return render_template('index.html', data=data)
 
+@app.route('/steam-level/<steamid>')
+def steam_level(steamid):
+    level = get_steam_level(steamid)
+    return jsonify({'steamid': steamid, 'level': level})
+
 @app.route('/update')
 def update():
     result = steam_api.update_friend_list()

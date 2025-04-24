@@ -21,7 +21,7 @@ load_dotenv()
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 CACHE_PATH = os.path.join(BASE_DIR, "database", "game_titles.json")
 
-SUPPORTED_LANGS = ["en", "tchinese", "japanese"]
+SUPPORTED_LANGS = ["tchinese", "en", "japanese"]
 
 def fetch_and_cache_games(lang="en", sleep_interval=1, existing_data=None):
     print(f"🌐 正在抓取語言：{lang}")

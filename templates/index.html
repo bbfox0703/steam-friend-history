@@ -11,21 +11,27 @@
         <li class="friend-item" {% if friend.incomplete %}style="opacity: 0.5;" title="{{ _('資料不完整：可能缺少名稱或頭像') }}"{% endif %}>
             <a href="{{ friend.profile_url }}" target="_blank" style="display:flex; text-decoration:none; color:inherit;">
                 <img src="{{ friend.avatar if friend.avatar else '/static/default-avatar.png' }}" alt="avatar">
-				<div class="friend-info">
-					<strong>
-						{{ friend.persona_name or _('【未知名稱】') }}
-						{% if friend.incomplete %}<span style="color: red;">（{{ _('不完整') }}）</span>{% endif %}
-					</strong><br>
-					<small>
-						{{ _('加入於') }} 
-						<time class="datetime-auto" data-timestamp="{{ friend.friend_since }}" title="{{ friend.friend_since | datetimeformat }}">
-							{{ friend.friend_since | datetimeformat }}
-						</time><br>
-						{% if friend.level is defined and friend.level is not none %}
-							{{ _('等級：') }}{{ friend.level }}
-						{% endif %}
-					</small>
-				</div>
+                <div class="friend-info">
+                    <strong>
+                        {{ friend.persona_name or _('【未知名稱】') }}
+                        {% if friend.incomplete %}<span style="color: red;">（{{ _('不完整') }}）</span>{% endif %}
+                    </strong><br>
+                    <small>
+                        {{ _('加入於') }} 
+                        <time class="datetime-auto" data-timestamp="{{ friend.friend_since }}" title="{{ friend.friend_since | datetimeformat }}">
+                            {{ friend.friend_since | datetimeformat }}
+                        </time><br>
+                        {{ _('等級：') }}
+                        {% if friend.level is defined and friend.level is not none %}
+                            {{ friend.level }}
+                            {% if friend.level_fetched_at %}
+                                <span style="color: gray; font-size: 0.8em;" title="{{ friend.level_fetched_at | datetimeformat }}">⏳</span>
+                            {% endif %}
+                        {% else %}
+                            <span class="steam-level" data-steamid="{{ friend.steamid }}">⏳</span>
+                        {% endif %}
+                    </small>
+                </div>
             </a>
         </li>
         {% endfor %}
@@ -38,41 +44,31 @@
 
 {% block extra_script %}
 <script>
-document.addEventListener("DOMContentLoaded", () => {
-    const lang = document.documentElement.lang || 'zh-TW';
-
-    // 🕒 將 UNIX timestamp 格式化
+  document.addEventListener("DOMContentLoaded", () => {
     document.querySelectorAll(".datetime-auto").forEach(el => {
-        const ts = el.dataset.timestamp || el.getAttribute("data-timestamp");
-        if (ts) {
-            const d = new Date(parseInt(ts) * 1000);
-            el.textContent = d.toLocaleString(lang);
-        }
+      const ts = el.dataset.timestamp;
+      if (ts) {
+        const d = new Date(parseInt(ts) * 1000);
+        el.textContent = d.toLocaleString();
+      }
     });
 
-    // 🔍 延遲查詢 Steam Level
-    document.querySelectorAll(".friend-item").forEach(li => {
-        const profileUrl = li.querySelector("a[href*='steamcommunity']").getAttribute("href");
-        const match = profileUrl.match(/(\d{17})$/);
-        if (!match) return;
-
-        const steamid = match[1];
-        fetch(`/steam-level/${steamid}`)
-            .then(res => res.json())
-            .then(data => {
-                if (data.level !== undefined) {
-                    const small = li.querySelector("small");
-                    const div = document.createElement("div");
-                    div.textContent = `{{ _('等級：') }}` + data.level;
-                    small.appendChild(document.createElement("br"));
-                    small.appendChild(div);
-                }
-            })
-            .catch(err => {
-                console.warn("❌ 無法取得 Steam 等級：", steamid, err);
-            });
+    document.querySelectorAll('.steam-level').forEach(span => {
+      const steamid = span.dataset.steamid;
+      if (!steamid) return;
+      fetch(`/steam-level/${steamid}`)
+        .then(res => res.json())
+        .then(data => {
+          if (data.level !== undefined && data.level !== null) {
+            span.innerHTML = `${data.level} <span style="color:gray; font-size: 0.8em;">⏳</span>`;
+          } else {
+            span.textContent = "-";
+          }
+        })
+        .catch(() => {
+          span.textContent = "?";
+        });
     });
-});
+  });
 </script>
 {% endblock %}
-

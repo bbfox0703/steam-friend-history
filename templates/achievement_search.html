@@ -12,9 +12,11 @@
     <hr>
 
     <label for="selectAppid">或從已擁有的遊戲中設搜尋條件：</label>
+    <p style="font-size: 0.9em; color: gray;">選擇後會自動跳轉至成就查詢頁面</p>
+
     <input type="text" id="gameSearch" placeholder="輸入關鍵字搜尋遊戲..." style="width:100%; padding:5px; margin-bottom: 8px;">
     <select id="selectAppid" style="width:100%;">
-        <option value="">-- 選擇一款遊戲 (請耐心等Steam回應) --</option>
+        <option selected disabled>🔄 載入遊戲列表中...</option>
     </select>
     <div id="coverPreview" style="margin-top: 10px;"></div>
 </form>
@@ -45,13 +47,17 @@ fetch("/cached-games")
             renderOptions(e.target.value);
         });
 
-        select.addEventListener("change", function () {
+        select.addEventListener("input", function () {
             const selected = games.find(g => g.appid === this.value);
             if (selected) {
-                fetch(`/achievement/${this.value}?lang=zh-tw`)
-                    .then(() => location.href = `/achievement/${this.value}?lang=zh-tw`);
+                window.location.href = `/achievement/${this.value}?lang=zh-tw`;
             }
         });
+    })
+    .catch(err => {
+        const select = document.getElementById("selectAppid");
+        select.innerHTML = '<option disabled selected>⚠️ 載入失敗，請稍後再試</option>';
+        console.error("載入 cached-games 失敗：", err);
     });
 </script>
 {% endblock %}

@@ -40,9 +40,9 @@ def fetch_and_cache_games(lang="en", sleep_interval=1, existing_data=None):
             continue
 
         # 補充：嘗試從 Store 抓取多語系名稱
-        if not name and lang != "en":
-            store_info = steam_api.fetch_store_name(appid, lang)
-            name = store_info or ""
+        # if not name and lang != "en":
+        #    store_info = steam_api.fetch_store_name(appid, lang)
+        #    name = store_info or ""
 
         name = game.get("name", "") or steam_api.fetch_store_name(appid, lang)
         if appid not in data:

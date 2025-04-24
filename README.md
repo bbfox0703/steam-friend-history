@@ -96,6 +96,13 @@ wsl --install
 ### 安裝 Docker Desktop on Windows
 https://docs.docker.com/desktop/setup/install/windows-install/
 
+### Windows Store 安裝 Debian
+#### 執行 Debian
+```bash
+sudo apt update
+sudo apt upgrade -y
+sudo apt install git curl procps -y
+```
 
 ## 部份Docker指令
 

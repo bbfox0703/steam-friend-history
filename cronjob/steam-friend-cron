@@ -1,4 +1,4 @@
 */10 * * * * root /app/cronjob/update.sh >> /var/log/cron_exec.log 2>&1
 0 * * * * root echo "✅ Ping cron at $(date)" >> /var/log/cron_exec.log
 0 0 * * * root /usr/sbin/logrotate /etc/logrotate.d/steam-friend-logs >> /var/log/cron_exec.log 2>&1
-34 * * * * root /app/cronjob/daily.sh >> /var/log/cron_exec.log 2>&1
+49 6 * * * root /app/cronjob/daily.sh >> /var/log/cron_exec.log 2>&1

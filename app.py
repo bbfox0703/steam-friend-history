@@ -531,7 +531,15 @@ def achievement_trend(appid):
                 timeline.append(dt.strftime("%Y-%m-%d"))
 
     if not timeline:
-        return render_template("achievement_trend.html", appid=appid, error="無達成成就資料", game_name=game_name)
+        return render_template("achievement_trend.html",
+                               appid=appid,
+                               error="⚠️ 尚無任何成就達成紀錄",
+                               game_name=game_name,
+                               header_image=header_image,
+                               data=[],
+                               total=len(achievements),
+                               unlocked=0,
+                               mode=mode)
 
     # pandas 處理與補齊空白區間
     df = pd.DataFrame({"date": timeline})

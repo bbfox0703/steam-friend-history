@@ -4,34 +4,51 @@
 
 {% block content %}
 <h2>查詢 Steam 遊戲成就趨勢</h2>
-<form method="get" action="/achievement">
+<form method="get" action="/achievement" id="achievementForm">
     <label for="appid">請輸入 AppID：</label>
     <input type="text" name="appid" id="appid" required placeholder="例如 3123410">
     <button type="submit">查詢</button>
 
     <hr>
 
-    <label for="selectAppid">或從已擁有的遊戲選擇：</label>
-    <select id="selectAppid">
-        <option value="">-- 選擇一款遊戲 --</option>
-    </select>
+    <label for="gameSearch">或搜尋已擁有的遊戲：</label>
+    <input list="gameList" id="gameSearch" placeholder="輸入遊戲名稱或 AppID">
+    <datalist id="gameList"></datalist>
+
+    <div id="preview" style="margin-top: 1em;"></div>
 </form>
 
 <script>
+let gameMap = {};
+
 fetch("/cached-games")
     .then(res => res.json())
     .then(games => {
-        const select = document.getElementById("selectAppid");
+        const datalist = document.getElementById("gameList");
+        gameMap = {};
+
         games.forEach(g => {
-            const opt = document.createElement("option");
-            opt.value = g.appid;
-            opt.textContent = `${g.name} (${g.appid})`;
-            select.appendChild(opt);
+            const appid = g.appid.toString();
+            const name = g.name;
+            const option = document.createElement("option");
+            option.value = `${name} (${appid})`;
+            datalist.appendChild(option);
+            gameMap[`${name} (${appid})`] = g;
         });
 
-        select.addEventListener("change", function () {
-            if (this.value) {
-                location.href = `/achievement/${this.value}`;
+        const searchInput = document.getElementById("gameSearch");
+        const appidInput = document.getElementById("appid");
+        const preview = document.getElementById("preview");
+
+        searchInput.addEventListener("change", () => {
+            const selected = searchInput.value;
+            const game = gameMap[selected];
+            if (game) {
+                appidInput.value = game.appid;
+                preview.innerHTML = `
+                    <p>已選擇遊戲：<strong>${game.name}</strong>（AppID: ${game.appid}）</p>
+                    ${game.header_image ? `<img src="${game.header_image}" alt="封面圖" style="max-width: 100%; border-radius: 8px;">` : ''}
+                `;
             }
         });
     });

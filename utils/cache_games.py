@@ -23,7 +23,7 @@ CACHE_PATH = os.path.join(BASE_DIR, "database", "game_titles.json")
 
 SUPPORTED_LANGS = ["en", "tchinese", "japanese"]
 
-def fetch_and_cache_games(lang="en", sleep_interval=1):
+def fetch_and_cache_games(lang="en", sleep_interval=1, existing_data=None):
     print(f"🌐 正在抓取語言：{lang}")
     start = time.time()
     games = steam_api.fetch_owned_games(lang=lang)
@@ -33,22 +33,27 @@ def fetch_and_cache_games(lang="en", sleep_interval=1):
     data = {}
     for i, game in enumerate(games):
         appid = str(game["appid"])
-        name = game.get("name", "")
+
+        # 🛑 檢查是否已經快取過這個語言的名稱
+        if existing_data and appid in existing_data and lang in existing_data[appid]:
+            print(f"⏭️  [{i+1}/{len(games)}] {appid} ({lang}) 已存在，略過")
+            continue
 
         # 補充：嘗試從 Store 抓取多語系名稱
         if not name and lang != "en":
             store_info = steam_api.fetch_store_name(appid, lang)
             name = store_info or ""
 
+        name = game.get("name", "") or steam_api.fetch_store_name(appid, lang)
         if appid not in data:
             data[appid] = {}
         data[appid][lang] = name
-        print(f"✅ {time.strftime('%Y-%m-%d %H:%M:%S')} [{i+1}/{len(games)}] {appid} ({lang}): {name} ")
+        print(f"✅ {time.strftime('%Y-%m-%d %H:%M:%S')} [{i+1}/{len(games)}] {appid} ({lang}): {name}")
         time.sleep(sleep_interval)
 
     return data
 
-def build_game_title_cache(langs=["en"], sleep_interval=1):
+def build_game_title_cache(langs=["en"], sleep_interval=1.05):
     print("🚀 開始建立遊戲名稱多語系快取...")
 
     # 載入現有快取
@@ -59,7 +64,7 @@ def build_game_title_cache(langs=["en"], sleep_interval=1):
         merged = {}
 
     for lang in langs:
-        partial = fetch_and_cache_games(lang=lang, sleep_interval=sleep_interval)
+        partial = fetch_and_cache_games(lang=lang, sleep_interval=sleep_interval, existing_data=merged)
         for appid, lang_dict in partial.items():
             if not isinstance(merged.get(appid), dict):
                 merged[appid] = {}  # 初始化為 dict

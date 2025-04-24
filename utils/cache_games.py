@@ -17,16 +17,16 @@ except ImportError:
 # 自動載入環境變數
 load_dotenv()
 
-# 路徑設定
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 CACHE_PATH = os.path.join(BASE_DIR, "database", "game_titles.json")
 
-SUPPORTED_LANGS = ["tchinese", "english", "japanese"]
+# 語系對應 store API 的格式
+SUPPORTED_LANGS = ["en", "tchinese", "japanese"]
 
 def fetch_and_cache_games(lang="en", sleep_interval=1, existing_data=None):
     print(f"🌐 正在抓取語言：{lang}")
     start = time.time()
-    games = steam_api.fetch_owned_games(lang=lang)
+    games = steam_api.fetch_owned_games()
     print(f"📋 獲得 {len(games)} 筆遊戲（{lang}）")
     print(f"⏳ 取得 owned games 耗時：{time.time() - start:.2f} 秒")
 
@@ -34,20 +34,17 @@ def fetch_and_cache_games(lang="en", sleep_interval=1, existing_data=None):
     for i, game in enumerate(games):
         appid = str(game["appid"])
 
-        # 🛑 檢查是否已經快取過這個語言的名稱
+        # 若已存在該語言快取，略過
         if existing_data and appid in existing_data and lang in existing_data[appid]:
             print(f"⏭️  [{i+1}/{len(games)}] {appid} ({lang}) 已存在，略過")
             continue
 
-        # 補充：嘗試從 Store 抓取多語系名稱
-        # if not name and lang != "en":
-        #    store_info = steam_api.fetch_store_name(appid, lang)
-        #    name = store_info or ""
-
-        if lang != "english":
-          name = steam_api.fetch_store_name(appid, lang)
+        # 抓語系對應的名稱
+        if lang == "en":
+            name = game.get("name", "")
         else:
-          name = game.get("name", "") or steam_api.fetch_store_name(appid, lang)
+            name = steam_api.fetch_store_name(appid, lang)
+
         if appid not in data:
             data[appid] = {}
         data[appid][lang] = name
@@ -59,7 +56,6 @@ def fetch_and_cache_games(lang="en", sleep_interval=1, existing_data=None):
 def build_game_title_cache(langs=["en"], sleep_interval=1.7):
     print("🚀 開始建立遊戲名稱多語系快取...")
 
-    # 載入現有快取
     if os.path.exists(CACHE_PATH):
         with open(CACHE_PATH, "r", encoding="utf-8") as f:
             merged = json.load(f)
@@ -70,8 +66,8 @@ def build_game_title_cache(langs=["en"], sleep_interval=1.7):
         partial = fetch_and_cache_games(lang=lang, sleep_interval=sleep_interval, existing_data=merged)
         for appid, lang_dict in partial.items():
             if not isinstance(merged.get(appid), dict):
-                merged[appid] = {}  # 初始化為 dict
-            merged[appid].update(lang_dict)  # 合併 {lang: name}
+                merged[appid] = {}
+            merged[appid].update(lang_dict)
 
     os.makedirs(os.path.dirname(CACHE_PATH), exist_ok=True)
     with open(CACHE_PATH, "w", encoding="utf-8") as f:

@@ -17,4 +17,4 @@ find /app/backups/ -name "daily_*.json" -mtime +30 -delete
 
 # 快取 Steam 遊戲清單
 echo "[$(date)] 🎮 Updating game title cache..." >> /var/log/cron_exec.log
-python3 -m utils.cache_games >> /var/log/cron_exec.log 2>&1
+/usr/local/bin/python3 -m utils.cache_games >> /var/log/cron_exec.log 2>&1

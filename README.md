@@ -5,7 +5,7 @@
 一個輕量級、可在Raspberry Pi 5上跑的系統，可記錄自己的Steam好友列表與變化。  
 Steam api key可不用外流，自己用就好。  
 好友列表要公開，不然api抓不到會變空值。  
-持有遊戲如果太多，這應用程式可能不適合你，因為程式在半夜時、會在背景試著執行遊戲名稱預先快取，一個遊戲約需要10~15秒，如果你持有的遊戲很多，可能會一天都跑不完、或者是因api使用太頻繁、會被Steam拒絕存取。
+持有遊戲如果太多，這應用程式可能不適合你，因為程式在半夜時、會在背景試著執行遊戲名稱預先快取，一個遊戲約需要10~15秒，如果你持有的遊戲很多，可能會一天都跑不完、或者是因api使用太頻繁、會被Steam拒絕存取。  
 
 ## 📦 目前功能
 - 定時自動抓取Steam好友清單
@@ -83,17 +83,17 @@ http://伺服器ip:3000
 http://192.168.1.100:3000
 
 ## 🛠️ 安裝方法 (大約步驟使用Windwos 11 Home)
-需要安裝：WSL2、Docker Desktop on Windows
-使用VMWare等直接開VM裝Docker問題最少，WSL要改的地方不少，例如cron jobs等。
+需要安裝：WSL2、Docker Desktop on Windows  
+使用VMWare等直接開VM裝Docker問題最少，WSL要改的地方不少，例如cron jobs等。  
 
 ### WSL2 安裝
-使用管理員模式開啟命令提示字元 (cmd.exe)
-輸入：
+使用管理員模式開啟命令提示字元 (cmd.exe)  
+輸入：  
 ```powershell
 wsl --install
 ```
 ![wsl2 ](./docs/wsl2.png)
-重開機
+重開機  
 
 ### Windows Store 安裝 Debian
 確認WSL版本是 v2
@@ -120,7 +120,7 @@ cd steam-friend-history/
 cp .env.example .env
 ```
 
-修改 .env ，填入steam api key & steam id
+修改 .env ，填入steam api key & steam id  
 
 ```bash
 python3 -m venv venv
@@ -131,8 +131,8 @@ python app.py
 到此網頁應該會起來
 
 ### 其它系統定
-背景 cronjobs ，請參考steam-friend-cron-wsl、update_wsl.sh、daily_wsl.sh
-如果沒設定背景程式，好友資料和遊戲名稱是不會抓取的，其本上就是整個沒有作用。
+背景 cronjobs ，請參考steam-friend-cron-wsl、update_wsl.sh、daily_wsl.sh  
+如果沒設定背景程式，好友資料和遊戲名稱是不會抓取的，其本上就是整個沒有作用。  
   
   
   

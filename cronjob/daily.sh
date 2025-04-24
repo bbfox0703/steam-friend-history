@@ -1,6 +1,6 @@
 #!/bin/bash
 
-echo "🔍 Working dir: $(pwd)" >> /var/log/cron_exec.log
+echo "🕒 daily.sh started at $(date)" >> /var/log/cron_exec.log
 
 # 每天凌晨 3:00 存長期備份
 cp /app/database/friends.json /app/backups/daily_$(date +'%Y%m%d').json

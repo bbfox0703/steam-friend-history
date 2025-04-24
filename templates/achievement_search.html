@@ -75,8 +75,25 @@ fetch("/cached-games")
         console.error("載入 cached-games 失敗：", err);
     });
 
-document.getElementById("appidForm").addEventListener("submit", function () {
-    document.getElementById("manualLoading").style.display = "block";
+	document.getElementById("appidForm").addEventListener("submit", function () {
+		document.getElementById("manualLoading").style.display = "block";
+		
+	window.addEventListener("pageshow", () => {
+		const m = document.getElementById("manualLoading");
+		const l = document.getElementById("loadingMessage");
+		if (m) m.style.display = "none";
+		if (l) l.style.display = "none";
+	});
+
+	document.addEventListener("visibilitychange", () => {
+		if (document.visibilityState === "visible") {
+			const m = document.getElementById("manualLoading");
+			const l = document.getElementById("loadingMessage");
+			if (m) m.style.display = "none";
+			if (l) l.style.display = "none";
+		}
+	});
+	
 });
 </script>
 {% endblock %}

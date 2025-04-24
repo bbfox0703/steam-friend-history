@@ -1,7 +1,7 @@
 from dotenv import load_dotenv
 load_dotenv()
 
-from flask import Flask, render_template, request, redirect, url_for, jsonify, send_from_directory, send_file
+from flask import Flask, render_template, request, redirect, url_for, jsonify, send_from_directory, send_file, Blueprint
 import utils.steam_api as steam_api
 from utils.steam_api import get_friend_data
 from utils.steam_api import fetch_game_info

@@ -151,7 +151,8 @@ def filter_friend_list(args):
     return filtered
     
 app = Flask(__name__)
-import os
+app.register_blueprint(cached_games_bp)
+
 # print("=== API_KEY Loaded ===", os.getenv('STEAM_API_KEY'))
 # print("=== STEAM_USER_ID Loaded ===", os.getenv('STEAM_USER_ID'))
 

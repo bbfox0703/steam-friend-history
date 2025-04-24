@@ -133,7 +133,10 @@ python app.py
 ### 其它系統定
 背景 cronjobs ，請參考steam-friend-cron-wsl、update_wsl.sh、daily_wsl.sh
 如果沒設定背景程式，好友資料和遊戲名稱是不會抓取的，其本上就是整個沒有作用。
-
+  
+  
+  
+  
 ## 部份Docker指令
 
 ### 看container狀態

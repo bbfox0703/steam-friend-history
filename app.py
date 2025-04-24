@@ -151,6 +151,7 @@ def filter_friend_list(args):
     return filtered
     
 app = Flask(__name__)
+cached_games_bp = Blueprint("cached_games", __name__)
 app.register_blueprint(cached_games_bp)
 
 # print("=== API_KEY Loaded ===", os.getenv('STEAM_API_KEY'))
@@ -548,8 +549,6 @@ def achievement_trend(appid):
                            unlocked=unlocked,
                            mode=mode)
                            
-cached_games_bp = Blueprint("cached_games", __name__)
-
 @cached_games_bp.route("/cached-games")
 def cached_games():
     path = "./database/game_titles.json"

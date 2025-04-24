@@ -13,6 +13,7 @@ Steam api key可不用外流，自己用就好。
 - 國別統計與國別分類
 - 好友加入趨勢圖
 - 好友狀態看板
+- 單一遊戲成就達成趨勢圖
 - 點擊好友可以連到Steam個人頁面
 - **移除記錄功能沒有實際測過**
 - 使用Docker簡單部署，可運行於Raspberry Pi 5 (使用SSD裝置)
@@ -28,7 +29,10 @@ Steam api key可不用外流，自己用就好。
 ## 圖例：變更記錄 
 從此對方再怎改，也不會改到認不得娘親
 ![變更記錄 ](./docs/history.png)
-
+## 圖例：成就達成趨勢圖
+![成就達成趨勢圖 ](./docs/achievement_trend.png)
+###需要輸入AppID
+![appid ](./docs/appid.png)
 ---
 
 ## 🛠️ 安裝方法 (使用Raspberry Pi 5)

@@ -1,28 +1,28 @@
 {% extends "base.html" %}
 
-{% block title %}成就查詢{% endblock %}
+{% block title %}{{ _('成就查詢') }}{% endblock %}
 
 {% block content %}
-<h2>查詢 Steam 遊戲成就趨勢</h2>
+<h2>{{ _('查詢 Steam 遊戲成就趨勢') }}</h2>
 
 <form method="get" action="/achievement" id="appidForm">
-    <label for="appid">請輸入 AppID：</label>
-    <input type="text" name="appid" id="appid" required placeholder="例如 3123410">
-    <button type="submit">查詢</button>
+    <label for="appid">{{ _('請輸入 AppID：') }}</label>
+    <input type="text" name="appid" id="appid" required placeholder="{{ _('例如 3123410') }}">
+    <button type="submit">{{ _('查詢') }}</button>
 
-    <p id="manualLoading" style="display:none; color: gray; font-size: 0.9em;">⏳ 正在查詢資料，請稍候...</p>
+    <p id="manualLoading" style="display:none; color: gray; font-size: 0.9em;">{{ _('⏳ 正在查詢資料，請稍候...') }}</p>
 </form>
 
 <hr>
 
-<label for="selectAppid">或從已擁有的遊戲中設搜尋條件：</label>
-<p style="font-size: 0.9em; color: gray;">選擇後會自動跳轉至成就查詢頁面，請耐心等 Steam 回應</p>
+<label for="selectAppid">{{ _('或從已擁有的遊戲中設搜尋條件：') }}</label>
+<p style="font-size: 0.9em; color: gray;">{{ _('選擇後會自動跳轉至成就查詢頁面，請耐心等 Steam 回應') }}</p>
 
-<input type="text" id="gameSearch" placeholder="輸入關鍵字搜尋遊戲..." style="width:100%; padding:5px; margin-bottom: 8px;">
+<input type="text" id="gameSearch" placeholder="{{ _('輸入關鍵字搜尋遊戲...') }}" style="width:100%; padding:5px; margin-bottom: 8px;">
 <select id="selectAppid" style="width:100%;">
-    <option selected disabled>🔄 載入遊戲列表中...</option>
+    <option selected disabled>🔄 {{ _('載入遊戲列表中...') }}</option>
 </select>
-<p id="loadingMessage" style="display:none; color: gray; font-size: 0.9em;">⏳ 正在查詢資料，請稍候...</p>
+<p id="loadingMessage" style="display:none; color: gray; font-size: 0.9em;">{{ _('⏳ 正在查詢資料，請稍候...') }}</p>
 
 <div id="coverPreview" style="margin-top: 10px;"></div>
 {% endblock %}

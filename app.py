@@ -1,10 +1,11 @@
 from dotenv import load_dotenv
 load_dotenv()
 
-from flask import Flask, render_template, request, redirect, url_for, jsonify, send_from_directory, send_file, Blueprint
+from flask import Flask, render_template, request, redirect, url_for, jsonify, send_from_directory, send_file, Blueprint, g
 import utils.steam_api as steam_api
 from utils.steam_api import get_friend_data
 from utils.steam_api import fetch_game_info
+from utils.i18n import _, load_translations
 import requests
 import utils.backup as backup
 import pandas as pd
@@ -16,6 +17,9 @@ import operator
 from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
 from collections import defaultdict, Counter
+
+# 🌐 載入翻譯字典
+load_translations()
 
 tz = ZoneInfo("Asia/Taipei")
 
@@ -151,6 +155,7 @@ def filter_friend_list(args):
     return filtered
    
 app = Flask(__name__)
+app.jinja_env.globals.update(_=_)  # ✅ 新增: 將 _() 提供給 Jinja 模板使用
 cached_games_bp = Blueprint("cached_games", __name__)
 
 import os
@@ -158,6 +163,10 @@ from flask import g
 
 # print("=== API_KEY Loaded ===", os.getenv('STEAM_API_KEY'))
 # print("=== STEAM_USER_ID Loaded ===", os.getenv('STEAM_USER_ID'))
+
+@app.context_processor
+def inject_globals():
+    return {'_': _}
 
 @app.before_request
 def detect_language():

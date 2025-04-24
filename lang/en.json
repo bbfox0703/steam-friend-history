@@ -1,0 +1,12 @@
+{
+  "成就查詢": "Achievement Search",
+  "查詢 Steam 遊戲成就趨勢": "Search Steam Game Achievement Trends",
+  "請輸入 AppID：": "Enter AppID:",
+  "例如 3123410": "e.g., 3123410",
+  "查詢": "Search",
+  "⏳ 正在查詢資料，請稍候...": "⏳ Querying data, please wait...",
+  "或從已擁有的遊戲中設搜尋條件：": "Or search from your owned games:",
+  "選擇後會自動跳轉至成就查詢頁面，請耐心等 Steam 回應": "Selecting will auto-redirect. Please wait for Steam to respond.",
+  "輸入關鍵字搜尋遊戲...": "Search games...",
+  "載入遊戲列表中...": "Loading game list..."
+}

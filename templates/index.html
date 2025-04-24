@@ -16,16 +16,10 @@
                         {{ friend.persona_name or _('【未知名稱】') }}
                         {% if friend.incomplete %}<span style="color: red;">（{{ _('不完整') }}）</span>{% endif %}
                     </strong><br>
-                    <small>
-                        {{ _('加入於') }} 
+                    <small>{{ _('加入於') }} 
                         <time class="datetime-auto" data-timestamp="{{ friend.friend_since }}" title="{{ friend.friend_since | datetimeformat }}">
                             {{ friend.friend_since | datetimeformat }}
-                        </time><br>
-							{% if friend.level is defined and friend.level is not none %}
-								{{ _('等級：') }}{{ friend.level }}
-							{% else %}
-								{{ _('等級：') }}<span class="steam-level" data-steamid="{{ friend.steamid }}">⏳</span>
-							{% endif %}
+                        </time>
                     </small>
                 </div>
             </a>
@@ -40,35 +34,16 @@
 
 {% block extra_script %}
 <script>
-document.addEventListener("DOMContentLoaded", () => {
+  // 自動轉換為地區語系時間格式
+  document.addEventListener("DOMContentLoaded", () => {
     const nodes = document.querySelectorAll(".datetime-auto");
     for (const el of nodes) {
-        const ts = el.getAttribute("data-timestamp");
-        if (ts) {
-            const d = new Date(parseInt(ts) * 1000);
-            el.textContent = d.toLocaleString();
-        }
+      const ts = el.getAttribute("data-timestamp");
+      if (ts) {
+        const d = new Date(parseInt(ts) * 1000);
+        el.textContent = d.toLocaleString();
+      }
     }
-
-    // 延遲查詢等級
-    document.querySelectorAll(".steam-level[data-steamid]").forEach(span => {
-        const steamid = span.dataset.steamid;
-        fetch(`/steam-level/${steamid}`)
-            .then(res => res.json())
-            .then(data => {
-                if (data.level !== undefined && data.cache_time !== undefined) {
-                    const time = new Date(data.cache_time * 1000);
-                    const timeStr = time.toLocaleString();
-                    span.innerHTML = `${data.level} <span style="color:gray;" title="快取時間">${timeStr}</span>`;
-                } else {
-                    span.textContent = "?";
-                }
-            })
-            .catch(err => {
-                console.error("查詢等級失敗", err);
-                span.textContent = "?";
-            });
-    });
-});
+  });
 </script>
 {% endblock %}

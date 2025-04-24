@@ -38,16 +38,41 @@
 
 {% block extra_script %}
 <script>
-  // 自動轉換為地區語系時間格式
-  document.addEventListener("DOMContentLoaded", () => {
-    const nodes = document.querySelectorAll(".datetime-auto");
-    for (const el of nodes) {
-      const ts = el.getAttribute("data-timestamp");
-      if (ts) {
-        const d = new Date(parseInt(ts) * 1000);
-        el.textContent = d.toLocaleString();
-      }
-    }
-  });
+document.addEventListener("DOMContentLoaded", () => {
+    const lang = document.documentElement.lang || 'zh-TW';
+
+    // 🕒 將 UNIX timestamp 格式化
+    document.querySelectorAll(".datetime-auto").forEach(el => {
+        const ts = el.dataset.timestamp || el.getAttribute("data-timestamp");
+        if (ts) {
+            const d = new Date(parseInt(ts) * 1000);
+            el.textContent = d.toLocaleString(lang);
+        }
+    });
+
+    // 🔍 延遲查詢 Steam Level
+    document.querySelectorAll(".friend-item").forEach(li => {
+        const profileUrl = li.querySelector("a[href*='steamcommunity']").getAttribute("href");
+        const match = profileUrl.match(/(\d{17})$/);
+        if (!match) return;
+
+        const steamid = match[1];
+        fetch(`/steam-level/${steamid}`)
+            .then(res => res.json())
+            .then(data => {
+                if (data.level !== undefined) {
+                    const small = li.querySelector("small");
+                    const div = document.createElement("div");
+                    div.textContent = `{{ _('等級：') }}` + data.level;
+                    small.appendChild(document.createElement("br"));
+                    small.appendChild(div);
+                }
+            })
+            .catch(err => {
+                console.warn("❌ 無法取得 Steam 等級：", steamid, err);
+            });
+    });
+});
 </script>
 {% endblock %}
+

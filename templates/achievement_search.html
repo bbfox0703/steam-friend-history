@@ -30,71 +30,64 @@
 {% block extra_script %}
 <script>
 window.addEventListener("pageshow", () => {
-    document.getElementById("loadingMessage").style.display = "none";
-    document.getElementById("manualLoading").style.display = "none";
+	const m = document.getElementById("manualLoading");
+	const l = document.getElementById("loadingMessage");
+	if (m) m.style.display = "none";
+	if (l) l.style.display = "none";
 });
 
-fetch("/cached-games")
-    .then(res => res.json())
-    .then(games => {
-        const select = document.getElementById("selectAppid");
-        const search = document.getElementById("gameSearch");
-        const loadingMsg = document.getElementById("loadingMessage");
-
-        function renderOptions(keyword = "") {
-            select.innerHTML = '<option value="">-- 選擇一款遊戲 --</option>';
-            games.forEach(g => {
-                if (g.name.toLowerCase().includes(keyword.toLowerCase())) {
-                    const opt = document.createElement("option");
-                    opt.value = g.appid;
-                    opt.textContent = `${g.name} (${g.appid})`;
-                    select.appendChild(opt);
-                }
-            });
-        }
-
-        renderOptions();
-
-        search.addEventListener("input", e => {
-            renderOptions(e.target.value);
-        });
-
-        select.addEventListener("input", function () {
-            const selected = games.find(g => g.appid === this.value);
-            if (selected) {
-                select.disabled = true;
-                search.disabled = true;
-                loadingMsg.style.display = "block";
-                window.location.href = `/achievement/${this.value}?lang=zh-tw`;
-            }
-        });
-    })
-    .catch(err => {
-        const select = document.getElementById("selectAppid");
-        select.innerHTML = '<option disabled selected>⚠️ 載入失敗，請稍後再試</option>';
-        console.error("載入 cached-games 失敗：", err);
-    });
-
-	document.getElementById("appidForm").addEventListener("submit", function () {
-		document.getElementById("manualLoading").style.display = "block";
-		
-	window.addEventListener("pageshow", () => {
+document.addEventListener("visibilitychange", () => {
+	if (document.visibilityState === "visible") {
 		const m = document.getElementById("manualLoading");
 		const l = document.getElementById("loadingMessage");
 		if (m) m.style.display = "none";
 		if (l) l.style.display = "none";
+	}
+});
+
+fetch("/cached-games")
+	.then(res => res.json())
+	.then(games => {
+		const select = document.getElementById("selectAppid");
+		const search = document.getElementById("gameSearch");
+		const loadingMsg = document.getElementById("loadingMessage");
+
+		function renderOptions(keyword = "") {
+			select.innerHTML = '<option value="">-- 選擇一款遊戲 --</option>';
+			games.forEach(g => {
+				if (g.name.toLowerCase().includes(keyword.toLowerCase())) {
+					const opt = document.createElement("option");
+					opt.value = g.appid;
+					opt.textContent = `${g.name} (${g.appid})`;
+					select.appendChild(opt);
+				}
+			});
+		}
+
+		renderOptions();
+
+		search.addEventListener("input", e => {
+			renderOptions(e.target.value);
+		});
+
+		select.addEventListener("input", function () {
+			const selected = games.find(g => g.appid === this.value);
+			if (selected) {
+				select.disabled = true;
+				search.disabled = true;
+				loadingMsg.style.display = "block";
+				window.location.href = `/achievement/${this.value}?lang=zh-tw`;
+			}
+		});
+	})
+	.catch(err => {
+		const select = document.getElementById("selectAppid");
+		select.innerHTML = '<option disabled selected>⚠️ 載入失敗，請稍後再試</option>';
+		console.error("載入 cached-games 失敗：", err);
 	});
 
-	document.addEventListener("visibilitychange", () => {
-		if (document.visibilityState === "visible") {
-			const m = document.getElementById("manualLoading");
-			const l = document.getElementById("loadingMessage");
-			if (m) m.style.display = "none";
-			if (l) l.style.display = "none";
-		}
-	});
-	
+document.getElementById("appidForm").addEventListener("submit", function () {
+	document.getElementById("manualLoading").style.display = "block";
 });
 </script>
 {% endblock %}
-

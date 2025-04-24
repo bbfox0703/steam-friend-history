@@ -546,6 +546,20 @@ def achievement_trend(appid):
                            total=total,
                            unlocked=unlocked,
                            mode=mode)
+                           
+@app.route("/cached-games")
+def cached_games():
+    path = "./database/game_titles.json"
+    if not os.path.exists(path):
+        return jsonify([])
+
+    with open(path, "r", encoding="utf-8") as f:
+        data = json.load(f)
+
+    # 回傳排序過的遊戲列表
+    result = [{"appid": k, "name": v} for k, v in data.items()]
+    result.sort(key=lambda g: g["name"].lower())
+    return jsonify(result)                           
                        
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=3000)

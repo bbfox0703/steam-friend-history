@@ -1,7 +1,7 @@
 #!/bin/bash
 
 echo "🕒 daily.sh started at $(date)" >> /var/log/cron_exec.log
-echo "🔍 Working dir: $(pwd)" >> /var/log/cron_exec.log
+echo "🔍 daily cron: Working dir: $(pwd)" >> /var/log/cron_exec.log
 
 # 明確設定 PYTHONPATH
 export PYTHONPATH="/app"

@@ -17,6 +17,12 @@ BACKUP_DIR = './backups'
 
 print = functools.partial(print, flush=True)
 
+STORE_LANG_MAP = {
+    "english": "en",
+    "tchinese": "tchinese",
+    "japanese": "japanese"
+}
+
 def fetch_friend_list():
     url = f"https://api.steampowered.com/ISteamUser/GetFriendList/v1/?key={API_KEY}&steamid={STEAM_ID}&relationship=friend"
     response = requests.get(url)
@@ -234,7 +240,8 @@ def fetch_game_info(appid, lang="en"):
 
 
 def fetch_store_name(appid: str, lang: str) -> str:
-    url = f"https://store.steampowered.com/api/appdetails?appids={appid}&l={lang}"
+    lang_code = STORE_LANG_MAP.get(lang, "en")
+    url = f"https://store.steampowered.com/api/appdetails?appids={appid}&l={lang_code}"
     print(f"🔍 {time.strftime('%Y-%m-%d %H:%M:%S')} fetch_store_name(): {url}")
     try:
         r = requests.get(url, timeout=10)

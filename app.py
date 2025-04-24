@@ -5,7 +5,7 @@ from flask import Flask, render_template, request, redirect, url_for, jsonify, s
 import utils.steam_api as steam_api
 from utils.steam_api import get_friend_data
 from utils.steam_api import fetch_game_info
-from utils.i18n import _, load_translations
+from utils.i18n import _, load_translations, get_locale
 import requests
 import utils.backup as backup
 import pandas as pd
@@ -599,34 +599,24 @@ def cached_games():
     with open(path, "r", encoding="utf-8") as f:
         data = json.load(f)
 
-    # 依據語系優先順序（從 querystring or Accept-Language）
-    lang_order = request.args.get("lang")
-    if lang_order:
-        preferred_langs = lang_order.split(",")
-    else:
-        preferred_langs = []
-        accept_langs = request.headers.get("Accept-Language", "")
-        if "zh-TW" in accept_langs:
-            preferred_langs.append("tchinese")
-        if "ja" in accept_langs:
-            preferred_langs.append("japanese")
-        preferred_langs.append("en")
+    # 使用 get_locale 統一語系來源
+    locale = get_locale().lower()  # zh-TW → zh-tw
+    steam_lang_map = {
+        "zh-tw": "tchinese",
+        "ja": "japanese",
+        "en": "english"
+    }
+    steam_lang = steam_lang_map.get(locale, "english")
 
     result = []
     for appid, names in data.items():
-        name = ""
-        for lang in preferred_langs:
-            if lang in names:
-                name = names[lang]
-                break
-        name = name or names.get("en") or list(names.values())[0]
-
+        name = names.get(steam_lang) or names.get("en") or list(names.values())[0]
         result.append({
             "appid": appid,
             "name": name
         })
 
-    return jsonify(result)                       
+    return jsonify(result)
 
 app.register_blueprint(cached_games_bp)
                        

@@ -66,6 +66,8 @@ docker compose up -d
 ### 5. 如要更新repos
 ```bash
 docker compose down
+#忽略本地變更：
+#git reset --hard
 git pull
 COMPOSE_BAKE=true docker compose build
 docker compose up -d
@@ -76,3 +78,30 @@ http://伺服器ip:3000
 
 例如ip是192.168.1.100的話：
 http://192.168.1.100:3000
+
+
+## Docker指令
+
+### 看container狀態
+```bash
+docker ps
+```
+>CONTAINER ID   IMAGE                      COMMAND                  CREATED              STATUS              PORTS                                         NAMES
+>a32ffd9b20f5   steam-friend-history-web   "/usr/bin/supervisord"   About a minute ago   Up About a minute   0.0.0.0:3000->3000/tcp, [::]:3000->3000/tcp   steam-friend-history-web-1
+
+由上得知container name為steam-friend-history-web-1
+
+### bash進Container：用以上例子
+```bash
+docker exec -it steam-friend-history-web-1 /bin/bash
+```
+
+### cronjob process是否執行
+```bash
+docker exec steam-friend-history-web-1 sh -c "ps aux | grep cron"
+```
+
+### crob jobs 是否 import
+```bash
+docker exec -it steam-friend-history-web-1 cat /etc/cron.d/steam-friend-cron
+```

@@ -549,17 +549,25 @@ def achievement_trend(appid):
                            
 @app.route("/cached-games")
 def cached_games():
+    lang_order = ["tchinese", "japanese", "en"]
     path = "./database/game_titles.json"
-    if not os.path.exists(path):
-        return jsonify([])
 
-    with open(path, "r", encoding="utf-8") as f:
+    with open(path, encoding="utf-8") as f:
         data = json.load(f)
 
-    # 回傳排序過的遊戲列表
-    result = [{"appid": k, "name": v} for k, v in data.items()]
-    result.sort(key=lambda g: g["name"].lower())
-    return jsonify(result)                           
+    result = []
+    for appid, names in data.items():
+        if isinstance(names, dict):
+            for lang in lang_order:
+                if lang in names:
+                    result.append({"appid": appid, "name": names[lang]})
+                    break
+        elif isinstance(names, str):
+            # 兼容舊格式：僅有英文名稱
+            result.append({"appid": appid, "name": names})
+
+    return jsonify(result)
+                        
                        
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=3000)

@@ -5,7 +5,7 @@ WORKDIR /app
 COPY requirements.txt ./
 RUN pip install -r requirements.txt
 
-# 安裝 cron + curl + supervisor + logrotate
+# 安裝 cron + curl + supervisor + logrotate + ps
 RUN apt-get update && \
     apt-get install -y cron curl supervisor logrotate procps && \
     rm -rf /var/lib/apt/lists/*	
@@ -13,9 +13,11 @@ RUN apt-get update && \
 # 複製專案
 COPY . .
 
+# 確保 utils 是模組（解決 ModuleNotFoundError）
+RUN touch /app/utils/__init__.py
+
 # 複製 cronjob 目錄（內含 shell script 與排程設定）
 COPY cronjob /app/cronjob
-# 設定執行權限
 RUN chmod +x /app/cronjob/*.sh
 
 # 複製 logrotate 設定檔

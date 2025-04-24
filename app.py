@@ -154,9 +154,20 @@ app = Flask(__name__)
 cached_games_bp = Blueprint("cached_games", __name__)
 
 import os
+from flask import g
 
 # print("=== API_KEY Loaded ===", os.getenv('STEAM_API_KEY'))
 # print("=== STEAM_USER_ID Loaded ===", os.getenv('STEAM_USER_ID'))
+
+@app.before_request
+def detect_language():
+    lang = request.accept_languages.best_match(["zh-TW", "ja", "en"], default="en")
+    if lang.lower().startswith("zh"):
+        g.language = "zh-tw"
+    elif lang.lower().startswith("ja"):
+        g.language = "ja"
+    else:
+        g.language = "en"
 
 @app.template_filter('datetimeformat')
 def datetimeformat(ts):

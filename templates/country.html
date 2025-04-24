@@ -22,7 +22,7 @@
                     <details>
                         <summary>
                             <strong>{{ code }}</strong>
-							({{ country_name_map[code] if code in country_name_map else 'Unknown' }})：{{ count }} 人
+                            ({{ country_name_map[code] if code in country_name_map else 'Unknown' }})：{{ count }} 人
                         </summary>
                         <ul class="friend-list">
                             {% for friend in country_members[code] %}
@@ -32,11 +32,11 @@
                                         <div class="friend-info">
                                             <strong>{{ friend.persona_name or '[未知名稱]' }}</strong><br>
                                             <small>
-												加入於 
-												<time class="datetime-auto" data-timestamp="{{ friend.friend_since }}">
-													{{ friend.friend_since | datetimeformat }}
-												</time>
-											</small>
+                                                加入於 
+                                                <time class="datetime-auto" data-timestamp="{{ friend.friend_since }}">
+                                                    {{ friend.friend_since | datetimeformat }}
+                                                </time>
+                                            </small>
                                         </div>
                                     </a>
                                 </li>
@@ -47,4 +47,20 @@
             {% endfor %}
         </ul>
     </div>
+{% endblock %}
+
+{% block extra_script %}
+<script>
+  document.querySelectorAll('time.datetime-auto').forEach(el => {
+    const ts = el.dataset.timestamp;
+    if (!ts) return;
+    const date = new Date(Number(ts) * 1000);
+    el.textContent = date.toLocaleDateString(navigator.language || 'zh-TW', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      timeZone: 'Asia/Taipei'
+    });
+  });
+</script>
 {% endblock %}

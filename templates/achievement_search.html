@@ -3,26 +3,52 @@
 {% block title %}成就查詢{% endblock %}
 
 {% block content %}
-<h2>查詢 Steam 遊戲成就趨勢</h2>
+<h2>
+  {% if language == "ja" %}
+    Steamゲームの実績トレンドを検索
+  {% elif language == "zh-tw" %}
+    查詢 Steam 遊戲成就趨勢
+  {% else %}
+    Search Steam Game Achievement Trends
+  {% endif %}
+</h2>
 
 <form method="get" action="/achievement" id="appidForm">
-    <label for="appid">請輸入 AppID：</label>
-    <input type="text" name="appid" id="appid" required placeholder="例如 3123410">
-    <button type="submit">查詢</button>
+  <label for="appid">
+    {% if language == "ja" %}
+      AppID を入力してください：
+    {% elif language == "zh-tw" %}
+      請輸入 AppID：
+    {% else %}
+      Enter AppID:
+    {% endif %}
+  </label>
+  <input type="text" name="appid" id="appid" required placeholder="3123410">
+  <button type="submit">
+    {% if language == "ja" %}検索{% elif language == "zh-tw" %}查詢{% else %}Search{% endif %}
+  </button>
 
-    <p id="manualLoading" style="display:none; color: gray; font-size: 0.9em;">⏳ 正在查詢資料，請稍候...</p>
+  <p id="manualLoading" style="display:none; color: gray; font-size: 0.9em;">
+    ⏳ {% if language == "ja" %}データを取得中...{% elif language == "zh-tw" %}正在查詢資料，請稍候...{% else %}Loading data, please wait...{% endif %}
+  </p>
 </form>
 
 <hr>
 
-<label for="selectAppid">或從已擁有的遊戲中搜尋：</label>
-<p style="font-size: 0.9em; color: gray;">選擇後會自動跳轉至成就查詢頁面，請耐心等 Steam 回應</p>
+<label for="selectAppid">
+  {% if language == "ja" %}所持しているゲームから検索：{% elif language == "zh-tw" %}或從已擁有的遊戲中設搜尋條件：{% else %}Or search from your owned games:{% endif %}
+</label>
+<p style="font-size: 0.9em; color: gray;">
+  {% if language == "ja" %}選択すると自動的に実績ページに移動します。Steam の応答をお待ちください{% elif language == "zh-tw" %}選擇後會自動跳轉至成就查詢頁面，請耐心等 Steam 回應{% else %}Selecting will auto redirect. Please wait for Steam to respond.{% endif %}
+</p>
 
-<input type="text" id="gameSearch" placeholder="輸入關鍵字搜尋遊戲..." style="width:100%; padding:5px; margin-bottom: 8px;">
+<input type="text" id="gameSearch" placeholder="{% if language == "ja" %}キーワードで検索{% elif language == "zh-tw" %}輸入關鍵字搜尋遊戲...{% else %}Search games...{% endif %}" style="width:100%; padding:5px; margin-bottom: 8px;">
 <select id="selectAppid" style="width:100%;">
-    <option selected disabled>🔄 載入遊戲列表中...</option>
+  <option selected disabled>🔄 {% if language == "ja" %}ゲームリストを読み込み中...{% elif language == "zh-tw" %}載入遊戲列表中...{% else %}Loading game list...{% endif %}</option>
 </select>
-<p id="loadingMessage" style="display:none; color: gray; font-size: 0.9em;">⏳ 正在查詢資料，請稍候...</p>
+<p id="loadingMessage" style="display:none; color: gray; font-size: 0.9em;">
+  ⏳ {% if language == "ja" %}データを取得中...{% elif language == "zh-tw" %}正在查詢資料，請稍候...{% else %}Loading data, please wait...{% endif %}
+</p>
 
 <div id="coverPreview" style="margin-top: 10px;"></div>
 {% endblock %}
@@ -30,64 +56,53 @@
 {% block extra_script %}
 <script>
 window.addEventListener("pageshow", () => {
-    const m = document.getElementById("manualLoading");
-    const l = document.getElementById("loadingMessage");
-    if (m) m.style.display = "none";
-    if (l) l.style.display = "none";
-});
-
-document.addEventListener("visibilitychange", () => {
-    if (document.visibilityState === "visible") {
-        const m = document.getElementById("manualLoading");
-        const l = document.getElementById("loadingMessage");
-        if (m) m.style.display = "none";
-        if (l) l.style.display = "none";
-    }
+  document.getElementById("loadingMessage").style.display = "none";
+  document.getElementById("manualLoading").style.display = "none";
 });
 
 fetch("/cached-games")
-    .then(res => res.json())
-    .then(games => {
-        const select = document.getElementById("selectAppid");
-        const search = document.getElementById("gameSearch");
-        const loadingMsg = document.getElementById("loadingMessage");
+  .then(res => res.json())
+  .then(games => {
+    const select = document.getElementById("selectAppid");
+    const search = document.getElementById("gameSearch");
+    const loadingMsg = document.getElementById("loadingMessage");
 
-        function renderOptions(keyword = "") {
-            select.innerHTML = '<option value="">-- 選擇一款遊戲 --</option>';
-            games.forEach(g => {
-                if (g.name.toLowerCase().includes(keyword.toLowerCase())) {
-                    const opt = document.createElement("option");
-                    opt.value = g.appid;
-                    opt.textContent = `${g.name} (${g.appid})`;
-                    select.appendChild(opt);
-                }
-            });
+    function renderOptions(keyword = "") {
+      select.innerHTML = '<option value="">-- {% if language == "ja" %}ゲームを選択{% elif language == "zh-tw" %}選擇一款遊戲{% else %}Select a game{% endif %} --</option>';
+      games.forEach(g => {
+        if (g.name.toLowerCase().includes(keyword.toLowerCase())) {
+          const opt = document.createElement("option");
+          opt.value = g.appid;
+          opt.textContent = `${g.name} (${g.appid})`;
+          select.appendChild(opt);
         }
+      });
+    }
 
-        renderOptions();
+    renderOptions();
 
-        search.addEventListener("input", e => {
-            renderOptions(e.target.value);
-        });
-
-        select.addEventListener("input", function () {
-            const selected = games.find(g => g.appid === this.value);
-            if (selected) {
-                select.disabled = true;
-                search.disabled = true;
-                loadingMsg.style.display = "block";
-                window.location.href = `/achievement/${this.value}?lang=zh-tw`;
-            }
-        });
-    })
-    .catch(err => {
-        const select = document.getElementById("selectAppid");
-        select.innerHTML = '<option disabled selected>⚠️ 載入失敗，請稍後再試</option>';
-        console.error("載入 cached-games 失敗：", err);
+    search.addEventListener("input", e => {
+      renderOptions(e.target.value);
     });
 
+    select.addEventListener("input", function () {
+      const selected = games.find(g => g.appid === this.value);
+      if (selected) {
+        select.disabled = true;
+        search.disabled = true;
+        loadingMsg.style.display = "block";
+        window.location.href = `/achievement/${this.value}?lang={{ language }}`;
+      }
+    });
+  })
+  .catch(err => {
+    const select = document.getElementById("selectAppid");
+    select.innerHTML = '<option disabled selected>⚠️ {% if language == "ja" %}読み込み失敗{% elif language == "zh-tw" %}載入失敗，請稍後再試{% else %}Failed to load, please try again{% endif %}</option>';
+    console.error("載入 cached-games 失敗：", err);
+  });
+
 document.getElementById("appidForm").addEventListener("submit", function () {
-    document.getElementById("manualLoading").style.display = "block";
+  document.getElementById("manualLoading").style.display = "block";
 });
 </script>
 {% endblock %}

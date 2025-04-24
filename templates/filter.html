@@ -73,10 +73,7 @@ const statusMap = {
     6: '想玩遊戲'
 };
 
-// ✅ 單一綁定 change（適用全部欄位）
 form.addEventListener('change', fetchFiltered);
-
-// ✅ submit 攔截也走同一條路
 form.addEventListener('submit', e => {
     e.preventDefault();
     fetchFiltered();
@@ -84,7 +81,7 @@ form.addEventListener('submit', e => {
 
 function formatLocalTime(ts) {
     const date = new Date(ts * 1000);
-    return date.toLocaleString('zh-TW', {
+    return date.toLocaleString(undefined, {
         year: 'numeric',
         month: 'numeric',
         day: 'numeric',

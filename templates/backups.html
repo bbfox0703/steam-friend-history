@@ -68,5 +68,36 @@ document.getElementById('select-all').addEventListener('change', function() {
     const checkboxes = document.querySelectorAll('input[name="files"]');
     for (const cb of checkboxes) cb.checked = this.checked;
 });
+
+function formatLocalTime(ts) {
+    const date = new Date(ts * 1000);
+    return date.toLocaleString(undefined, {
+        year: 'numeric',
+        month: 'numeric',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hourCycle: 'h23'
+    });
+}
+
+function formatDaysAgo(ts) {
+    const now = new Date();
+    const then = new Date(ts * 1000);
+    const diffDays = Math.floor((now - then) / 86400000);
+    return `${diffDays} 天前`;
+}
+
+function updateAllTimestamps() {
+    document.querySelectorAll('.datetime-auto').forEach(el => {
+        const ts = parseInt(el.dataset.timestamp, 10);
+        if (!isNaN(ts)) {
+            el.innerText = formatLocalTime(ts) + '（' + formatDaysAgo(ts) + '）';
+        }
+    });
+}
+
+updateAllTimestamps();
 </script>
 {% endblock %}

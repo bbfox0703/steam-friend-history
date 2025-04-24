@@ -27,9 +27,20 @@
 
 	{% block extra_script %}
 	<script>
+	function getPreferredLang() {
+		const langs = navigator.languages || [navigator.language || 'en'];
+		for (const lang of langs) {
+			const l = lang.toLowerCase();
+			if (l.includes('zh-tw')) return 'zh-TW';
+			if (l.includes('ja')) return 'ja';
+		}
+		return 'en';
+	}
+	document.documentElement.lang = getPreferredLang();
+
 	function formatLocalTime(ts) {
 		const date = new Date(ts * 1000);
-		return date.toLocaleString('zh-TW', {
+		return date.toLocaleString(document.documentElement.lang, {
 			year: 'numeric',
 			month: 'numeric',
 			day: 'numeric',

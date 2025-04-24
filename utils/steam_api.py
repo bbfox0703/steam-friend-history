@@ -2,6 +2,7 @@ import os
 import json
 import requests
 import time
+import functools
 from datetime import datetime
 from dotenv import load_dotenv
 
@@ -14,6 +15,7 @@ HISTORY_PATH = './database/name_history.json'
 CHANGELOG_PATH = './database/friend_changes.json'
 BACKUP_DIR = './backups'
 
+print = functools.partial(print, flush=True)
 
 def fetch_friend_list():
     url = f"https://api.steampowered.com/ISteamUser/GetFriendList/v1/?key={API_KEY}&steamid={STEAM_ID}&relationship=friend"

@@ -44,7 +44,6 @@ def fetch_friend_list():
         raise Exception(f"Steam API Error: {response.status_code} {response.text}")
     return response.json().get('friendslist', {}).get('friends', [])
 
-
 def fetch_friend_profiles(steam_ids):
     if not steam_ids:
         return {}
@@ -74,7 +73,6 @@ def fetch_friend_profiles(steam_ids):
 
     return result
 
-
 def try_restore_from_backup(sid, fields=("persona_name", "avatar"), lookback=10):
     files = sorted(
         [f for f in os.listdir(BACKUP_DIR) if f.startswith("friends_") and f.endswith(".json")],
@@ -93,19 +91,18 @@ def try_restore_from_backup(sid, fields=("persona_name", "avatar"), lookback=10)
             pass
     return {}
 
-
 def get_friend_data():
     if not os.path.exists(DB_PATH):
         return []
     with open(DB_PATH, 'r') as f:
         return json.load(f)
 
-
 def save_friend_data(friend_list):
     os.makedirs(os.path.dirname(DB_PATH), exist_ok=True)
-    with open(DB_PATH, 'w') as f:
+    tmp_path = DB_PATH + ".tmp"
+    with open(tmp_path, 'w') as f:
         json.dump(friend_list, f, indent=2)
-
+    os.replace(tmp_path, DB_PATH)  # ✅ 原子替換，避免讀到寫到一半的檔案
 
 def backup_friend_data(friend_list):
     os.makedirs(BACKUP_DIR, exist_ok=True)
@@ -114,19 +111,16 @@ def backup_friend_data(friend_list):
     with open(path, 'w') as f:
         json.dump(friend_list, f, indent=2)
 
-
 def load_json(path):
     if not os.path.exists(path):
         return {}
     with open(path, 'r') as f:
         return json.load(f)
 
-
 def save_json(path, data):
     os.makedirs(os.path.dirname(path), exist_ok=True)
     with open(path, 'w') as f:
         json.dump(data, f, indent=2)
-
 
 def update_friend_list():
     friend_list = fetch_friend_list()

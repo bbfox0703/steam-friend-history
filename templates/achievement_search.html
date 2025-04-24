@@ -29,6 +29,11 @@
 
 {% block extra_script %}
 <script>
+const i18n = {
+    selectPrompt: "{{ _('-- 選擇一款遊戲 --') }}",
+    loadFail: "⚠️ {{ _('載入失敗，請稍後再試') }}",
+};
+
 function getPreferredSteamLang() {
     const langs = navigator.languages || [navigator.language || 'en'];
     for (const lang of langs) {
@@ -52,7 +57,7 @@ fetch("/cached-games?lang=" + getPreferredSteamLang())
         const loadingMsg = document.getElementById("loadingMessage");
 
         function renderOptions(keyword = "") {
-            select.innerHTML = '<option value="">-- 選擇一款遊戲 --</option>';
+            select.innerHTML = `<option value="">${i18n.selectPrompt}</option>`;
             games.forEach(g => {
                 if (g.name.toLowerCase().includes(keyword.toLowerCase())) {
                     const opt = document.createElement("option");
@@ -81,7 +86,7 @@ fetch("/cached-games?lang=" + getPreferredSteamLang())
     })
     .catch(err => {
         const select = document.getElementById("selectAppid");
-        select.innerHTML = '<option disabled selected>⚠️ 載入失敗，請稍後再試</option>';
+        select.innerHTML = `<option disabled selected>${i18n.loadFail}</option>`;
         console.error("載入 cached-games 失敗：", err);
     });
 

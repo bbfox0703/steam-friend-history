@@ -23,20 +23,6 @@ STORE_LANG_MAP = {
     "japanese": "japanese"
 }
 
-def get_steam_level(steamid):
-    url = f"https://api.steampowered.com/IPlayerService/GetSteamLevel/v1/"
-    params = {
-        "key": API_KEY,
-        "steamid": steamid
-    }
-    try:
-        res = requests.get(url, params=params)
-        data = res.json()
-        return data.get("response", {}).get("player_level", None)
-    except Exception as e:
-        print(f"⚠️ 無法取得 {steamid} 的等級資訊：{e}")
-        return None
-
 def fetch_friend_list():
     url = f"https://api.steampowered.com/ISteamUser/GetFriendList/v1/?key={API_KEY}&steamid={STEAM_ID}&relationship=friend"
     response = requests.get(url)

@@ -171,8 +171,7 @@ def update_friend_list():
             'profile_url': profile.get('profileurl', f'https://steamcommunity.com/profiles/{sid}'),
             'country_code': profile.get('loccountrycode', '??'),
             'lastlogoff': profile.get('lastlogoff'),
-            'personastate': profile.get('personastate'),
-            'level': get_steam_level(sid)  # ✅ 新增等級資訊
+            'personastate': profile.get('personastate')
         }
 
         if enriched['persona_name'] == '' or enriched['avatar'] == '':

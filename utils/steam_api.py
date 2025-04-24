@@ -26,7 +26,7 @@ STORE_LANG_MAP = {
 def get_steam_level(steamid):
     url = f"https://api.steampowered.com/IPlayerService/GetSteamLevel/v1/"
     params = {
-        "key": STEAM_API_KEY,
+        "key": API_KEY,
         "steamid": steamid
     }
     try:

@@ -508,7 +508,18 @@ def achievement_trend(appid):
     try:
         achievements = steam_api.fetch_achievements(appid)
     except Exception as e:
-        return render_template("achievement_trend.html", appid=appid, error=str(e), game_name=game_name)
+        msg = str(e)
+        if "no stats" in msg:
+            msg = "⚠️ 該遊戲沒有成就資料"
+        return render_template("achievement_trend.html",
+                               appid=appid,
+                               error=msg,
+                               game_name=game_name,
+                               header_image=header_image,
+                               data=[],
+                               total=0,
+                               unlocked=0,
+                               mode="day")
 
     timeline = []
     for a in achievements:

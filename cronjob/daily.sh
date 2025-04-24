@@ -9,8 +9,11 @@ export PYTHONPATH="/app"
 # 切換到專案根目錄
 cd /app
 
-# 每天凌晨 3:00 存長期備份
-cp /app/database/friends.json /app/backups/daily_$(date +'%Y%m%d').json
+# 每天凌晨存長期備份
+cp /app/database/friends.json /app/backups/daily_friends_$(date +'%Y%m%d').json
+cp /app/database/friend_changes.json.json /app/backups/daily_friend_changes_$(date +'%Y%m%d').json
+cp /app/database/name_history.json.json /app/backups/daily_name_history_$(date +'%Y%m%d').json
+cp /app/database/game_titles.json /app/backups/daily_game_titles_$(date +'%Y%m%d').json
 
 # 刪除 30 天以前的 daily 備份
 find /app/backups/ -name "daily_*.json" -mtime +30 -delete

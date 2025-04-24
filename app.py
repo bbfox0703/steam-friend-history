@@ -363,7 +363,7 @@ def filter_friends():
     return render_template(
         'filter.html',
         friends=friends,
-        status_map=STATUS_MAP,
+        status_map=get_status_map(),
         all_countries=all_countries
     )
 

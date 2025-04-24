@@ -4,21 +4,24 @@
 
 {% block content %}
 <h2>查詢 Steam 遊戲成就趨勢</h2>
-<form method="get" action="/achievement">
+<form id="appidForm" method="get" action="/achievement">
     <label for="appid">請輸入 AppID：</label>
     <input type="text" name="appid" id="appid" required placeholder="例如 3123410">
     <button type="submit">查詢</button>
 
+    <p id="manualLoading" style="display:none; color: green;">⏳ 正在查詢成就資料，請稍候...</p>
+
     <hr>
 
-    <label for="selectAppid">或從已擁有的遊戲中設搜尋條件：</label>
-    <p style="font-size: 0.9em; color: gray;">選擇後會自動跳轉至成就查詢頁面，請耐心等Steam回應</p>
+    <label for="selectAppid">或從已擁有的遊戲中搜尋：</label>
+    <p style="font-size: 0.9em; color: gray;">選擇後會自動跳轉至成就查詢頁面，請耐心等候 Steam 回應。</p>
 
     <input type="text" id="gameSearch" placeholder="輸入關鍵字搜尋遊戲..." style="width:100%; padding:5px; margin-bottom: 8px;">
     <select id="selectAppid" style="width:100%;">
         <option selected disabled>🔄 載入遊戲列表中...</option>
     </select>
     <div id="coverPreview" style="margin-top: 10px;"></div>
+    <p id="loadingMessage" style="display:none; color: green;">⏳ 正在查詢成就資料，請稍候...</p>
 </form>
 
 <script>
@@ -27,7 +30,7 @@ fetch("/cached-games")
     .then(games => {
         const select = document.getElementById("selectAppid");
         const search = document.getElementById("gameSearch");
-        const preview = document.getElementById("coverPreview");
+        const loadingMsg = document.getElementById("loadingMessage");
 
         function renderOptions(keyword = "") {
             select.innerHTML = '<option value="">-- 選擇一款遊戲 --</option>';
@@ -50,6 +53,9 @@ fetch("/cached-games")
         select.addEventListener("input", function () {
             const selected = games.find(g => g.appid === this.value);
             if (selected) {
+                select.disabled = true;
+                search.disabled = true;
+                loadingMsg.style.display = "block";
                 window.location.href = `/achievement/${this.value}?lang=zh-tw`;
             }
         });
@@ -59,5 +65,10 @@ fetch("/cached-games")
         select.innerHTML = '<option disabled selected>⚠️ 載入失敗，請稍後再試</option>';
         console.error("載入 cached-games 失敗：", err);
     });
+
+// 手動查詢 AppID 顯示 loading
+document.getElementById("appidForm").addEventListener("submit", function () {
+    document.getElementById("manualLoading").style.display = "block";
+});
 </script>
 {% endblock %}

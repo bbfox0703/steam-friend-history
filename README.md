@@ -97,7 +97,7 @@ Steam帳號ID:
 前往網站：https://steamid.io/  
 輸入你的 Steam 自訂 ID 或個人頁面網址  
 會顯示包括：
-- SteamID64
+- SteamID64 <== 此為要的ID
 - SteamID3
 - SteamID
 - CustomURL 等資訊

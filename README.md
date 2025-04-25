@@ -60,9 +60,10 @@ cp .env.example .env
 vi .env
 ```
 
-### 3.1 修改 .env 的API KEY及ID，填入Steam API KEY、和Steam帳號的64位元ID 76561xxxxxxxxxxxx
+### 3.1 修改 .env 的API KEY及ID {#enter_id}
+填入Steam API KEY、和Steam帳號的64位元ID 76561xxxxxxxxxxxx  
 Steam api key: https://steamcommunity.com/dev/apikey  
-**好友列表、遊戲資料如未公開，則無法取得資料且有可能報錯**
+**好友列表、遊戲資料如未公開，則無法取得資料且有可能報錯**  
 
 ### 3.2 修改 docker-compose.yml 的 DNS 設定，請調整成自己環境的設置
 
@@ -161,7 +162,8 @@ cd steam-friend-history
 cp .env.example .env
 vi .env
 ```
-### 接上方的 Raspberry Pi 5步驟的 3.1 修改 .env 的API KEY及ID.....
+### 接上方的 Raspberry Pi 5步驟的 3.1
+[跳到該處](#entry_id)
   
   
 ## 🛠️ Windows WSL安裝方法未完成版 (使用Windwos 11 Home)

@@ -288,8 +288,9 @@ docker exec -it steam-friend-history-web-1 cat /etc/cron.d/steam-friend-cron
   
   
 ## 如何調整好友資料背景更新頻率
-修改 cronjob 資料夾下的 steam-friend-cron 第一行:
-\*\/10 代表每10分鐘一次，調整完後存檔、重起 docker
+修改 cronjob 資料夾下的 steam-friend-cron 第一行:  
+\*\/10 代表每10分鐘一次，調整完後存檔、重起 docker  
+其它批次工作的時間，也可在這調整
 ```bash
 */10 * * * * root /app/cronjob/update.sh >> /var/log/cron_exec.log 2>&1
 0 * * * * root echo "✅ Ping cron at $(date)" >> /var/log/cron_exec.log

@@ -155,10 +155,13 @@ def update_friend_list():
             'personastate': profile.get('personastate')
         }
 
-        important_fields = ['persona_name', 'avatar', 'lastlogoff', 'personastate']
+        important_fields = ['persona_name', 'avatar', 'lastlogoff', 'personastate', 'country_code']
 
         # 判斷真正缺失的欄位（None 或 空字串）
-        missing_keys = [k for k in important_fields if enriched.get(k) is None or enriched.get(k) == '']
+        missing_keys = [
+            k for k in important_fields
+            if enriched.get(k) is None or enriched.get(k) == '' or (k == 'country_code' and enriched.get(k) == '??')
+        ]
 
         if missing_keys:
             enriched['incomplete'] = True

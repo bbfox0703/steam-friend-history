@@ -6,17 +6,18 @@
 <h2>{{ _('好友狀態看板') }}</h2>
 
 <div style="margin-bottom: 1em;">
-	<form method="get" style="margin-bottom: 1em;">
-		<label>
-			<input type="checkbox" name="online_only" value="on" onchange="this.form.submit()" {% if show_online_only %}checked{% endif %}>
-			{{ _('只顯示線上好友') }}
-		</label>&nbsp;&nbsp;
-		<label>
-		<input type="checkbox" id="auto-refresh-toggle" checked>
-		{{ _('每10分鐘自動更新') }}
-		</label>		
-	</form>
+  <form method="get" style="display: flex; gap: 1.5em; flex-wrap: wrap; align-items: center;">
+    <label>
+      <input type="checkbox" name="online_only" value="on" onchange="this.form.submit()" {% if show_online_only %}checked{% endif %}>
+      {{ _('只顯示線上好友') }}
+    </label>
+    <label>
+      <input type="checkbox" id="auto-refresh-toggle" checked>
+      {{ _('每10分鐘自動更新') }}
+    </label>
+  </form>
 </div>
+
 <div class="status-grid">
     {% for f in friends %}
     <div class="status-card {{ 'online' if f.personastate != 0 else 'offline' }}">

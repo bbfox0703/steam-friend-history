@@ -99,7 +99,7 @@ docker ps
 ```bash
 docker exec -it steam-friend-history-web-1 /bin/bash
 cd /app
-PYTHONPATH="." python3 utils/cache_games.py
+PYTHONPATH="." python3 utils/cache_games.py --lang all --sleep 1
 ```
 沒問題的話會開始執行  
 ![Cache game](./docs/cache_game.png)

@@ -5,55 +5,79 @@
 {% block content %}
 <h2>{{ _('Steam 等級走勢') }}</h2>
 
-<div class="chart-wrapper">
-  <canvas id="levelChart" width="1000" height="400"></canvas>
+<div class="toggle-buttons" style="margin-bottom: 1em;">
+  <span>{{ _('顯示方式：') }}</span>
+  <a href="?mode=day" class="{{ 'active' if mode == 'day' else '' }}">{{ _('日') }}</a> |
+  <a href="?mode=month" class="{{ 'active' if mode == 'month' else '' }}">{{ _('月') }}</a> |
+  <a href="?mode=year" class="{{ 'active' if mode == 'year' else '' }}">{{ _('年') }}</a>
 </div>
+
+<div class="chart-wrapper">
+  <canvas id="levelChart" height="400"></canvas>
+</div>
+{% endblock %}
+
+{% block extra_head %}
+<style>
+.chart-wrapper {
+  width: 100%;
+  overflow-x: auto;
+}
+.chart-wrapper canvas {
+  min-width: 600px;
+  max-width: 100%;
+}
+.toggle-buttons a {
+  margin: 0 0.3em;
+  text-decoration: none;
+}
+.toggle-buttons .active {
+  font-weight: bold;
+  color: red;
+}
+</style>
 {% endblock %}
 
 {% block extra_script %}
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-  const labels = {{ labels | tojson }};
-  const data = {{ data | tojson }};
+const labels = {{ labels | tojson }};
+const data = {{ data | tojson }};
 
-  if (labels.length > 0 && data.length > 0) {
-    const ctx = document.getElementById('levelChart').getContext('2d');
-    new Chart(ctx, {
-      type: 'line',
-      data: {
+const ctx = document.getElementById('levelChart').getContext('2d');
+new Chart(ctx, {
+    type: 'line',
+    data: {
         labels: labels,
         datasets: [{
-          label: '{{ _("Steam 等級") }}',
-          data: data,
-          fill: false,
-          borderColor: 'rgba(255, 99, 132, 1)',
-          backgroundColor: 'rgba(255, 99, 132, 0.2)',
-          tension: 0.2,
-          pointRadius: 3
+            label: '{{ _("Steam 等級") }}',
+            data: data,
+            fill: false,
+            borderColor: 'rgba(255, 99, 132, 1)',
+            backgroundColor: 'rgba(255, 99, 132, 0.2)',
+            tension: 0.3,
+            pointRadius: 4
         }]
-      },
-      options: {
+    },
+    options: {
         responsive: true,
         maintainAspectRatio: false,
         scales: {
-          y: {
-            beginAtZero: false,
-            title: {
-              display: true,
-              text: '{{ _("等級") }}'
+            y: {
+                beginAtZero: false,
+                title: {
+                    display: true,
+                    text: '{{ _("等級") }}'
+                }
+            },
+            x: {
+                title: {
+                    display: true,
+                    text: '{{ _("日期") }}'
+                }
             }
-          },
-          x: {
-            title: {
-              display: true,
-              text: '{{ _("日期") }}'
-            }
-          }
         }
-      }
-    });
-  } else {
-    document.querySelector(".chart-wrapper").innerHTML = "<p>{{ _('目前尚無等級統計資料') }}</p>";
-  }
+    }
+});
 </script>
 {% endblock %}

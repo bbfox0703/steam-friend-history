@@ -1,4 +1,4 @@
-![Game search](./docs/Stem Friend Info.png)
+![Game search]("./docs/Steam Friend Info.png")
 ### 目前大部份皆可執行，部份未驗證
 
 # Steam Friend

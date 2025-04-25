@@ -1,0 +1,6 @@
+#!/bin/bash
+docker compose down
+git checkout dev
+git pull
+COMPOSE_BAKE=true docker compose build
+docker compose up -d

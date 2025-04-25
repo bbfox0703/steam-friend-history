@@ -451,7 +451,7 @@ def status_board():
     total_offline = len(friends) - total_online
 
     return render_template("status_board.html",
-                           friends=friends,
+                           friends=sorted_friends,
                            status_map=get_status_map(),
                            show_online_only=show_online_only,
                            total_online=total_online,

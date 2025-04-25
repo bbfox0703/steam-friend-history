@@ -112,7 +112,7 @@ PYTHONPATH="." python3 utils/cache_games.py --lang all --sleep 1
   
   
   
-# VMware下 Debian OS 內的安裝方法：
+# VMware下 Debian OS 內的安裝方法範例：
 
 ### 使用root權限，先把使用者加到 sudo group (例子中帳號為 admin01)：
 ```bash

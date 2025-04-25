@@ -1,6 +1,6 @@
-# 目前大部份皆可執行，部份未驗證
+### 目前大部份皆可執行，部份未驗證
 
-# Steam Friend History
+# Steam Friend
 
 一個輕量級、可在Raspberry Pi 5上跑的系統，可記錄自己的Steam好友列表與變化。  
 Steam api key可不用外流，自己用就好。  

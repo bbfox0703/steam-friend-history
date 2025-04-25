@@ -107,7 +107,9 @@ PYTHONPATH="." python3 utils/cache_games.py --lang all --sleep 1
 - 第二次執行時，只更新缺少的部份
 - 遊戲名稱如果變更，系統不會跟著改變
   
-## VMware Debian 安裝方法：
+  
+  
+## VMware下 Debian OS 內的安裝方法：
 
 ### 使用root權限，先把使用者加到 sudo group (例子中帳號為 admin01)：
 ```bash

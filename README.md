@@ -1,7 +1,7 @@
 ![Steam Friend Info](./docs/Steam%20Friend%20Info.png)
 # 🎮 Steam Friend Info（自架版）
 
-一個輕量級、可在 Raspberry Pi 5 或 Linux VM 上運行的 Steam 好友記錄分析系統，使用 Docker 可一鍵部署。所有資料皆保存在本地端，無需將 Steam API Key 上傳到第三方服務，適合重視隱私的用戶。
+一個輕量級、可在 Raspberry Pi 5 或 Linux VM 上運行的 Steam 好友記錄分析系統，使用 Docker 可輕易部署。所有資料皆保存在本地端，無需將 Steam API Key 上傳到第三方服務，適合重視隱私的用戶。
 
 ---
 

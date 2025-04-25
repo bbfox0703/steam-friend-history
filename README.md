@@ -16,7 +16,6 @@
 - 🐧 **可執行於 Raspberry Pi 5 / Linux 虛擬機（Debian / Ubuntu）**
 - 🐳 **使用 Docker 快速部署，可運行於Raspberry Pi 5 (使用SSD裝置)**
 - 🔄 **每日 1:05 AM 快取 Steam 遊戲列表（可手動執行）**
-- 🌐 **多語系支援：繁體中文 / 日文 / 英文（根據瀏覽器語言自動切換）**
   
 ## ❌ 不支援功能
 - 多Steam帳號

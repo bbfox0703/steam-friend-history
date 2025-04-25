@@ -103,6 +103,9 @@ PYTHONPATH="." python3 utils/cache_games.py --lang all --sleep 1
 ```
 沒問題的話會開始執行  
 ![Cache game](./docs/cache_game.png)
+- 一個遊戲要花約 10~15 秒，第一次執行一定要讓它全跑完，否則不會寫入資料
+- 第二次執行時，只更新缺少的部份
+- 遊戲名稱如果變更，系統不會跟著改變
   
 ## VMware Debian 安裝方法：
 

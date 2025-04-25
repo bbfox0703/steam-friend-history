@@ -91,7 +91,7 @@ Steam帳號ID:
 → 後面這串就是 SteamID64  
   
 或是：  
-如果有註冊SteamDB，SteamDB個人頁面也有  
+如果有註冊SteamDB https://steamdb.info/ ，SteamDB個人頁面也有  
   
 或是：  
 前往網站：https://steamid.io/  

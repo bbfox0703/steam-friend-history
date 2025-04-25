@@ -4,6 +4,7 @@
 
 {% block content %}
 <h2>{{ _('Steam 等級走勢') }}</h2>
+
 <div class="chart-wrapper">
   <canvas id="levelChart" width="1000" height="400"></canvas>
 </div>
@@ -12,23 +13,22 @@
 {% block extra_script %}
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-fetch("/level-history")
-  .then(res => res.json())
-  .then(data => {
-    const labels = Object.keys(data);
-    const values = Object.values(data);
+  const labels = {{ labels | tojson }};
+  const data = {{ data | tojson }};
 
-    new Chart(document.getElementById("levelChart").getContext("2d"), {
-      type: "line",
+  if (labels.length > 0 && data.length > 0) {
+    const ctx = document.getElementById('levelChart').getContext('2d');
+    new Chart(ctx, {
+      type: 'line',
       data: {
         labels: labels,
         datasets: [{
           label: '{{ _("Steam 等級") }}',
-          data: values,
-          fill: true,
-          borderColor: "rgba(255, 99, 132, 1)",
-          backgroundColor: "rgba(255, 99, 132, 0.2)",
-          tension: 0.3,
+          data: data,
+          fill: false,
+          borderColor: 'rgba(255, 99, 132, 1)',
+          backgroundColor: 'rgba(255, 99, 132, 0.2)',
+          tension: 0.2,
           pointRadius: 3
         }]
       },
@@ -37,7 +37,7 @@ fetch("/level-history")
         maintainAspectRatio: false,
         scales: {
           y: {
-            beginAtZero: true,
+            beginAtZero: false,
             title: {
               display: true,
               text: '{{ _("等級") }}'
@@ -52,6 +52,8 @@ fetch("/level-history")
         }
       }
     });
-  });
+  } else {
+    document.querySelector(".chart-wrapper").innerHTML = "<p>{{ _('目前尚無等級統計資料') }}</p>";
+  }
 </script>
 {% endblock %}

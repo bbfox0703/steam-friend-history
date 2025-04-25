@@ -109,6 +109,8 @@ PYTHONPATH="." python3 utils/cache_games.py --lang all --sleep 1
 - 一個遊戲要花約 10~15 秒，第一次執行一定要讓它全跑完，否則不會寫入資料
 - 第二次執行時，只更新缺少的部份
 - 遊戲名稱如果變更，系統不會跟著改變
+遊戲清單更新後用途：在要看成就走勢時，會列出遊戲供選擇，不然就要自行輸入appid
+![Game search](./docs/game_search.png)
   
   
   

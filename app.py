@@ -450,12 +450,15 @@ def status_board():
     total_online = sum(1 for f in friends if f.get("personastate", 0) != 0)
     total_offline = len(friends) - total_online
 
+    update_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+
     return render_template("status_board.html",
                            friends=sorted_friends,
                            status_map=get_status_map(),
                            show_online_only=show_online_only,
                            total_online=total_online,
-                           total_offline=total_offline)
+                           total_offline=total_offline,
+                           update_time=update_time)
 
 @app.route('/backups')
 def backups():

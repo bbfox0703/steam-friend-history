@@ -22,7 +22,9 @@
         ✅ {{ _('線上好友') }}：{{ total_online }}｜{{ _('離線好友') }}：{{ total_offline }}
     </label>
 </div>
-
+<div style="margin-bottom: 1em; font-size: 0.9em; color: #666;">
+    {{ _('最後更新時間：') }} <span id="last-updated">{{ update_time }}</span>
+</div>
 <div class="status-grid">
     {% for f in friends %}
     <div class="status-card {{ 'online' if f.personastate != 0 else 'offline' }}">

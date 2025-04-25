@@ -1,6 +1,7 @@
 #!/bin/bash
 
-echo "🔍 Working dir: $(pwd)" >> /var/log/cron_exec.log
+# 記錄開始時間
+echo "[$(date '+%Y-%m-%d %H:%M:%S')] 🔍 Working dir: $(pwd)" >> /var/log/cron_exec.log
 
 # Flask 更新資料
 curl -s http://localhost:3000/update

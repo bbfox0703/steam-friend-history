@@ -15,7 +15,7 @@
 - 💾 **自動備份 / ZIP 匯出 / 快照保留**
 - 🐧 **可執行於 Raspberry Pi 5 / Linux 虛擬機（Debian / Ubuntu）**
 - 🐳 **使用 Docker 快速部署，可運行於Raspberry Pi 5 (使用SSD裝置)**
-- 🔄 **每日 1:05 AM 快取 Steam 遊戲列表（可手動執行）**
+- 🔄 **每日 11:05 AM 快取 Steam 遊戲列表（可手動執行）**
   
 ## ❌ 不支援功能
 - 多Steam帳號

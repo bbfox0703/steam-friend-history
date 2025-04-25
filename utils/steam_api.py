@@ -59,7 +59,7 @@ def fetch_friend_profiles(steam_ids):
 
     return result
 
-def try_restore_from_backup(sid, fields=("persona_name", "avatar"), lookback=10):
+def try_restore_from_backup(sid, fields=("persona_name", "avatar", "lastlogoff", "personastate"), lookback=10):
     files = sorted(
         [f for f in os.listdir(BACKUP_DIR) if f.startswith("friends_") and f.endswith(".json")],
         reverse=True
@@ -71,7 +71,7 @@ def try_restore_from_backup(sid, fields=("persona_name", "avatar"), lookback=10)
                 data = json.load(f)
                 for entry in data:
                     if entry.get("steamid") == sid:
-                        if all(entry.get(k) is not None for k in fields):
+                        if all(entry.get(k) is not None and entry.get(k) != '' for k in fields):
                             return {k: entry[k] for k in fields if k in entry}
         except Exception as e:
             print(f"⚠️ 無法從備份 {filename} 讀取 {sid}：{e}")
@@ -155,20 +155,21 @@ def update_friend_list():
             'personastate': profile.get('personastate')
         }
 
-        # 🔍 判斷缺少欄位的情況（不只是 name/avatar）
-        missing_keys = [k for k in ['persona_name', 'avatar', 'lastlogoff', 'personastate'] if not enriched.get(k)]
+        important_fields = ['persona_name', 'avatar', 'lastlogoff', 'personastate']
+
+        # 判斷真正缺失的欄位（None 或 空字串）
+        missing_keys = [k for k in important_fields if enriched.get(k) is None or enriched.get(k) == '']
+
         if missing_keys:
             enriched['incomplete'] = True
-            # ✅ 嘗試從舊備份補齊這些欄位
             restored = try_restore_from_backup(sid, fields=missing_keys)
             if restored:
                 enriched.update(restored)
                 enriched['restored'] = True
 
-                # 如果補齊成功，確認是否已無缺
-                still_missing = [k for k in ['persona_name', 'avatar', 'lastlogoff', 'personastate'] if not enriched.get(k)]
+                still_missing = [k for k in important_fields if enriched.get(k) is None or enriched.get(k) == '']
                 if not still_missing:
-                    enriched.pop('incomplete', None)  # 補齊成功，取消標記
+                    enriched.pop('incomplete', None)
 
         enriched_friends.append(enriched)
 

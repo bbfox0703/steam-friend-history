@@ -1,6 +1,7 @@
 services:
   web:
     build: .
+    container_name: steam-friend-history-web-1
     ports:
       - "3000:3000"
     volumes:
@@ -11,10 +12,15 @@ services:
     env_file:
       - .env
     environment:
-      - TZ=Asia/Taipei      
+      TZ: Asia/Taipei     
     dns:
       - 192.168.1.3
       - 192.168.1.2
       - 1.1.1.1
       - 9.9.9.9
     restart: unless-stopped
+    healthcheck: 
+      test: ["CMD", "curl", "-f", "http://localhost:3000/"]
+      interval: 1m30s
+      timeout: 10s
+      retries: 3    

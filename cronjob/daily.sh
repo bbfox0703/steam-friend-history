@@ -1,7 +1,7 @@
 #!/bin/bash
 
-echo "🕒 daily.sh started at $(date)" >> /var/log/cron_exec.log
-echo "🔍 daily cron: Working dir: $(pwd)" >> /var/log/cron_exec.log
+echo "[$(date '+%Y-%m-%d %H:%M:%S')] 🕒 daily.sh started at $(date)" >> /var/log/cron_exec.log
+echo "[$(date '+%Y-%m-%d %H:%M:%S')] 🔍 daily cron: Working dir: $(pwd)" >> /var/log/cron_exec.log
 
 # 明確設定 PYTHONPATH
 export PYTHONPATH="/app"
@@ -19,5 +19,5 @@ cp /app/database/game_titles.json /app/backups/daily_game_titles_$(date +'%Y%m%d
 find /app/backups/ -name "daily_*.json" -mtime +30 -delete
 
 # 快取 Steam 遊戲清單（支援繁中、日文、英文）
-echo "[$(date)] 🎮 Updating game title cache (all languages)..." >> /var/log/cron_exec.log
+echo "[$(date '+%Y-%m-%d %H:%M:%S')]  🎮 Updating game title cache (all languages)..." >> /var/log/cron_exec.log
 /usr/local/bin/python3 -m utils.cache_games --lang all --sleep 1 >> /var/log/cron_exec.log 2>&1

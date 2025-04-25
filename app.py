@@ -14,6 +14,7 @@ import os
 import io
 import zipfile
 import operator
+import functools
 from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
 from collections import defaultdict, Counter
@@ -22,6 +23,8 @@ from collections import defaultdict, Counter
 load_translations()
 
 tz = ZoneInfo("Asia/Taipei")
+
+print = functools.partial(print, flush=True)
 
 # 國碼對照英文名稱表（完整）
 country_name_map = {
@@ -612,7 +615,8 @@ def level_trend():
 
     labels = sorted(level_data.keys())
     levels = [level_data[d] for d in labels]
-
+    print("Labels:", labels)
+    print("Data:", levels)
     return render_template("level_trend.html", data=levels, labels=labels)
          
 @app.route("/level-history")

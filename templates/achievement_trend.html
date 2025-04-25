@@ -49,7 +49,12 @@
     <h2>{{ game_name }}（AppID: {{ appid }}）{{ _('的成就達成趨勢圖') }}</h2>
 </div>
 
-<p>{{ _('已達成') }} {{ unlocked }} / {{ total }} {{ _('個成就') }}</p>
+<p>
+    {{ _('已達成') }} {{ unlocked }} / {{ total }} {{ _('個成就') }}
+    {% if playtime_minutes %}
+    ｜🎮 {{ _('總遊玩時間：') }}{{ '%.1f' | format(playtime_minutes / 60) }} 小時
+    {% endif %}
+</p>
 
 <div class="toggle-buttons">
     <span>{{ _('顯示方式：') }}</span>

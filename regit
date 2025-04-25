@@ -1,0 +1,6 @@
+docker compose down
+#忽略本地變更：
+#git reset --hard
+git pull
+COMPOSE_BAKE=true docker compose build
+docker compose up -d

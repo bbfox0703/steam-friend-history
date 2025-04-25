@@ -85,7 +85,24 @@ http://伺服器ip:3000
 
 例如ip是192.168.1.100的話：
 http://192.168.1.100:3000
+
+## 手動更新遊戲清單
+安裝完後，系統會在1:05AM執行遊戲清單更新，如果你裝置的系統不是整天執行，而要取得遊戲清單的話，可手動執行。
+### 取得 container name
+```bash
+docker ps
+```
+![docker ps](./docs/docker_ps.png)
   
+### 執行 docker bash
+更改 container name 為你系統上的名字
+```bash
+docker exec -it steam-friend-history-web-1 /bin/bash
+cd /app
+PYTHONPATH="." python3 utils/cache_games.py
+```
+沒問題的話會開始執行  
+![Cache game](./docs/cache_game.png)
   
 ## VMware Debian 安裝方法：
 
@@ -137,9 +154,9 @@ cd steam-friend-history
 cp .env.example .env
 vi .env
 ```
-### 接上方的 Raspberry Pi 5步驟的 3.1
-
-
+### 接上方的 Raspberry Pi 5步驟的 3.1 修改 .env 的API KEY及ID.....
+  
+  
 ## 🛠️ Windows WSL安裝方法未完成版 (使用Windwos 11 Home)
 使用例如VMWare等Hypervisor、直接開VM裝Docker問題最少! 裝個Debian、Ubuntu VM應該都沒問題。  
   

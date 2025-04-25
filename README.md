@@ -26,20 +26,21 @@ Steam api key可不用外流，自己用就好。
 ## 圖例：好友趨勢圖
 ![好友趨勢圖](./docs/trend.png)
 ## 圖例：好友狀態看板 
-![好友狀態看板 ](./docs/status_board.png)
+![好友狀態看板](./docs/status_board.png)
 ## 圖例：變更記錄 
 從此對方再怎改，也不會改到認不得娘親
-![變更記錄 ](./docs/history.png)
+![變更記錄](./docs/history.png)
 ## 圖例：成就達成趨勢圖
-![成就達成趨勢圖 ](./docs/achievement_trend.png)
+![成就達成趨勢圖](./docs/achievement_trend.png)
 ### 需要輸入AppID
-![appid ](./docs/appid.png)
+![appid](./docs/appid.png)
 ---
 
-## 🛠️ 安裝方法 (使用Raspberry Pi 5)
+## 🛠️ 安裝方法 (使用Raspberry Pi 5 8GB版本)
 
 ### 1. 安裝 Docker
 ```bash
+cd
 curl -sSL https://get.docker.com | sudo sh
 sudo usermod -aG docker $USER
 newgrp docker
@@ -48,6 +49,9 @@ newgrp docker
 ### 2. Git Clone 或下載專案
 #### 此例為Git clone
 ```bash
+sudo apt update;sudo apt upgrade -y
+sudo apt install git -y
+cd
 git clone https://github.com/bbfox0703/steam-friend-history.git
 cd steam-friend-history
 cp .env.example .env
@@ -81,12 +85,66 @@ http://伺服器ip:3000
 
 例如ip是192.168.1.100的話：
 http://192.168.1.100:3000
+  
+  
+## VMware Debian 安裝方法：
 
-## 🛠️ WSL安裝方法 (不完全步驟 使用Windwos 11 Home)
+### 使用root權限，先把使用者加到 sudo group (例子中帳號為 admin01)：
+```bash
+su -
+usermod -aG sudo admin01
+```
+  
+### 以下使用一般使用者帳號 (有進sudo group) 權限執行 (要重新登入)：
+```bash
+sudo apt update;sudo apt upgrade -y
+sudo apt install open-vm-tools -y
+sudo apt install git curl -y
+cd
+curl -sSL https://get.docker.com | sudo sh
+sudo apt-get install -y uidmap
+dockerd-rootless-setuptool.sh install
+id -u
+```
+記下輸出數字，例如 1000
+
+```bash
+vi .bashrc
+```
+加入：  
+export PATH=/usr/bin:$PATH  
+export DOCKER_HOST=unix:///run/user/1000/docker.sock  
+  
+上面的 1000 是之前 id -u輸出的數字  
+
+```bash
+sudo loginctl enable-linger admin01
+source ~/.bashrc
+```
+  
+#### 測試 Docker 是否可用
+```bash
+docker version
+docker info
+docker run hello-world
+```
+![Hello Docker](./docs/hello_docker.png)
+  
+```bash
+cd
+git clone https://github.com/bbfox0703/steam-friend-history.git
+cd steam-friend-history
+cp .env.example .env
+vi .env
+```
+### 接上方的 Raspberry Pi 5步驟的 3.1
+
+
+## 🛠️ Windows WSL安裝方法未完成版 (使用Windwos 11 Home)
 使用例如VMWare等Hypervisor、直接開VM裝Docker問題最少! 裝個Debian、Ubuntu VM應該都沒問題。  
   
 需要安裝：WSL2  
-WSL要改的地方不少，例如cron jobs等，還有Python venv問題。  
+WSL要改的地方不少，例如cron jobs等，還有Python venv問題。這邊沒有說明。  
 
 ### WSL2 安裝
 使用管理員模式開啟命令提示字元 (cmd.exe)  

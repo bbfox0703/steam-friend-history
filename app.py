@@ -518,13 +518,22 @@ def achievement_trend(appid):
     else:
         lang = request.accept_languages.best_match(["zh-tw", "ja", "en"], default="en")
         steam_lang = lang_map.get(lang, "english")
-    
+
     game_info = fetch_game_info(appid, steam_lang)
     game_name = game_info["name"] or get_game_title(appid)
     header_image = game_info["header_image"]
-
-
     mode = request.args.get("mode", "day")
+
+    # 🔍 查詢總遊玩時間
+    playtime_minutes = 0
+    try:
+        owned_games = steam_api.fetch_owned_games()
+        for g in owned_games:
+            if str(g.get("appid")) == str(appid):
+                playtime_minutes = g.get("playtime_forever", 0)
+                break
+    except Exception as e:
+        print(f"⚠️ 無法取得遊玩時間: {e}")
 
     try:
         achievements = steam_api.fetch_achievements(appid)
@@ -540,7 +549,8 @@ def achievement_trend(appid):
                                data=[],
                                total=0,
                                unlocked=0,
-                               mode="day")
+                               mode="day",
+                               playtime_minutes=playtime_minutes)
 
     timeline = []
     for a in achievements:
@@ -560,9 +570,9 @@ def achievement_trend(appid):
                                data=[],
                                total=len(achievements),
                                unlocked=0,
-                               mode=mode)
+                               mode=mode,
+                               playtime_minutes=playtime_minutes)
 
-    # pandas 處理與補齊空白區間
     df = pd.DataFrame({"date": timeline})
     df["date"] = pd.to_datetime(df["date"])
 
@@ -579,7 +589,7 @@ def achievement_trend(appid):
 
     data = stat.to_dict(orient="records")
     total = len(achievements)
-    unlocked = sum(a.get("achieved", 0) for a in achievements)  
+    unlocked = sum(a.get("achieved", 0) for a in achievements)
 
     return render_template("achievement_trend.html",
                            appid=appid,
@@ -588,7 +598,8 @@ def achievement_trend(appid):
                            data=data,
                            total=total,
                            unlocked=unlocked,
-                           mode=mode)
+                           mode=mode,
+                           playtime_minutes=playtime_minutes)
                            
 @cached_games_bp.route("/cached-games")
 def cached_games():

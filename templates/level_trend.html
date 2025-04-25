@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+
+{% block title %}{{ _('Steam 等級走勢') }}{% endblock %}
+
+{% block content %}
+<h2>{{ _('Steam 等級走勢') }}</h2>
+<div class="chart-wrapper">
+  <canvas id="levelChart" width="1000" height="400"></canvas>
+</div>
+{% endblock %}
+
+{% block extra_script %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+fetch("/level-history")
+  .then(res => res.json())
+  .then(data => {
+    const labels = Object.keys(data);
+    const values = Object.values(data);
+
+    new Chart(document.getElementById("levelChart").getContext("2d"), {
+      type: "line",
+      data: {
+        labels: labels,
+        datasets: [{
+          label: '{{ _("Steam 等級") }}',
+          data: values,
+          fill: true,
+          borderColor: "rgba(255, 99, 132, 1)",
+          backgroundColor: "rgba(255, 99, 132, 0.2)",
+          tension: 0.3,
+          pointRadius: 3
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          y: {
+            beginAtZero: true,
+            title: {
+              display: true,
+              text: '{{ _("等級") }}'
+            }
+          },
+          x: {
+            title: {
+              display: true,
+              text: '{{ _("日期") }}'
+            }
+          }
+        }
+      }
+    });
+  });
+</script>
+{% endblock %}

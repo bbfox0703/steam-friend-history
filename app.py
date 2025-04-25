@@ -600,7 +600,32 @@ def achievement_trend(appid):
                            unlocked=unlocked,
                            mode=mode,
                            playtime_minutes=playtime_minutes)
-                           
+
+@app.route("/level-trend")
+def level_trend():
+    path = "./database/level_history.json"
+    if not os.path.exists(path):
+        return render_template("level_trend.html", data=[], labels=[])
+
+    with open(path, "r") as f:
+        level_data = json.load(f)
+
+    labels = sorted(level_data.keys())
+    levels = [level_data[d] for d in labels]
+
+    return render_template("level_trend.html", data=levels, labels=labels)
+         
+@app.route("/level-history")
+def level_history():
+    path = "./database/level_history.json"
+    if not os.path.exists(path):
+        return "❌ No level data yet", 404
+    with open(path, "r", encoding="utf-8") as f:
+        data = json.load(f)
+    # ⚡ 因為 level_history.json 是 dict，所以要轉成排序列表
+    history = sorted(data.items())  # [(date, level), ...]
+    return render_template("level_history.html", history=history)
+         
 @cached_games_bp.route("/cached-games")
 def cached_games():
     path = "./database/game_titles.json"

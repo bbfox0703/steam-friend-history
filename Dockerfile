@@ -7,7 +7,7 @@ RUN pip install -r requirements.txt
 
 # 安裝 cron + curl + supervisor + logrotate + ps
 RUN apt-get update && \
-    apt-get install -y cron curl supervisor logrotate procps tzdata && \
+    apt-get install -y cron curl supervisor logrotate procps tzdata jq && \
     rm -rf /var/lib/apt/lists/*	
 
 # 複製專案

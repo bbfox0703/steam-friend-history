@@ -606,18 +606,33 @@ def achievement_trend(appid):
 
 @app.route("/level-trend")
 def level_trend():
+    import pandas as pd
+
     path = "./database/level_history.json"
     if not os.path.exists(path):
-        return render_template("level_trend.html", data=[], labels=[])
+        return render_template("level_trend.html", data=[], labels=[], mode="day")
 
     with open(path, "r") as f:
-        level_data = json.load(f)
+        raw = json.load(f)
 
-    labels = sorted(level_data.keys())
-    levels = [level_data[d] for d in labels]
-    print("Labels:", labels)
-    print("Data:", levels)
-    return render_template("level_trend.html", data=levels, labels=labels)
+    mode = request.args.get("mode", "day")  # 預設為日
+    df = pd.DataFrame(list(raw.items()), columns=["date", "level"])
+    df["date"] = pd.to_datetime(df["date"])
+
+    if mode == "month":
+        df["period"] = df["date"].dt.to_period("M").astype(str)
+    elif mode == "year":
+        df["period"] = df["date"].dt.to_period("Y").astype(str)
+    else:
+        df["period"] = df["date"].dt.strftime("%Y-%m-%d")
+
+    stat = df.groupby("period")["level"].max().reset_index()
+    stat.columns = ["date", "level"]
+
+    labels = stat["date"].tolist()
+    data = stat["level"].tolist()
+
+    return render_template("level_trend.html", labels=labels, data=data, mode=mode)
          
 @app.route("/level-history")
 def level_history():

@@ -5,7 +5,7 @@
 {% block content %}
 <h2>{{ _('好友狀態看板') }}</h2>
 
-<div>
+<div style="margin-bottom: 1em;">
 	<form method="get" style="margin-bottom: 1em;">
 		<label>
 			<input type="checkbox" name="online_only" value="on" onchange="this.form.submit()" {% if show_online_only %}checked{% endif %}>
@@ -13,12 +13,10 @@
 		</label>
 	</form>
 
-	<div style="margin-bottom: 1em;">
 	  <label>
 		<input type="checkbox" id="auto-refresh-toggle" checked>
 		{{ _('每10分鐘自動更新') }}
 	  </label>
-	</div>
 </div>
 <div class="status-grid">
     {% for f in friends %}

@@ -118,5 +118,7 @@
   "Steam 等級走勢": "Steam Level Trend",
   "Steam 等級": "Steam Level",
   "Steam 等級紀錄": "Steam Level History",
-  "每10分鐘自動更新": "Refresh every 10 minutes"
+  "每10分鐘自動更新": "Refresh every 10 minutes",
+  "線上好友": "Online", 
+  "離線好友": "Offline"  
 }

@@ -447,7 +447,15 @@ def status_board():
     filtered = [f for f in friends if not show_online_only or f.get('personastate', 0) != 0]
     sorted_friends = sorted(filtered, key=sort_key)
 
-    return render_template('status_board.html', friends=sorted_friends, status_map=get_status_map(), show_online_only=show_online_only)
+    total_online = sum(1 for f in friends if f.get("personastate", 0) != 0)
+    total_offline = len(friends) - total_online
+
+    return render_template("status_board.html",
+                           friends=friends,
+                           status_map=status_map,
+                           show_online_only=show_online_only,
+                           total_online=total_online,
+                           total_offline=total_offline)
 
 @app.route('/backups')
 def backups():

@@ -85,6 +85,23 @@ vi .env
 Steam api key: https://steamcommunity.com/dev/apikey  
 **好友列表、遊戲資料如未公開，則無法取得資料且有可能報錯**  
 
+Steam帳號ID:  
+開啟你的 Steam 個人檔案（例如：https://steamcommunity.com/id/你的自訂ID 或 https://steamcommunity.com/profiles/數字ID）  
+如果是 https://steamcommunity.com/profiles/7656119XXXXXXXXXX  
+→ 後面這串就是 SteamID64  
+  
+或是：  
+如果有註冊SteamDB，SteamDB個人頁面也有  
+  
+或是：  
+前往網站：https://steamid.io/  
+輸入你的 Steam 自訂 ID 或個人頁面網址  
+會顯示包括：
+- SteamID64
+- SteamID3
+- SteamID
+- CustomURL 等資訊
+
 ### 3.2 修改 docker-compose.yml 的 DNS 設定，請調整成自己環境的設置
 
 ### 4. 建立docker映像檔：

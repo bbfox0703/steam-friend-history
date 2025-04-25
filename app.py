@@ -452,7 +452,7 @@ def status_board():
 
     return render_template("status_board.html",
                            friends=friends,
-                           status_map=status_map,
+                           status_map=status_map(),
                            show_online_only=show_online_only,
                            total_online=total_online,
                            total_offline=total_offline)

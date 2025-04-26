@@ -710,39 +710,50 @@ def game_playtime(appid):
     except Exception:
         playtime_data = {}
 
-    # 確保補滿所有日期，不跳日期
-    dates = sorted(playtime_data.keys())
-    if dates:
-        start_date = datetime.strptime(dates[0], '%Y-%m-%d')
-        end_date = datetime.strptime(dates[-1], '%Y-%m-%d')
-    else:
-        start_date = end_date = datetime.today()
+    # 過濾出有該 AppID 資料的日期
+    filtered_dates = []
+    for date, apps in playtime_data.items():
+        if str(appid) in apps:
+            filtered_dates.append(date)
 
-    date_list = []
-    current = start_date
-    while current <= end_date:
-        date_list.append(current.strftime('%Y-%m-%d'))
-        current += timedelta(days=1)
+    if filtered_dates:
+        start_date = datetime.strptime(min(filtered_dates), '%Y-%m-%d')
+        end_date = datetime.strptime(max(filtered_dates), '%Y-%m-%d')
+    else:
+        start_date = end_date = None
 
     daily_minutes = {}
     last_playtime = None
-    for date in date_list:
-        today_data = playtime_data.get(date, {})
-        today_playtime = today_data.get(str(appid))
 
-        if last_playtime is None:
-            diff = 0
-        elif today_playtime is None:
-            diff = 0
-        else:
-            diff = today_playtime - last_playtime
-            if diff < 0 or diff > 1440:
+    if start_date and end_date:
+        current = start_date
+        while current <= end_date:
+            date_str = current.strftime('%Y-%m-%d')
+            apps = playtime_data.get(date_str, {})
+            today_playtime = apps.get(str(appid))
+
+            if last_playtime is None:
                 diff = 0
+            elif today_playtime is None:
+                diff = 0
+            else:
+                diff = today_playtime - last_playtime
+                if diff < 0 or diff > 1440:
+                    diff = 0
 
-        daily_minutes[date] = diff
+            daily_minutes[date_str] = diff
 
-        if today_playtime is not None:
-            last_playtime = today_playtime
+            if today_playtime is not None:
+                last_playtime = today_playtime
+
+            current += timedelta(days=1)
+
+    # recent 30天資料（不管有沒有紀錄）
+    recent_daily_minutes = {}
+    today = datetime.today()
+    for i in range(30):
+        date = (today - timedelta(days=29 - i)).strftime('%Y-%m-%d')
+        recent_daily_minutes[date] = daily_minutes.get(date, 0)
 
     mode = request.args.get('mode', 'day')
 
@@ -769,6 +780,7 @@ def game_playtime(appid):
         appid=appid,
         game_name=game_name,
         daily_minutes=result,
+        recent_daily_minutes=recent_daily_minutes,
         mode=mode
     )
     

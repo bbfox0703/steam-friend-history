@@ -11,9 +11,11 @@
   </form>
 
   <div>
-    <label for="gameSearch">{{ _('或從持有遊戲中選擇：') }}</label>
-    <input type="text" id="gameSearch" placeholder="{{ _('搜尋遊戲...') }}" style="width: 300px; padding: 5px;">
-    <div id="searchResults" style="margin-top: 10px;"></div>
+    <label for="gameSelect">{{ _('或從持有遊戲中選擇：') }}</label>
+    <select id="gameSelect" style="width: 300px; padding: 5px;" disabled>
+      <option>{{ _('載入中...') }}</option>
+    </select>
+    <button id="selectButton" disabled>{{ _('查詢選取遊戲') }}</button>
   </div>
 </div>
 
@@ -25,28 +27,27 @@ function fetchGames() {
     .then(response => response.json())
     .then(data => {
       games = data;
+      const select = document.getElementById('gameSelect');
+      select.innerHTML = '<option value="">{{ _("請選擇一款遊戲") }}</option>';
+      games.forEach(game => {
+        const opt = document.createElement('option');
+        opt.value = game.appid;
+        opt.textContent = `[${game.appid}] ${game.name}`;
+        select.appendChild(opt);
+      });
+      select.disabled = false;
+      document.getElementById('selectButton').disabled = false;
     });
-}
-
-function searchGames(query) {
-  const results = games.filter(g => g.name.toLowerCase().includes(query.toLowerCase()));
-  const resultDiv = document.getElementById('searchResults');
-  resultDiv.innerHTML = '';
-  results.forEach(game => {
-    const link = document.createElement('a');
-    link.href = '/game-playtime/' + game.appid;
-    link.textContent = `[${game.appid}] ${game.name}`;
-    link.style.display = 'block';
-    link.style.marginBottom = '4px';
-    resultDiv.appendChild(link);
-  });
 }
 
 document.addEventListener('DOMContentLoaded', () => {
   fetchGames();
 
-  document.getElementById('gameSearch').addEventListener('input', (e) => {
-    searchGames(e.target.value);
+  document.getElementById('selectButton').addEventListener('click', () => {
+    const appid = document.getElementById('gameSelect').value;
+    if (appid) {
+      window.location.href = '/game-playtime/' + appid;
+    }
   });
 });
 </script>

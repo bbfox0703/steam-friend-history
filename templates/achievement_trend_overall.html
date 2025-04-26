@@ -33,7 +33,7 @@ let achievementChart, playtimeChart;
 function processDailyChange(data, granularity) {
   const sortedDates = Object.keys(data).sort();
   const result = {};
-  let prevTotals = {};
+  let prevAppTotals = {};
 
   for (const date of sortedDates) {
     let key = date;
@@ -43,21 +43,22 @@ function processDailyChange(data, granularity) {
       key = date.slice(0, 4);
     }
 
-    let total = 0;
     const appData = data[date];
+    let diffTotal = 0;
+
     for (const appid in appData) {
-      total += appData[appid];
+      const current = appData[appid];
+      const previous = prevAppTotals[appid] || 0;
+      diffTotal += (current - previous);
     }
 
     if (!(key in result)) {
       result[key] = 0;
     }
+    result[key] += diffTotal;
 
-    if (prevTotals[key] !== undefined) {
-      const diff = total - prevTotals[key];
-      result[key] += diff;
-    }
-    prevTotals[key] = total;
+    // 更新前一天的記錄
+    prevAppTotals = appData;
   }
 
   return result;

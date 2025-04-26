@@ -1,0 +1,57 @@
+
+{% extends "base.html" %}
+{% block content %}
+<div class="container">
+  <h2>{{ game_name }} - {{ _('每日新增遊玩時間') }}</h2>
+
+  <div class="chart-wrapper">
+    <canvas id="playtimeChart"></canvas>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th>{{ _('日期') }}</th>
+        <th>{{ _('新增遊玩分鐘數') }}</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for date, minutes in daily_minutes.items() %}
+      <tr>
+        <td>{{ date }}</td>
+        <td>{{ minutes }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+const data = {{ daily_minutes | tojson }};
+const labels = Object.keys(data);
+const values = Object.values(data);
+
+const ctx = document.getElementById('playtimeChart').getContext('2d');
+const playtimeChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+        labels: labels,
+        datasets: [{
+            label: '{{ _("每日新增遊玩時間（分鐘）") }}',
+            data: values,
+            fill: false,
+            borderColor: 'green',
+            tension: 0.1
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+            y: { beginAtZero: true }
+        }
+    }
+});
+</script>
+{% endblock %}

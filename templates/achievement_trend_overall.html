@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container">
+  <h2>{{ _('成就總趨勢') }}</h2>
+
+  <div>
+    <label for="granularity">{{ _('時間粒度') }}:</label>
+    <select id="granularity" onchange="updateCharts()">
+      <option value="day">{{ _('日') }}</option>
+      <option value="month">{{ _('月') }}</option>
+      <option value="year">{{ _('年') }}</option>
+    </select>
+  </div>
+
+  <div style="margin-top: 20px;">
+    <h3>{{ _('成就成長趨勢') }}</h3>
+    <canvas id="achievementChart" width="400" height="200"></canvas>
+  </div>
+
+  <div style="margin-top: 40px;">
+    <h3>{{ _('遊玩時間成長趨勢') }}</h3>
+    <canvas id="playtimeChart" width="400" height="200"></canvas>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+const rawAchievements = {{ achievements | tojson }};
+const rawPlaytimes = {{ playtimes | tojson }};
+
+let achievementChart, playtimeChart;
+
+function processData(data, granularity) {
+  const result = {};
+
+  for (const date in data) {
+    let key = date;
+    if (granularity === 'month') {
+      key = date.slice(0, 7); // YYYY-MM
+    } else if (granularity === 'year') {
+      key = date.slice(0, 4); // YYYY
+    }
+
+    if (!result[key]) {
+      result[key] = 0;
+    }
+
+    const appData = data[date];
+    for (const appid in appData) {
+      result[key] += appData[appid];
+    }
+  }
+
+  return result;
+}
+
+function drawChart(canvasId, chartRef, label, data, color) {
+  const ctx = document.getElementById(canvasId).getContext('2d');
+  if (chartRef) {
+    chartRef.destroy();
+  }
+
+  const labels = Object.keys(data).sort();
+  const values = labels.map(k => data[k]);
+
+  return new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: labels,
+      datasets: [{
+        label: label,
+        data: values,
+        fill: false,
+        borderColor: color,
+        tension: 0.1
+      }]
+    },
+    options: {
+      responsive: true,
+      scales: {
+        y: { beginAtZero: true }
+      }
+    }
+  });
+}
+
+function updateCharts() {
+  const granularity = document.getElementById('granularity').value;
+  const processedAchievements = processData(rawAchievements, granularity);
+  const processedPlaytimes = processData(rawPlaytimes, granularity);
+
+  achievementChart = drawChart('achievementChart', achievementChart, '{{ _("成就成長趨勢") }}', processedAchievements, 'blue');
+  playtimeChart = drawChart('playtimeChart', playtimeChart, '{{ _("遊玩時間成長趨勢") }}', processedPlaytimes, 'green');
+}
+
+// 初次載入
+updateCharts();
+</script>
+{% endblock %}

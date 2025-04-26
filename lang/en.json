@@ -122,7 +122,7 @@
   "線上好友": "Online", 
   "離線好友": "Offline",
   "最後更新時間：": "Last updated:",
-  "成就總趨勢": "Achievement Overall Trend",
+  "成就及遊玩時間總趨勢": "Achievement and Playtime Total Trends",
   "成就趨勢": "Achievement Trend",
   "遊玩時間趨勢": "Playtime Trend",
   "每日新增": "Daily update",
@@ -138,5 +138,6 @@
   "日期": "Date",  
   "新增遊玩分鐘數": "Added Playtime (Minutes)",
   "每日新增遊玩時間（分鐘）": "Daily Added Playtime (Minutes)",
-  "每日遊玩時間": "Daily Playtime" 
+  "每日遊玩時間": "Daily Playtime",
+  "累積總遊玩時間（分鐘）": "Total Accumulated Playtime (Minutes)"
 }

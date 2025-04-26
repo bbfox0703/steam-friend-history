@@ -1,54 +1,82 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>{{ _('遊玩時間趨勢查詢') }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <h1>{{ _('遊玩時間趨勢查詢') }}</h1>
 
-{% extends "base.html" %}
-{% block content %}
-<div class="container">
-  <h2>{{ _('遊戲每日遊玩時間查詢') }}</h2>
+    <div style="margin-bottom: 1em;">
+        <input type="text" id="gameSearch" placeholder="{{ _('輸入關鍵字搜尋...') }}" style="padding: 6px; width: 300px;">
+    </div>
 
-  <form method="get" action="/game-playtime/" style="margin-bottom: 1em;">
-    <label for="appid">{{ _('手動輸入 AppID') }}:</label>
-    <input type="text" id="appid" name="appid" required>
-    <button type="submit">{{ _('查詢') }}</button>
-  </form>
+    <div style="margin-bottom: 1em;">
+        <select id="gameSelect" style="padding: 6px; width: 300px;"></select>
+    </div>
 
-  <div>
-    <label for="gameSelect">{{ _('或從持有遊戲中選擇：') }}</label>
-    <select id="gameSelect" style="width: 300px; padding: 5px;" disabled>
-      <option>{{ _('載入中...') }}</option>
-    </select>
-    <button id="selectButton" disabled>{{ _('查詢選取遊戲') }}</button>
-  </div>
-</div>
+    <div id="loading">⏳ {{ _('載入中...') }}</div>
 
-<script>
-let games = [];
+    <script>
+    const select = document.getElementById('gameSelect');
+    const searchInput = document.getElementById('gameSearch');
+    const loading = document.getElementById('loading');
 
-function fetchGames() {
-  fetch('/cached-games')
-    .then(response => response.json())
-    .then(data => {
-      games = data;
-      const select = document.getElementById('gameSelect');
-      select.innerHTML = '<option value="">{{ _("請選擇一款遊戲") }}</option>';
-      games.forEach(game => {
-        const opt = document.createElement('option');
-        opt.value = game.appid;
-        opt.textContent = `[${game.appid}] ${game.name}`;
-        select.appendChild(opt);
-      });
-      select.disabled = false;
-      document.getElementById('selectButton').disabled = false;
-    });
-}
+    let games = [];
 
-document.addEventListener('DOMContentLoaded', () => {
-  fetchGames();
-
-  document.getElementById('selectButton').addEventListener('click', () => {
-    const appid = document.getElementById('gameSelect').value;
-    if (appid) {
-      window.location.href = '/game-playtime/' + appid;
+    function renderOptions(filterText = '') {
+        select.innerHTML = '';
+        const filtered = games.filter(g => g.name.toLowerCase().includes(filterText.toLowerCase()));
+        for (const game of filtered) {
+            const option = document.createElement('option');
+            option.value = game.appid;
+            option.textContent = game.name;
+            select.appendChild(option);
+        }
     }
-  });
-});
-</script>
-{% endblock %}
+
+    async function fetchGames() {
+        try {
+            const res = await fetch('/cached-games?lang=' + getPreferredLang());
+            games = await res.json();
+            renderOptions();
+            loading.style.display = 'none';
+        } catch (e) {
+            loading.innerText = '{{ _('載入失敗') }}';
+        }
+    }
+
+    function getPreferredLang() {
+        const langs = navigator.languages || [navigator.language || 'en'];
+        for (const lang of langs) {
+            const l = lang.toLowerCase();
+            if (l.includes('zh-tw')) return 'tchinese';
+            if (l.includes('ja')) return 'japanese';
+        }
+        return 'english';
+    }
+
+    select.addEventListener('change', () => {
+        if (select.value) {
+            window.location.href = '/game-playtime/' + select.value;
+        }
+    });
+
+    searchInput.addEventListener('input', (e) => {
+        renderOptions(e.target.value);
+    });
+
+    searchInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+            const firstOption = select.options[0];
+            if (firstOption) {
+                window.location.href = '/game-playtime/' + firstOption.value;
+            }
+        }
+    });
+
+    fetchGames();
+    </script>
+</body>
+</html>

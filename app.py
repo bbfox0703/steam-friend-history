@@ -710,7 +710,7 @@ def game_playtime(appid):
     except Exception:
         playtime_data = {}
 
-    # 補完整日期範圍
+    # 確保補滿所有日期，不跳日期
     dates = sorted(playtime_data.keys())
     if dates:
         start_date = datetime.strptime(dates[0], '%Y-%m-%d')
@@ -727,16 +727,12 @@ def game_playtime(appid):
     daily_minutes = {}
     last_playtime = None
     for date in date_list:
-        today_apps = playtime_data.get(date, {})
-        today_playtime = today_apps.get(str(appid))
-
-        if today_playtime is None:
-            if last_playtime is None:
-                today_playtime = 0
-            else:
-                today_playtime = last_playtime
+        today_data = playtime_data.get(date, {})
+        today_playtime = today_data.get(str(appid))
 
         if last_playtime is None:
+            diff = 0
+        elif today_playtime is None:
             diff = 0
         else:
             diff = today_playtime - last_playtime
@@ -744,11 +740,12 @@ def game_playtime(appid):
                 diff = 0
 
         daily_minutes[date] = diff
-        last_playtime = today_playtime
+
+        if today_playtime is not None:
+            last_playtime = today_playtime
 
     mode = request.args.get('mode', 'day')
 
-    # 粒度切換處理
     from collections import OrderedDict
     result = OrderedDict()
 

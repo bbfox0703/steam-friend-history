@@ -674,7 +674,121 @@ def achievement_trend_overall():
         playtimes=playtime_data,
         mode=mode
     )
-         
+
+@app.route('/game-playtime-search')
+def game_playtime_search():
+    return render_template('game_playtime_search.html')
+
+@app.route('/game-playtime/<appid>')
+def game_playtime(appid):
+    import json
+    from flask import request, render_template
+    from datetime import datetime, timedelta
+
+    lang_override = request.cookies.get("lang_override")
+    if lang_override in lang_map:
+        steam_lang = lang_map[lang_override]
+    else:
+        lang = request.accept_languages.best_match(["zh-tw", "ja", "en"], default="en")
+        steam_lang = lang_map.get(lang, "en")
+
+    try:
+        with open('./database/game_titles.json', 'r', encoding='utf-8') as f:
+            game_titles = json.load(f)
+    except Exception:
+        game_titles = {}
+
+    game_info = game_titles.get(str(appid))
+    if game_info:
+        game_name = game_info.get(steam_lang) or game_info.get('en') or f"AppID {appid}"
+    else:
+        game_name = f"AppID {appid}"
+
+    try:
+        with open('./database/playtime_trend.json', 'r', encoding='utf-8') as f:
+            playtime_data = json.load(f)
+    except Exception:
+        playtime_data = {}
+
+    # 過濾出有該 AppID 資料的日期
+    filtered_dates = []
+    for date, apps in playtime_data.items():
+        if str(appid) in apps:
+            filtered_dates.append(date)
+
+    if filtered_dates:
+        start_date = datetime.strptime(min(filtered_dates), '%Y-%m-%d')
+        end_date = datetime.strptime(max(filtered_dates), '%Y-%m-%d')
+    else:
+        start_date = end_date = None
+
+    daily_minutes = {}
+    last_playtime = None
+
+    if start_date and end_date:
+        current = start_date
+        while current <= end_date:
+            date_str = current.strftime('%Y-%m-%d')
+            apps = playtime_data.get(date_str, {})
+            today_playtime = apps.get(str(appid))
+
+            if last_playtime is None:
+                if today_playtime is not None:
+                    diff = today_playtime
+                    if diff > 1440:
+                        diff = 0
+                else:
+                    diff = 0
+            elif today_playtime is None:
+                diff = 0
+            else:
+                diff = today_playtime - last_playtime
+                if diff < 0 or diff > 1440:
+                    diff = 0
+
+            daily_minutes[date_str] = diff
+
+            if today_playtime is not None:
+                last_playtime = today_playtime
+
+            current += timedelta(days=1)
+
+    # recent 30天資料
+    recent_daily_minutes = {}
+    today = datetime.today()
+    for i in range(30):
+        date = (today - timedelta(days=29 - i)).strftime('%Y-%m-%d')
+        recent_daily_minutes[date] = daily_minutes.get(date, 0)
+
+    mode = request.args.get('mode', 'day')
+
+    from collections import OrderedDict
+    result = OrderedDict()
+
+    if mode == 'day':
+        result = daily_minutes
+    elif mode == 'month':
+        monthly = {}
+        for d, v in daily_minutes.items():
+            month = d[:7]
+            monthly[month] = monthly.get(month, 0) + v
+        result = OrderedDict(sorted(monthly.items()))
+    elif mode == 'year':
+        yearly = {}
+        for d, v in daily_minutes.items():
+            year = d[:4]
+            yearly[year] = yearly.get(year, 0) + v
+        result = OrderedDict(sorted(yearly.items()))
+
+    return render_template(
+        'game_playtime.html',
+        appid=appid,
+        game_name=game_name,
+        daily_minutes=result,
+        recent_daily_minutes=recent_daily_minutes,
+        mode=mode
+    )
+    
 @cached_games_bp.route("/cached-games")
 def cached_games():
     path = "./database/game_titles.json"

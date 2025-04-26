@@ -1,0 +1,147 @@
+
+{% extends "base.html" %}
+{% block content %}
+<div class="container">
+  <h2>{{ game_name }} - {{ _('每日新增遊玩時間') }}</h2>
+
+  <div class="toggle-buttons">
+    <span>{{ _('顯示單位：') }}</span>
+    <a href="?mode=day" class="{{ 'active' if mode == 'day' else '' }}">{{ _('日') }}</a>
+    <a href="?mode=month" class="{{ 'active' if mode == 'month' else '' }}">{{ _('月') }}</a>
+    <a href="?mode=year" class="{{ 'active' if mode == 'year' else '' }}">{{ _('年') }}</a>
+  </div>
+
+  {% if daily_minutes %}
+  <div class="chart-wrapper">
+    <canvas id="playtimeChart"></canvas>
+  </div>
+  {% else %}
+  <div style="text-align: center; margin-top: 2em; font-size: 1.2em;">
+    📭 {{ _('此遊戲在目前資料中沒有遊玩紀錄') }}
+  </div>
+  {% endif %}
+
+  {% if daily_minutes %}
+  <button onclick="downloadCSV()" style="margin-top: 1em;">📥 {{ _('下載完整資料（CSV）') }}</button>
+
+  <table>
+    <thead>
+      <tr>
+        <th>{{ _('日期') }}</th>
+        <th>{{ _('新增遊玩分鐘數') }}</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for date, minutes in recent_daily_minutes.items() %}
+      <tr>
+        <td>{{ date }}</td>
+        <td>{{ minutes }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% endif %}
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+{% if daily_minutes %}
+const data = {{ daily_minutes | tojson }};
+const labels = Object.keys(data);
+const deltaValues = Object.values(data);
+
+// 計算累積總分鐘數
+const sumValues = [];
+let total = 0;
+for (const v of deltaValues) {
+    total += v;
+    sumValues.push(total);
+}
+
+const ctx = document.getElementById('playtimeChart').getContext('2d');
+const playtimeChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+        labels: labels,
+        datasets: [
+            {
+                label: '{{ _("每日新增遊玩時間（分鐘）") }}',
+                data: deltaValues,
+                borderColor: 'green',
+                backgroundColor: 'green',
+                yAxisID: 'y',
+                tension: 0.2,
+                fill: false
+            },
+            {
+                label: '{{ _("累積總遊玩時間（分鐘）") }}',
+                data: sumValues,
+                borderColor: 'blue',
+                backgroundColor: 'blue',
+                yAxisID: 'y1',
+                tension: 0.2,
+                fill: false
+            }
+        ]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+            y: {
+                type: 'linear',
+                position: 'left',
+                title: {
+                    display: true,
+                    text: '{{ _("每日新增（分鐘）") }}'
+                },
+                beginAtZero: true
+            },
+            y1: {
+                type: 'linear',
+                position: 'right',
+                title: {
+                    display: true,
+                    text: '{{ _("累積總時間（分鐘）") }}'
+                },
+                grid: {
+                    drawOnChartArea: false
+                },
+                beginAtZero: true
+            }
+        },
+        plugins: {
+            legend: {
+                display: true,
+                position: 'top'
+            },
+            tooltip: {
+                mode: 'index',
+                intersect: false
+            }
+        },
+        interaction: {
+            mode: 'nearest',
+            axis: 'x',
+            intersect: false
+        }
+    }
+});
+
+function downloadCSV() {
+    let csvContent = "data:text/csv;charset=utf-8,";
+    csvContent += "{{ _('日期') }},{{ _('新增遊玩分鐘數') }}\n";
+    for (const [date, minutes] of Object.entries(data)) {
+        csvContent += `${date},${minutes}\n`;
+    }
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", "playtime_data_{{ appid }}.csv");
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
+{% endif %}
+</script>
+{% endblock %}

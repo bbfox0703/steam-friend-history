@@ -1,0 +1,54 @@
+
+{% extends "base.html" %}
+{% block content %}
+<div class="container">
+  <h2>{{ _('遊戲每日遊玩時間查詢') }}</h2>
+
+  <form method="get" action="/game-playtime/" style="margin-bottom: 1em;">
+    <label for="appid">{{ _('手動輸入 AppID') }}:</label>
+    <input type="text" id="appid" name="appid" required>
+    <button type="submit">{{ _('查詢') }}</button>
+  </form>
+
+  <div>
+    <label for="gameSelect">{{ _('或從持有遊戲中選擇：') }}</label>
+    <select id="gameSelect" style="width: 300px; padding: 5px;" disabled>
+      <option>{{ _('載入中...') }}</option>
+    </select>
+    <button id="selectButton" disabled>{{ _('查詢選取遊戲') }}</button>
+  </div>
+</div>
+
+<script>
+let games = [];
+
+function fetchGames() {
+  fetch('/cached-games')
+    .then(response => response.json())
+    .then(data => {
+      games = data;
+      const select = document.getElementById('gameSelect');
+      select.innerHTML = '<option value="">{{ _("請選擇一款遊戲") }}</option>';
+      games.forEach(game => {
+        const opt = document.createElement('option');
+        opt.value = game.appid;
+        opt.textContent = `[${game.appid}] ${game.name}`;
+        select.appendChild(opt);
+      });
+      select.disabled = false;
+      document.getElementById('selectButton').disabled = false;
+    });
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  fetchGames();
+
+  document.getElementById('selectButton').addEventListener('click', () => {
+    const appid = document.getElementById('gameSelect').value;
+    if (appid) {
+      window.location.href = '/game-playtime/' + appid;
+    }
+  });
+});
+</script>
+{% endblock %}

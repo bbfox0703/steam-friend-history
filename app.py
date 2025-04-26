@@ -674,6 +674,68 @@ def achievement_trend_overall():
         playtimes=playtime_data,
         mode=mode
     )
+
+@app.route('/game-playtime-search')
+def game_playtime_search():
+    return render_template('game_playtime_search.html')
+
+@app.route('/game-playtime/<appid>')
+def game_playtime(appid):
+    import json
+    from flask import request, render_template
+
+    lang_override = request.cookies.get("lang_override")
+    if lang_override in lang_map:
+        steam_lang = lang_map[lang_override]
+    else:
+        lang = request.accept_languages.best_match(["zh-tw", "ja", "en"], default="en")
+        steam_lang = lang_map.get(lang, "en")
+
+    try:
+        with open('./database/game_titles.json', 'r', encoding='utf-8') as f:
+            game_titles = json.load(f)
+    except Exception:
+        game_titles = {}
+
+    game_info = game_titles.get(str(appid))
+    if game_info:
+        game_name = game_info.get(steam_lang) or game_info.get('en') or f"AppID {appid}"
+    else:
+        game_name = f"AppID {appid}"
+
+    try:
+        with open('./database/playtime_trend.json', 'r', encoding='utf-8') as f:
+            playtime_data = json.load(f)
+    except Exception:
+        playtime_data = {}
+
+    sorted_dates = sorted(playtime_data.keys())
+    daily_minutes = {}
+    prev_playtime = None
+
+    for date in sorted_dates:
+        apps = playtime_data[date]
+        current_playtime = apps.get(str(appid))
+
+        if current_playtime is None:
+            continue
+
+        if prev_playtime is None:
+            daily_minutes[date] = 0
+        else:
+            diff = current_playtime - prev_playtime
+            if diff < 0 or diff > 1440:
+                diff = 0
+            daily_minutes[date] = diff
+
+        prev_playtime = current_playtime
+
+    return render_template(
+        'game_playtime.html',
+        appid=appid,
+        game_name=game_name,
+        daily_minutes=daily_minutes
+    )    
          
 @cached_games_bp.route("/cached-games")
 def cached_games():

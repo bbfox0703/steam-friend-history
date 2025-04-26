@@ -4,6 +4,13 @@
 <div class="container">
   <h2>{{ game_name }} - {{ _('每日新增遊玩時間') }}</h2>
 
+  <div class="toggle-buttons">
+    <span>{{ _('顯示單位：') }}</span>
+    <a href="?mode=day" class="{{ 'active' if mode == 'day' else '' }}">{{ _('日') }}</a>
+    <a href="?mode=month" class="{{ 'active' if mode == 'month' else '' }}">{{ _('月') }}</a>
+    <a href="?mode=year" class="{{ 'active' if mode == 'year' else '' }}">{{ _('年') }}</a>
+  </div>
+
   <div class="chart-wrapper">
     <canvas id="playtimeChart"></canvas>
   </div>

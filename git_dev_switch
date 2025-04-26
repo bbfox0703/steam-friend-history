@@ -1,0 +1,4 @@
+ #!/bin/bash
+ git pull
+ git fetch origin
+ git checkout -b dev origin/dev

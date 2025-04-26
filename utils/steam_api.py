@@ -256,3 +256,21 @@ def fetch_store_name(appid: str, lang: str) -> str:
     except Exception as e:
         print(f"❌ {appid} ({lang}) 錯誤: {e}")
     return ""
+    
+def fetch_recent_games():
+    url = f"https://api.steampowered.com/IPlayerService/GetRecentlyPlayedGames/v1/?key={API_KEY}&steamid={STEAM_ID}"
+    print(f"🔍 {time.strftime('%Y-%m-%d %H:%M:%S')} fetch_recent_games(): {url}")
+    resp = requests.get(url)
+    if resp.status_code == 200:
+        return resp.json().get('response', {}).get('games', [])
+    return []
+
+def fetch_achievement_count(appid):
+    url = f"https://api.steampowered.com/ISteamUserStats/GetPlayerAchievements/v1/?key={API_KEY}&steamid={STEAM_ID}&appid={appid}"
+    print(f"🔍 {time.strftime('%Y-%m-%d %H:%M:%S')} fetch_achievement_count(): {url}")
+    resp = requests.get(url)
+    if resp.status_code == 200:
+        achievements = resp.json().get('response', {}).get('achievements', [])
+        unlocked = [a for a in achievements if a.get('achieved', 0) == 1]
+        return len(unlocked)
+    return 0

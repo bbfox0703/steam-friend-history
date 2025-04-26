@@ -655,6 +655,25 @@ def level_history():
     # ⚡ 因為 level_history.json 是 dict，所以要轉成排序列表
     history = sorted(data.items())  # [(date, level), ...]
     return render_template("level_history.html", history=history)
+
+@app.route('/achievement-trend-overall')
+def achievement_trend_overall():
+    mode = request.args.get('mode', 'day')
+    try:
+        with open('./database/achievement_trend.json', 'r', encoding='utf-8') as f:
+            achievement_data = json.load(f)
+        with open('./database/playtime_trend.json', 'r', encoding='utf-8') as f:
+            playtime_data = json.load(f)
+    except Exception:
+        achievement_data = {}
+        playtime_data = {}
+
+    return render_template(
+        'achievement_trend_overall.html',
+        achievements=achievement_data,
+        playtimes=playtime_data,
+        mode=mode
+    )
          
 @cached_games_bp.route("/cached-games")
 def cached_games():

@@ -121,5 +121,9 @@
   "每10分鐘自動更新": "Refresh every 10 minutes",
   "線上好友": "Online", 
   "離線好友": "Offline",
-  "最後更新時間：": "Last updated:"
+  "最後更新時間：": "Last updated:",
+  "成就總趨勢": "Achievement Overall Trend",
+  "成就趨勢": "Achievement Trend",
+  "遊玩時間趨勢": "Playtime Trend",
+  "每日新增": "Daily update"
 }

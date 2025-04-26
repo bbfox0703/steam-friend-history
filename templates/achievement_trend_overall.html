@@ -1,0 +1,112 @@
+
+{% extends "base.html" %}
+{% block title %}{{ _('成就總趨勢') }}{% endblock %}
+
+{% block content %}
+<div class="container">
+  <h2>{{ _('成就總趨勢') }}</h2>
+
+  <div class="toggle-buttons" style="margin-bottom: 1rem;">
+    <span>{{ _('顯示單位：') }}</span>
+    <a href="/achievement-trend-overall?mode=day" class="{{ 'active' if mode == 'day' else '' }}">{{ _('日') }}</a>
+    <a href="/achievement-trend-overall?mode=month" class="{{ 'active' if mode == 'month' else '' }}">{{ _('月') }}</a>
+    <a href="/achievement-trend-overall?mode=year" class="{{ 'active' if mode == 'year' else '' }}">{{ _('年') }}</a>
+  </div>
+
+  <div style="margin-top: 20px;">
+    <h3>{{ _('成就趨勢') }} ({{ _('每日新增') }})</h3>
+		<div style="width: 100%; max-width: 2400px; margin: auto;">
+			<canvas id="achievementChart" height="400"></canvas>
+		</div>
+  </div>
+
+  <div style="margin-top: 40px;">
+    <h3>{{ _('遊玩時間趨勢') }} ({{ _('每日新增') }})</h3>
+		<div style="width: 100%; max-width: 2400px; margin: auto;">
+			<canvas id="playtimeChart" height="400"></canvas>
+		</div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+const rawAchievements = {{ achievements | tojson }};
+const rawPlaytimes = {{ playtimes | tojson }};
+const granularity = "{{ mode }}";
+
+let achievementChart, playtimeChart;
+
+function processDailyChange(data, granularity) {
+  const sortedDates = Object.keys(data).sort();
+  const result = {};
+  let prevAppTotals = {};
+  let isFirst = true;
+
+  for (const date of sortedDates) {
+    let key = date;
+    if (granularity === 'month') key = date.slice(0, 7);
+    else if (granularity === 'year') key = date.slice(0, 4);
+
+    const appData = data[date];
+    let diffTotal = 0;
+
+    for (const appid in appData) {
+      const current = appData[appid];
+      const previous = prevAppTotals[appid] || 0;
+      diffTotal += (current - previous);
+    }
+
+    if (!(key in result)) result[key] = 0;
+
+    if (isFirst) {
+      // 第一筆強制設為0，避免異常突出
+      result[key] = 0;
+      isFirst = false;
+    } else {
+      result[key] += diffTotal;
+    }
+
+    prevAppTotals = appData;
+  }
+
+  return result;
+}
+
+function drawChart(canvasId, chartRef, label, data, color) {
+  const ctx = document.getElementById(canvasId).getContext('2d');
+  if (chartRef) chartRef.destroy();
+
+  const labels = Object.keys(data).sort();
+  const values = labels.map(k => data[k]);
+
+  return new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: labels,
+      datasets: [{
+        label: label,
+        data: values,
+        fill: false,
+        borderColor: color,
+        tension: 0.1
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      scales: { y: { beginAtZero: true } }
+    }
+  });
+}
+
+function updateCharts() {
+  const processedAchievements = processDailyChange(rawAchievements, granularity);
+  const processedPlaytimes = processDailyChange(rawPlaytimes, granularity);
+
+  achievementChart = drawChart('achievementChart', achievementChart, '{{ _("成就趨勢") }} ({{ _("每日新增") }})', processedAchievements, 'blue');
+  playtimeChart = drawChart('playtimeChart', playtimeChart, '{{ _("遊玩時間趨勢") }} ({{ _("每日新增") }})', processedPlaytimes, 'green');
+}
+
+updateCharts();
+</script>
+{% endblock %}

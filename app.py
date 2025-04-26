@@ -645,16 +645,35 @@ def level_trend():
 
     return render_template("level_trend.html", labels=labels, data=data, mode=mode)
          
-@app.route("/level-history")
+@app.route('/level-history')
 def level_history():
-    path = "./database/level_history.json"
+    import json
+    from datetime import datetime, timedelta
+    import os
+
+    path = './database/level_history.json'
     if not os.path.exists(path):
         return "❌ No level data yet", 404
-    with open(path, "r", encoding="utf-8") as f:
+
+    with open(path, 'r', encoding='utf-8') as f:
         data = json.load(f)
-    # ⚡ 因為 level_history.json 是 dict，所以要轉成排序列表
-    history = sorted(data.items())  # [(date, level), ...]
-    return render_template("level_history.html", history=history)
+
+    # 強制排序
+    history = dict(sorted(data.items()))
+
+    # recent 30天資料
+    recent = {}
+    today = datetime.today()
+    for i in range(30):
+        date = (today - timedelta(days=29 - i)).strftime('%Y-%m-%d')
+        if date in history:
+            recent[date] = history[date]
+
+    return render_template(
+        'level_history.html',
+        full_history=history,
+        recent_history=recent.items()
+    )
 
 @app.route('/achievement-trend-overall')
 def achievement_trend_overall():

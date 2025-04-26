@@ -658,6 +658,7 @@ def level_history():
 
 @app.route('/achievement-trend-overall')
 def achievement_trend_overall():
+    mode = request.args.get('mode', 'day')
     try:
         with open('./database/achievement_trend.json', 'r', encoding='utf-8') as f:
             achievement_data = json.load(f)
@@ -667,7 +668,12 @@ def achievement_trend_overall():
         achievement_data = {}
         playtime_data = {}
 
-    return render_template('achievement_trend_overall.html', achievements=achievement_data, playtimes=playtime_data)
+    return render_template(
+        'achievement_trend_overall.html',
+        achievements=achievement_data,
+        playtimes=playtime_data,
+        mode=mode
+    )
          
 @cached_games_bp.route("/cached-games")
 def cached_games():

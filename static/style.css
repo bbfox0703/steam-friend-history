@@ -103,3 +103,29 @@ a:visited {
     color: white;
 }
 
+.menu-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 1.5em;
+}
+
+.menu-link {
+    display: inline-block;
+    padding: 6px 14px;
+    background-color: #007bff;
+    color: white;
+    border-radius: 20px;
+    text-decoration: none;
+    font-size: 0.95em;
+    transition: background-color 0.2s;
+}
+
+.menu-link:hover {
+    background-color: #0056b3;
+}
+
+.menu-link.active {
+    background-color: #0056b3;
+    font-weight: bold;
+}

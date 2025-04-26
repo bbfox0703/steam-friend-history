@@ -683,6 +683,7 @@ def game_playtime_search():
 def game_playtime(appid):
     import json
     from flask import request, render_template
+    from datetime import datetime, timedelta
 
     lang_override = request.cookies.get("lang_override")
     if lang_override in lang_map:
@@ -709,34 +710,71 @@ def game_playtime(appid):
     except Exception:
         playtime_data = {}
 
-    sorted_dates = sorted(playtime_data.keys())
+    # 補完整日期範圍
+    dates = sorted(playtime_data.keys())
+    if dates:
+        start_date = datetime.strptime(dates[0], '%Y-%m-%d')
+        end_date = datetime.strptime(dates[-1], '%Y-%m-%d')
+    else:
+        start_date = end_date = datetime.today()
+
+    date_list = []
+    current = start_date
+    while current <= end_date:
+        date_list.append(current.strftime('%Y-%m-%d'))
+        current += timedelta(days=1)
+
     daily_minutes = {}
-    prev_playtime = None
+    last_playtime = None
+    for date in date_list:
+        today_apps = playtime_data.get(date, {})
+        today_playtime = today_apps.get(str(appid))
 
-    for date in sorted_dates:
-        apps = playtime_data[date]
-        current_playtime = apps.get(str(appid))
+        if today_playtime is None:
+            if last_playtime is None:
+                today_playtime = 0
+            else:
+                today_playtime = last_playtime
 
-        if current_playtime is None:
-            continue
-
-        if prev_playtime is None:
-            daily_minutes[date] = 0
+        if last_playtime is None:
+            diff = 0
         else:
-            diff = current_playtime - prev_playtime
+            diff = today_playtime - last_playtime
             if diff < 0 or diff > 1440:
                 diff = 0
-            daily_minutes[date] = diff
 
-        prev_playtime = current_playtime
+        daily_minutes[date] = diff
+        last_playtime = today_playtime
+
+    mode = request.args.get('mode', 'day')
+
+    # 粒度切換處理
+    from collections import OrderedDict
+    result = OrderedDict()
+
+    if mode == 'day':
+        result = daily_minutes
+    elif mode == 'month':
+        monthly = {}
+        for d, v in daily_minutes.items():
+            month = d[:7]
+            monthly[month] = monthly.get(month, 0) + v
+        result = OrderedDict(sorted(monthly.items()))
+    elif mode == 'year':
+        yearly = {}
+        for d, v in daily_minutes.items():
+            year = d[:4]
+            yearly[year] = yearly.get(year, 0) + v
+        result = OrderedDict(sorted(yearly.items()))
 
     return render_template(
         'game_playtime.html',
         appid=appid,
         game_name=game_name,
-        daily_minutes=daily_minutes
-    )    
-         
+        daily_minutes=result,
+        mode=mode
+    )
+    
 @cached_games_bp.route("/cached-games")
 def cached_games():
     path = "./database/game_titles.json"

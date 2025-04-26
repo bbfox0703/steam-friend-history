@@ -1,82 +1,79 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="utf-8">
-    <title>{{ _('遊玩時間趨勢查詢') }}</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-</head>
-<body>
-    <h1>{{ _('遊玩時間趨勢查詢') }}</h1>
+{% extends "base.html" %}
 
-    <div style="margin-bottom: 1em;">
-        <input type="text" id="gameSearch" placeholder="{{ _('輸入關鍵字搜尋...') }}" style="padding: 6px; width: 300px;">
-    </div>
+{% block content %}
+<h1>{{ _('遊玩時間趨勢查詢') }}</h1>
 
-    <div style="margin-bottom: 1em;">
-        <select id="gameSelect" style="padding: 6px; width: 300px;"></select>
-    </div>
+<div style="margin-bottom: 1em;">
+    <input type="text" id="gameSearch" placeholder="{{ _('輸入關鍵字搜尋...') }}" style="padding: 6px; width: 300px;">
+</div>
 
-    <div id="loading">⏳ {{ _('載入中...') }}</div>
+<div style="margin-bottom: 1em;">
+    <select id="gameSelect" style="padding: 6px; width: 300px;"></select>
+</div>
 
-    <script>
-    const select = document.getElementById('gameSelect');
-    const searchInput = document.getElementById('gameSearch');
-    const loading = document.getElementById('loading');
+<div id="loading">⏳ {{ _('載入中...') }}</div>
 
-    let games = [];
+{% endblock %}
 
-    function renderOptions(filterText = '') {
-        select.innerHTML = '';
-        const filtered = games.filter(g => g.name.toLowerCase().includes(filterText.toLowerCase()));
-        for (const game of filtered) {
-            const option = document.createElement('option');
-            option.value = game.appid;
-            option.textContent = game.name;
-            select.appendChild(option);
+{% block extra_script %}
+<script>
+const select = document.getElementById('gameSelect');
+const searchInput = document.getElementById('gameSearch');
+const loading = document.getElementById('loading');
+
+let games = [];
+
+function renderOptions(filterText = '') {
+    select.innerHTML = '';
+    const filtered = games.filter(g => g.name.toLowerCase().includes(filterText.toLowerCase()));
+    for (const game of filtered) {
+        const option = document.createElement('option');
+        option.value = game.appid;
+        option.textContent = game.name;
+        select.appendChild(option);
+    }
+}
+
+async function fetchGames() {
+    try {
+        const res = await fetch('/cached-games?lang=' + getPreferredLang());
+        games = await res.json();
+        renderOptions();
+        loading.style.display = 'none';
+    } catch (e) {
+        loading.innerText = '{{ _('載入失敗') }}';
+    }
+}
+
+function getPreferredLang() {
+    const langs = navigator.languages || [navigator.language || 'en'];
+    for (const lang of langs) {
+        const l = lang.toLowerCase();
+        if (l.includes('zh-tw')) return 'tchinese';
+        if (l.includes('ja')) return 'japanese';
+    }
+    return 'english';
+}
+
+select.addEventListener('change', () => {
+    if (select.value) {
+        window.location.href = '/game-playtime/' + select.value;
+    }
+});
+
+searchInput.addEventListener('input', (e) => {
+    renderOptions(e.target.value);
+});
+
+searchInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+        const firstOption = select.options[0];
+        if (firstOption) {
+            window.location.href = '/game-playtime/' + firstOption.value;
         }
     }
+});
 
-    async function fetchGames() {
-        try {
-            const res = await fetch('/cached-games?lang=' + getPreferredLang());
-            games = await res.json();
-            renderOptions();
-            loading.style.display = 'none';
-        } catch (e) {
-            loading.innerText = '{{ _('載入失敗') }}';
-        }
-    }
-
-    function getPreferredLang() {
-        const langs = navigator.languages || [navigator.language || 'en'];
-        for (const lang of langs) {
-            const l = lang.toLowerCase();
-            if (l.includes('zh-tw')) return 'tchinese';
-            if (l.includes('ja')) return 'japanese';
-        }
-        return 'english';
-    }
-
-    select.addEventListener('change', () => {
-        if (select.value) {
-            window.location.href = '/game-playtime/' + select.value;
-        }
-    });
-
-    searchInput.addEventListener('input', (e) => {
-        renderOptions(e.target.value);
-    });
-
-    searchInput.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') {
-            const firstOption = select.options[0];
-            if (firstOption) {
-                window.location.href = '/game-playtime/' + firstOption.value;
-            }
-        }
-    });
-
-    fetchGames();
-    </script>
-</body>
-</html>
+fetchGames();
+</script>
+{% endblock %}

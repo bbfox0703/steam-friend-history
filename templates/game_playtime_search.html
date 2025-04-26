@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
 {% block content %}
-<h1>{{ _('遊玩時間趨勢查詢') }}</h1>
+<h2>{{ _('遊戲每日遊玩時間查詢') }}</h2>
 
 <div style="margin-bottom: 1em;">
     <input type="text" id="gameSearch" placeholder="{{ _('輸入關鍵字搜尋...') }}" style="padding: 6px; width: 300px;">
@@ -11,14 +11,23 @@
     <select id="gameSelect" style="padding: 6px; width: 300px;"></select>
 </div>
 
-<div id="loading">⏳ {{ _('載入中...') }}</div>
+<div style="margin-bottom: 1em;">
+    <input type="text" id="manualAppid" placeholder="{{ _('或手動輸入 AppID') }}" style="padding: 6px; width: 300px;">
+</div>
 
+<div style="margin-bottom: 1em;">
+    <button id="startQuery" style="padding: 6px 12px;">🔍 {{ _('開始查詢') }}</button>
+</div>
+
+<div id="loading">⏳ {{ _('載入中...') }}</div>
 {% endblock %}
 
 {% block extra_script %}
 <script>
 const select = document.getElementById('gameSelect');
 const searchInput = document.getElementById('gameSearch');
+const manualInput = document.getElementById('manualAppid');
+const startButton = document.getElementById('startQuery');
 const loading = document.getElementById('loading');
 
 let games = [];
@@ -55,9 +64,13 @@ function getPreferredLang() {
     return 'english';
 }
 
-select.addEventListener('change', () => {
-    if (select.value) {
-        window.location.href = '/game-playtime/' + select.value;
+startButton.addEventListener('click', () => {
+    let appid = manualInput.value.trim();
+    if (!appid && select.value) {
+        appid = select.value;
+    }
+    if (appid) {
+        window.location.href = '/game-playtime/' + appid;
     }
 });
 

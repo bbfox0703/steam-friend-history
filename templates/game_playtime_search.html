@@ -1,0 +1,53 @@
+
+{% extends "base.html" %}
+{% block content %}
+<div class="container">
+  <h2>{{ _('遊戲每日遊玩時間查詢') }}</h2>
+
+  <form method="get" action="/game-playtime/" style="margin-bottom: 1em;">
+    <label for="appid">{{ _('手動輸入 AppID') }}:</label>
+    <input type="text" id="appid" name="appid" required>
+    <button type="submit">{{ _('查詢') }}</button>
+  </form>
+
+  <div>
+    <label for="gameSearch">{{ _('或從持有遊戲中選擇：') }}</label>
+    <input type="text" id="gameSearch" placeholder="{{ _('搜尋遊戲...') }}" style="width: 300px; padding: 5px;">
+    <div id="searchResults" style="margin-top: 10px;"></div>
+  </div>
+</div>
+
+<script>
+let games = [];
+
+function fetchGames() {
+  fetch('/cached-games')
+    .then(response => response.json())
+    .then(data => {
+      games = data;
+    });
+}
+
+function searchGames(query) {
+  const results = games.filter(g => g.name.toLowerCase().includes(query.toLowerCase()));
+  const resultDiv = document.getElementById('searchResults');
+  resultDiv.innerHTML = '';
+  results.forEach(game => {
+    const link = document.createElement('a');
+    link.href = '/game-playtime/' + game.appid;
+    link.textContent = `[${game.appid}] ${game.name}`;
+    link.style.display = 'block';
+    link.style.marginBottom = '4px';
+    resultDiv.appendChild(link);
+  });
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  fetchGames();
+
+  document.getElementById('gameSearch').addEventListener('input', (e) => {
+    searchGames(e.target.value);
+  });
+});
+</script>
+{% endblock %}

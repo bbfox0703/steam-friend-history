@@ -18,9 +18,6 @@ cp /app/database/level_history.json /app/backups/daily_level_history_$(date +'%Y
 cp /app/database/achievement_trend.json /app/backups/daily_achievement_trend_$(date +'%Y%m%d').json
 cp /app/database/playtime_trend.json /app/backups/daily_playtime_trend_$(date +'%Y%m%d').json
 
-
-achievement_trend.json
-
 # 刪除 30 天以前的 daily 備份
 find /app/backups/ -name "daily_*.json" -mtime +30 -delete
 

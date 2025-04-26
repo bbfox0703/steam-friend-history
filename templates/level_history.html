@@ -1,9 +1,13 @@
+
 {% extends "base.html" %}
 
 {% block title %}{{ _('Steam 等級紀錄') }}{% endblock %}
 
 {% block content %}
 <h2>{{ _('Steam 等級紀錄') }}</h2>
+
+<button onclick="downloadCSV()" style="margin-bottom: 1em;">📥 {{ _('下載完整資料（CSV）') }}</button>
+
 <table>
   <thead>
     <tr>
@@ -12,7 +16,7 @@
     </tr>
   </thead>
   <tbody>
-    {% for date, level in history %}
+    {% for date, level in recent_history %}
     <tr>
       <td>{{ date }}</td>
       <td>{{ level }}</td>
@@ -37,4 +41,24 @@ th {
   background: #f2f2f2;
 }
 </style>
+{% endblock %}
+
+{% block extra_script %}
+<script>
+const allData = {{ full_history | tojson }};
+
+function downloadCSV() {
+    let csvContent = "data:text/csv;charset=utf-8,{{ _('日期') }},{{ _('等級') }}\n";
+    for (const [date, level] of Object.entries(allData)) {
+        csvContent += `${date},${level}\n`;
+    }
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", "level_history.csv");
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
+</script>
 {% endblock %}

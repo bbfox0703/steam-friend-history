@@ -92,8 +92,8 @@ function updateCharts() {
   const processedAchievements = processDailyChange(rawAchievements, granularity);
   const processedPlaytimes = processDailyChange(rawPlaytimes, granularity);
 
-  achievementChart = drawChart('achievementChart', achievementChart, '{{ _("成就成長趨勢") }} ({{ _("每日新增") }})', processedAchievements, 'blue');
-  playtimeChart = drawChart('playtimeChart', playtimeChart, '{{ _("遊玩時間成長趨勢") }} ({{ _("每日新增") }})', processedPlaytimes, 'green');
+  achievementChart = drawChart('achievementChart', achievementChart, '{{ _("成就趨勢") }} ({{ _("每日新增") }})', processedAchievements, 'blue');
+  playtimeChart = drawChart('playtimeChart', playtimeChart, '{{ _("遊玩時間趨勢") }} ({{ _("每日新增") }})', processedPlaytimes, 'green');
 }
 
 updateCharts();

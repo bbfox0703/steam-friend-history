@@ -8,22 +8,27 @@
 </head>
 <body>
     <!-- 🔗 功能導航區 -->
-    <div style="margin-bottom: 1em;">
-        <strong>{{ _('功能選單：') }}</strong>
-        <a href="/">{{ _('好友清單') }}</a> |
-        <a href="/history">{{ _('變更紀錄') }}</a> |
-        <a href="/country">{{ _('國別分析') }}</a> |
-        <a href="/country-chart">{{ _('國別統計圖') }}</a> |
-        <a href="/trend">{{ _('好友趨勢圖') }}</a> |
-        <a href="/status-board">{{ _('好友狀態看板') }}</a> |
-        <a href="/achievement">{{ _('成就查詢') }}</a> |
-        <a href="/filter">{{ _('條件篩選') }}</a> |
-        <a href="/backups">{{ _('備份管理') }}</a> |
-        <a href="/level-trend">{{ _('等級趨勢圖') }}</a> |
-        <a href="/level-history">{{ _('等級變化紀錄') }}</a> |
-        <a href="/achievement-trend-overall">{{ _('成就總趨勢') }}</a> |
-        <a href="/update">{{ _('更新資料（背景有自動定期更新）') }}</a>
-    </div>
+	<div class="menu-bar">
+		{% set current_path = request.path %}
+		{% set pages = [
+			('/', _('好友清單')),
+			('/history', _('變更紀錄')),
+			('/country', _('國別分析')),
+			('/country-chart', _('國別統計圖')),
+			('/trend', _('好友趨勢圖')),
+			('/status-board', _('好友狀態看板')),
+			('/achievement', _('成就查詢')),
+			('/filter', _('條件篩選')),
+			('/backups', _('備份管理')),
+			('/level-trend', _('等級趨勢圖')),
+			('/level-history', _('等級變化紀錄')),
+			('/achievement-trend-overall', _('成就總趨勢')),
+			('/update', _('更新資料（背景有自動定期更新）'))
+		] %}
+		{% for url, title in pages %}
+			<a href="{{ url }}" class="menu-link {% if current_path == url %}active{% endif %}">{{ title }}</a>
+		{% endfor %}
+	</div>
 
     {% block content %}{% endblock %}
 

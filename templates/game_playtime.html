@@ -2,7 +2,7 @@
 {% extends "base.html" %}
 {% block content %}
 <div class="container">
-  <h2>{{ game_name }} - {{ _('每日新增遊玩時間') }}</h2> 
+  <h2>{{ game_name }} - {{ _('每日新增遊玩時間') }}</h2>
 
   <div class="toggle-buttons">
     <span>{{ _('顯示單位：') }}</span>
@@ -11,9 +11,18 @@
     <a href="?mode=year" class="{{ 'active' if mode == 'year' else '' }}">{{ _('年') }}</a>
   </div>
 
+  {% if daily_minutes %}
   <div class="chart-wrapper">
     <canvas id="playtimeChart"></canvas>
   </div>
+  {% else %}
+  <div style="text-align: center; margin-top: 2em; font-size: 1.2em;">
+    📭 {{ _('此遊戲在目前資料中沒有遊玩紀錄') }}
+  </div>
+  {% endif %}
+
+  {% if daily_minutes %}
+  <button onclick="downloadCSV()" style="margin-top: 1em;">📥 {{ _('下載完整資料（CSV）') }}</button>
 
   <table>
     <thead>
@@ -23,7 +32,7 @@
       </tr>
     </thead>
     <tbody>
-      {% for date, minutes in daily_minutes.items() %}
+      {% for date, minutes in recent_daily_minutes.items() %}
       <tr>
         <td>{{ date }}</td>
         <td>{{ minutes }}</td>
@@ -31,10 +40,12 @@
       {% endfor %}
     </tbody>
   </table>
+  {% endif %}
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
+{% if daily_minutes %}
 const data = {{ daily_minutes | tojson }};
 const labels = Object.keys(data);
 const deltaValues = Object.values(data);
@@ -116,5 +127,21 @@ const playtimeChart = new Chart(ctx, {
         }
     }
 });
+
+function downloadCSV() {
+    let csvContent = "data:text/csv;charset=utf-8,";
+    csvContent += "{{ _('日期') }},{{ _('新增遊玩分鐘數') }}\n";
+    for (const [date, minutes] of Object.entries(data)) {
+        csvContent += `${date},${minutes}\n`;
+    }
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", "playtime_data_{{ appid }}.csv");
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
+{% endif %}
 </script>
 {% endblock %}

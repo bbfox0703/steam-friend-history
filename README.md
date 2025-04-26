@@ -56,6 +56,8 @@
 ![成就達成趨勢圖](./docs/achievement_trend.png)
 ### 需要輸入AppID
 ![appid](./docs/appid.png)
+### 單一遊戲時間資訊 (app要一直開啟執行才能記錄)
+![game time](./docs/game_play_time.png)
 ---
 
 # 🛠️ 安裝方法 (使用Raspberry Pi 5 8GB版本)

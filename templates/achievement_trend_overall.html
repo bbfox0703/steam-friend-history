@@ -1,15 +1,14 @@
+
 {% extends "base.html" %}
 {% block content %}
 <div class="container">
   <h2>{{ _('成就總趨勢') }}</h2>
 
-  <div>
-    <label for="granularity">{{ _('時間粒度') }}:</label>
-    <select id="granularity" onchange="updateCharts()">
-      <option value="day">{{ _('日') }}</option>
-      <option value="month">{{ _('月') }}</option>
-      <option value="year">{{ _('年') }}</option>
-    </select>
+  <div class="toggle-buttons" style="margin-bottom: 1rem;">
+    <span>{{ _('顯示單位：') }}</span>
+    <a href="/achievement-trend-overall?mode=day" class="{{ 'active' if mode == 'day' else '' }}">{{ _('日') }}</a>
+    <a href="/achievement-trend-overall?mode=month" class="{{ 'active' if mode == 'month' else '' }}">{{ _('月') }}</a>
+    <a href="/achievement-trend-overall?mode=year" class="{{ 'active' if mode == 'year' else '' }}">{{ _('年') }}</a>
   </div>
 
   <div style="margin-top: 20px;">
@@ -27,6 +26,7 @@
 <script>
 const rawAchievements = {{ achievements | tojson }};
 const rawPlaytimes = {{ playtimes | tojson }};
+const granularity = "{{ mode }}";
 
 let achievementChart, playtimeChart;
 
@@ -37,11 +37,8 @@ function processDailyChange(data, granularity) {
 
   for (const date of sortedDates) {
     let key = date;
-    if (granularity === 'month') {
-      key = date.slice(0, 7);
-    } else if (granularity === 'year') {
-      key = date.slice(0, 4);
-    }
+    if (granularity === 'month') key = date.slice(0, 7);
+    else if (granularity === 'year') key = date.slice(0, 4);
 
     const appData = data[date];
     let diffTotal = 0;
@@ -52,12 +49,8 @@ function processDailyChange(data, granularity) {
       diffTotal += (current - previous);
     }
 
-    if (!(key in result)) {
-      result[key] = 0;
-    }
+    if (!(key in result)) result[key] = 0;
     result[key] += diffTotal;
-
-    // 更新前一天的記錄
     prevAppTotals = appData;
   }
 
@@ -66,9 +59,7 @@ function processDailyChange(data, granularity) {
 
 function drawChart(canvasId, chartRef, label, data, color) {
   const ctx = document.getElementById(canvasId).getContext('2d');
-  if (chartRef) {
-    chartRef.destroy();
-  }
+  if (chartRef) chartRef.destroy();
 
   const labels = Object.keys(data).sort();
   const values = labels.map(k => data[k]);
@@ -87,15 +78,13 @@ function drawChart(canvasId, chartRef, label, data, color) {
     },
     options: {
       responsive: true,
-      scales: {
-        y: { beginAtZero: true }
-      }
+      maintainAspectRatio: false,
+      scales: { y: { beginAtZero: true } }
     }
   });
 }
 
 function updateCharts() {
-  const granularity = document.getElementById('granularity').value;
   const processedAchievements = processDailyChange(rawAchievements, granularity);
   const processedPlaytimes = processDailyChange(rawPlaytimes, granularity);
 
@@ -103,7 +92,6 @@ function updateCharts() {
   playtimeChart = drawChart('playtimeChart', playtimeChart, '{{ _("遊玩時間成長趨勢") }} ({{ _("每日新增") }})', processedPlaytimes, 'green');
 }
 
-// 初次載入
 updateCharts();
 </script>
 {% endblock %}

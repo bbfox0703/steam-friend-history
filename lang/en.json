@@ -139,5 +139,7 @@
   "新增遊玩分鐘數": "Added Playtime (Minutes)",
   "每日新增遊玩時間（分鐘）": "Daily Added Playtime (Minutes)",
   "每日遊玩時間": "Daily Playtime",
-  "累積總遊玩時間（分鐘）": "Total Accumulated Playtime (Minutes)"
+  "累積總遊玩時間（分鐘）": "Total Accumulated Playtime (Minutes)",
+  "開始查詢": "Start Search",
+  "載入失敗": "Failed to Load"  
 }

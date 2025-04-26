@@ -733,7 +733,12 @@ def game_playtime(appid):
             today_playtime = apps.get(str(appid))
 
             if last_playtime is None:
-                diff = 0
+                if today_playtime is not None:
+                    diff = today_playtime
+                    if diff > 1440:
+                        diff = 0
+                else:
+                    diff = 0
             elif today_playtime is None:
                 diff = 0
             else:
@@ -748,7 +753,7 @@ def game_playtime(appid):
 
             current += timedelta(days=1)
 
-    # recent 30天資料（不管有沒有紀錄）
+    # recent 30天資料
     recent_daily_minutes = {}
     today = datetime.today()
     for i in range(30):

@@ -38,6 +38,7 @@ function processDailyChange(data, granularity) {
   const sortedDates = Object.keys(data).sort();
   const result = {};
   let prevAppTotals = {};
+  let isFirst = true;
 
   for (const date of sortedDates) {
     let key = date;
@@ -54,7 +55,15 @@ function processDailyChange(data, granularity) {
     }
 
     if (!(key in result)) result[key] = 0;
-    result[key] += diffTotal;
+
+    if (isFirst) {
+      // 第一筆強制設為0，避免異常突出
+      result[key] = 0;
+      isFirst = false;
+    } else {
+      result[key] += diffTotal;
+    }
+
     prevAppTotals = appData;
   }
 

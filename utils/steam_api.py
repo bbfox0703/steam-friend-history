@@ -4,6 +4,7 @@ import requests
 import time
 import functools
 from datetime import datetime
+from utils.game_titles_db import get_game_title as db_get_game_title, get_all_game_titles
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -22,6 +23,15 @@ STORE_LANG_MAP = {
     "tchinese": "tchinese",
     "japanese": "japanese"
 }
+
+_cached_titles = None
+
+# 抓所有遊戲標題 cache
+def load_cached_titles():
+    global _cached_titles
+    if _cached_titles is None:
+        _cached_titles = get_all_game_titles()
+    return _cached_titles
 
 def fetch_friend_list():
     url = f"https://api.steampowered.com/ISteamUser/GetFriendList/v1/?key={API_KEY}&steamid={STEAM_ID}&relationship=friend"
@@ -204,29 +214,22 @@ def fetch_achievement_data(appid, steam_id=None):
     return response.json().get("playerstats", {})
 
 
-def load_game_title_cache():
-    path = "./database/game_titles.json"
-    if os.path.exists(path):
-        with open(path, "r", encoding="utf-8") as f:
-            return json.load(f)
-    return {}
-
-
+# 查目前持有的遊戲 (原本 fetch_owned_games 保留)
 def fetch_owned_games(lang="en"):
     url = f"https://api.steampowered.com/IPlayerService/GetOwnedGames/v1/?key={API_KEY}&steamid={STEAM_ID}&include_appinfo=true&l={lang}"
     print(f"🔍 {time.strftime('%Y-%m-%d %H:%M:%S')} fetch_owned_games()")
-    response = requests.get(url)
-    if response.status_code != 200:
-        raise Exception(f"Steam API Error: {response.status_code} {response.text}")
-    return response.json().get("response", {}).get("games", [])
+    try:
+        response = requests.get(url, timeout=10)
+        if response.status_code == 200:
+            data = response.json()
+            return data.get('response', {}).get('games', [])
+    except Exception as e:
+        print(f"⚠️ Fetch owned games error: {e}")
+    return []    
 
-_game_title_cache = None
-
-def get_game_title(appid: str) -> str:
-    global _game_title_cache
-    if _game_title_cache is None:
-        _game_title_cache = load_game_title_cache()
-    return _game_title_cache.get(str(appid), f"[AppID: {appid}]")
+# 查單個遊戲標題
+def get_game_title(appid, lang='en'):
+    return db_get_game_title(appid, lang)
 
 
 def fetch_game_info(appid, lang="en"):
@@ -244,7 +247,7 @@ def fetch_game_info(appid, lang="en"):
         pass
     return {"name": "", "header_image": ""}
 
-
+# 查單個遊戲的Steam Store標題
 def fetch_store_name(appid: str, lang: str) -> str:
     lang_code = STORE_LANG_MAP.get(lang, "en")
     url = f"https://store.steampowered.com/api/appdetails?appids={appid}&l={lang_code}"

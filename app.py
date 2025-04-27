@@ -7,7 +7,6 @@ from utils.steam_api import get_friend_data
 from utils.steam_api import fetch_game_info
 from utils.db import get_connection
 from utils.playtime_trend import get_playtime_by_appid, calculate_daily_minutes, summarize_minutes
-from utils.achievement_trend_db import calculate_daily_minutes, summarize_minutes
 from utils.i18n import _, load_translations, get_locale
 import requests
 import utils.backup as backup

@@ -6,32 +6,27 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     {% block extra_head %}{% endblock %}
 </head>
-<body>
-    <!-- 🔗 功能導航區 -->
-	<div class="menu-bar">
-		{% set current_path = request.path %}
-		{% set pages = [
-			('/', _('好友清單')),
-			('/history', _('變更紀錄')),
-			('/country', _('國別分析')),
-			('/country-chart', _('國別統計圖')),
-			('/trend', _('好友趨勢圖')),
-			('/status-board', _('好友狀態看板')),
-			('/achievement', _('成就查詢')),
-			('/filter', _('條件篩選')),
-			('/level-trend', _('等級趨勢圖')),
-			('/level-history', _('等級變化紀錄')),
-			('/achievement-trend-overall', _('成就及遊玩時間總趨勢')),
-			('/game-playtime-search', _('每日遊玩時間')),			
-			('/backups', _('備份管理')),
-			('/update', _('更新資料（背景有自動定期更新）'))
-		] %}
-		{% for url, title in pages %}
-			<a href="{{ url }}" class="menu-link {% if current_path == url %}active{% endif %}">{{ title }}</a>
-		{% endfor %}
-	</div>
+<body class="main-body">
 
-    {% block content %}{% endblock %}
+    <div class="menu-bar">
+        <a href="/" class="menu-link">{{ _('好友清單') }}</a>
+        <a href="/history" class="menu-link">{{ _('變更紀錄') }}</a>
+        <a href="/country" class="menu-link">{{ _('國別分析') }}</a>
+        <a href="/country-chart" class="menu-link">{{ _('國別統計圖') }}</a>
+        <a href="/trend" class="menu-link">{{ _('好友趨勢圖') }}</a>
+        <a href="/status-board" class="menu-link">{{ _('好友狀態看板') }}</a>
+        <a href="/achievement" class="menu-link">{{ _('成就查詢') }}</a>
+        <a href="/filter" class="menu-link">{{ _('條件篩選') }}</a>
+        <a href="/backups" class="menu-link">{{ _('備份管理') }}</a>
+        <a href="/level-trend" class="menu-link">{{ _('等級趨勢圖') }}</a>
+        <a href="/level-history" class="menu-link">{{ _('等級變化紀錄') }}</a>
+        <a href="/achievement-trend-overall" class="menu-link">{{ _('成就及遊玩時間總趨勢') }}</a>
+        <a href="/update" class="menu-link">{{ _('更新資料（背景有自動定期更新）') }}</a>
+    </div>
+
+    <div class="container">
+        {% block content %}{% endblock %}
+    </div>
 
     {% block extra_script %}
     <script>
@@ -78,5 +73,6 @@
     document.addEventListener('DOMContentLoaded', updateAllTimestamps);
     </script>
     {% endblock %}
+
 </body>
 </html>

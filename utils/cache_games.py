@@ -6,6 +6,9 @@ from datetime import datetime
 from utils.steam_api import fetch_owned_games, fetch_store_name
 from utils.game_titles_db import save_game_title, get_all_game_titles
 
+import functools
+print = functools.partial(print, flush=True)
+
 # 支援的語系
 LANGUAGES = {
     'en': 'en',

@@ -1,5 +1,6 @@
 import os
 import json
+import time
 from datetime import datetime
 from utils.steam_api import fetch_recent_games, fetch_achievement_count
 
@@ -32,6 +33,7 @@ def update_trends():
         achievement_count = fetch_achievement_count(appid)
         today_achievements[appid] = achievement_count
         today_playtime[appid] = playtime
+        time.sleep(1.1)
 
     achievements_data[today] = today_achievements
     playtime_data[today] = today_playtime

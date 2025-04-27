@@ -1,8 +1,26 @@
+
 {% extends "base.html" %}
 
-{% block title %}{{ _('成就達成趨勢圖') }}{% endblock %}
+{% block title %}{{ _('成就達成趨勢') }}{% endblock %}
 
 {% block content %}
+<div class="header-wrapper">
+    {% if header_image %}
+        <img src="{{ header_image }}" alt="game banner">
+    {% endif %}
+    <h3>{{ game_name }} (AppID: {{ appid }}) {{ _('的成就達成趨勢圖') }}</h3>
+</div>
+
+<div class="toggle-buttons" style="margin-bottom: 1em;">
+    <span>{{ _('顯示方式：') }}</span>
+    <a href="/achievement/{{ appid }}?mode=day" class="{{ 'active' if mode == 'day' else '' }}">{{ _('日') }}</a>
+    <a href="/achievement/{{ appid }}?mode=month" class="{{ 'active' if mode == 'month' else '' }}">{{ _('月') }}</a>
+</div>
+
+<canvas id="achievementChart" class="chart-wrapper"></canvas>
+{% endblock %}
+
+{% block extra_head %}
 <style>
 .header-wrapper {
     display: flex;
@@ -12,105 +30,91 @@
     margin-bottom: 1em;
     overflow-x: auto;
 }
-
 .header-wrapper img {
     height: 100px;
     margin-right: 1em;
 }
-
 .header-wrapper h3 {
     margin: 0;
     font-size: 1.4em;
     font-weight: bold;
 }
-
-@media (max-width: 600px) {
-    .header-wrapper {
-        flex-direction: column;
-        align-items: flex-start;
-    }
-    .header-wrapper img {
-        transform: scale(0.8);
-        margin-right: 0;
-        margin-bottom: 0.5em;
-    }
-}
-
-.chart-wrapper {
-    width: 100%;
-    overflow-x: auto;
-}
-.chart-wrapper canvas {
-    min-width: 600px;
-}
 </style>
-
-<div class="header-wrapper">
-    {% if header_image %}
-    <img src="{{ header_image }}" alt="{{ game_name }} header">
-    {% endif %}
-    <h3>{{ game_name }}（AppID: {{ appid }}）{{ _('的成就達成趨勢圖') }}</h3>
-</div>
-
-<p>
-    {{ _('已達成') }} {{ unlocked }} / {{ total }} {{ _('個成就') }}
-    {% if playtime_minutes %}
-    ｜🎮 {{ _('總遊玩時間：') }}{{ '%.1f' | format(playtime_minutes / 60) }} 小時
-    {% endif %}
-</p>
-
-<div class="toggle-buttons">
-    <span>{{ _('顯示方式：') }}</span>
-    <a href="?mode=day" class="{{ 'active' if mode == 'day' else '' }}">{{ _('日') }}</a>
-    <a href="?mode=month" class="{{ 'active' if mode == 'month' else '' }}">{{ _('月') }}</a>
-</div>
-
-<div class="chart-wrapper">
-    <canvas id="achieveChart" width="1000" height="400"></canvas>
-</div>
 {% endblock %}
 
 {% block extra_script %}
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-    const ctx = document.getElementById('achieveChart').getContext('2d');
-    const data = {{ data | tojson }};
-    const labels = data.map(d => d.date);
-    const values = data.map(d => d.count);
+const labels = {{ data | tojson | safe }}.map(d => d.date);
+const counts = {{ data | tojson | safe }}.map(d => d.count);
 
-    new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: labels,
-            datasets: [{
-                label: '{{ _("每日達成數") if mode == "day" else _("每月達成數") }}',
-                data: values,
-                fill: true,
-                borderColor: 'rgba(54, 162, 235, 1)',
-                backgroundColor: 'rgba(54, 162, 235, 0.2)',
-                tension: 0.3,
-                pointRadius: 3
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    title: {
-                        display: true,
-                        text: '{{ _("達成數") }}'
-                    }
+const totalAchievements = {{ total }};
+let cumulative = 0;
+const percentages = counts.map(c => {
+    cumulative += c;
+    return (totalAchievements === 0) ? 0 : Math.min(100, (cumulative / totalAchievements) * 100);
+});
+
+const ctx = document.getElementById('achievementChart').getContext('2d');
+const chart = new Chart(ctx, {
+    type: 'line',
+    data: {
+        labels: labels,
+        datasets: [
+            {
+                label: '{{ _("每日新增達成數") }}',
+                data: counts,
+                borderColor: 'green',
+                backgroundColor: 'transparent',
+                yAxisID: 'y',
+                pointRadius: 4,
+                pointHoverRadius: 6,
+                borderWidth: 2
+            },
+            {
+                label: '{{ _("累積完成百分比") }}',
+                data: percentages,
+                borderColor: '#f39c12',
+                backgroundColor: 'transparent',
+                yAxisID: 'y1',
+                pointRadius: 4,
+                pointHoverRadius: 6,
+                borderWidth: 2
+            }
+        ]
+    },
+    options: {
+        responsive: true,
+        scales: {
+            y: {
+                type: 'linear',
+                position: 'left',
+                title: {
+                    display: true,
+                    text: '{{ _("每日新增達成數") }}'
                 },
-                x: {
-                    title: {
-                        display: true,
-                        text: '{{ _("時間") }}'
-                    }
-                }
+                beginAtZero: true
+            },
+            y1: {
+                type: 'linear',
+                position: 'right',
+                title: {
+                    display: true,
+                    text: '{{ _("完成百分比 (%)") }}'
+                },
+                grid: {
+                    drawOnChartArea: false
+                },
+                min: 0,
+                max: 100
+            }
+        },
+        plugins: {
+            legend: {
+                display: true
             }
         }
-    });
+    }
+});
 </script>
 {% endblock %}

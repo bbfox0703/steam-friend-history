@@ -274,6 +274,7 @@ def fetch_store_name(appid: str, lang: str) -> str:
 
     # 如果失敗，再用英文查
     if lang_code != "en":
+        time.sleep(1)
         name = query_store(appid, "en")
         if name:
             return name

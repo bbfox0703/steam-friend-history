@@ -1,3 +1,6 @@
+#
+# 補齊昨天有、但今天沒有的appid成就資料
+#
 import os
 import json
 from datetime import datetime, timedelta

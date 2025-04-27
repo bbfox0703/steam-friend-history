@@ -3,8 +3,13 @@ load_dotenv()
 
 from flask import Flask, render_template, request, redirect, url_for, jsonify, send_from_directory, send_file, Blueprint, g
 import utils.steam_api as steam_api
-from utils.steam_api import get_friend_data
-from utils.steam_api import fetch_game_info
+
+from utils.steam_api import get_friend_data, fetch_game_info
+from utils.db import get_connection
+from utils.playtime_trend import get_playtime_by_appid, calculate_daily_minutes, summarize_minutes
+from utils.achievement_trend_db import get_playtime_by_date, get_achievements_by_date
+from utils.level_history_db import get_all_levels
+
 from utils.i18n import _, load_translations, get_locale
 import requests
 import utils.backup as backup
@@ -17,7 +22,7 @@ import operator
 import functools
 from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
-from collections import defaultdict, Counter
+from collections import defaultdict, Counter, OrderedDict
 
 # 🌐 載入翻譯字典
 load_translations()
@@ -617,16 +622,14 @@ def achievement_trend(appid):
 
 @app.route("/level-trend")
 def level_trend():
-    import pandas as pd
-
-    path = "./database/level_history.json"
-    if not os.path.exists(path):
-        return render_template("level_trend.html", data=[], labels=[], mode="day")
-
-    with open(path, "r") as f:
-        raw = json.load(f)
-
     mode = request.args.get("mode", "day")  # 預設為日
+
+    # 改成從 SQLite 撈資料
+    raw = get_all_levels()  # {date: level}
+
+    if not raw:
+        return render_template("level_trend.html", data=[], labels=[], mode=mode)
+
     df = pd.DataFrame(list(raw.items()), columns=["date", "level"])
     df["date"] = pd.to_datetime(df["date"])
 
@@ -644,22 +647,17 @@ def level_trend():
     data = stat["level"].tolist()
 
     return render_template("level_trend.html", labels=labels, data=data, mode=mode)
-         
+
 @app.route('/level-history')
 def level_history():
-    import json
-    from datetime import datetime, timedelta
-    import os
+    # 改成從 SQLite 撈資料
+    history = get_all_levels()  # {date: level}
 
-    path = './database/level_history.json'
-    if not os.path.exists(path):
+    if not history:
         return "❌ No level data yet", 404
 
-    with open(path, 'r', encoding='utf-8') as f:
-        data = json.load(f)
-
     # 強制排序
-    history = dict(sorted(data.items()))
+    history = dict(sorted(history.items()))
 
     # recent 30天資料
     recent = {}
@@ -678,14 +676,22 @@ def level_history():
 @app.route('/achievement-trend-overall')
 def achievement_trend_overall():
     mode = request.args.get('mode', 'day')
+
+    achievement_data = {}
+    playtime_data = {}
+
     try:
-        with open('./database/achievement_trend.json', 'r', encoding='utf-8') as f:
-            achievement_data = json.load(f)
-        with open('./database/playtime_trend.json', 'r', encoding='utf-8') as f:
-            playtime_data = json.load(f)
-    except Exception:
-        achievement_data = {}
-        playtime_data = {}
+        conn = get_connection()
+        c = conn.cursor()
+        c.execute('SELECT DISTINCT date FROM playtime_trend ORDER BY date ASC')
+        dates = [row[0] for row in c.fetchall()]
+        conn.close()
+
+        for date in dates:
+            achievement_data[date] = get_achievements_by_date(date)
+            playtime_data[date] = get_playtime_by_date(date)
+    except Exception as e:
+        print(f"⚠️ Error loading trend data: {e}")
 
     return render_template(
         'achievement_trend_overall.html',
@@ -700,10 +706,12 @@ def game_playtime_search():
 
 @app.route('/game-playtime/<appid>')
 def game_playtime(appid):
-    import json
-    from flask import request, render_template
-    from datetime import datetime, timedelta
+    try:
+        appid_int = int(appid)
+    except ValueError:
+        return "Invalid AppID", 400
 
+    # 取得語言設定
     lang_override = request.cookies.get("lang_override")
     if lang_override in lang_map:
         steam_lang = lang_map[lang_override]
@@ -711,93 +719,47 @@ def game_playtime(appid):
         lang = request.accept_languages.best_match(["zh-tw", "ja", "en"], default="en")
         steam_lang = lang_map.get(lang, "en")
 
+    # 讀取遊戲名稱
     try:
         with open('./database/game_titles.json', 'r', encoding='utf-8') as f:
             game_titles = json.load(f)
     except Exception:
         game_titles = {}
 
-    game_info = game_titles.get(str(appid))
+    game_info = game_titles.get(str(appid_int))
     if game_info:
         game_name = game_info.get(steam_lang) or game_info.get('en') or f"AppID {appid}"
     else:
         game_name = f"AppID {appid}"
 
-    try:
-        with open('./database/playtime_trend.json', 'r', encoding='utf-8') as f:
-            playtime_data = json.load(f)
-    except Exception:
-        playtime_data = {}
+    # 從 SQLite 讀取時間序列
+    playtime_records = get_playtime_by_appid(appid_int)
+    daily_minutes = calculate_daily_minutes(playtime_records)
 
-    # 過濾出有該 AppID 資料的日期
-    filtered_dates = []
-    for date, apps in playtime_data.items():
-        if str(appid) in apps:
-            filtered_dates.append(date)
-
-    if filtered_dates:
-        start_date = datetime.strptime(min(filtered_dates), '%Y-%m-%d')
-        end_date = datetime.strptime(max(filtered_dates), '%Y-%m-%d')
+    dates = list(daily_minutes.keys())
+    if dates:
+        start_date = datetime.strptime(min(dates), '%Y-%m-%d')
+        end_date = datetime.strptime(max(dates), '%Y-%m-%d')
     else:
         start_date = end_date = None
 
-    daily_minutes = {}
-    last_playtime = None
-
-    if start_date and end_date:
-        current = start_date
-        while current <= end_date:
-            date_str = current.strftime('%Y-%m-%d')
-            apps = playtime_data.get(date_str, {})
-            today_playtime = apps.get(str(appid))
-
-            if last_playtime is None:
-                if today_playtime is not None:
-                    diff = today_playtime
-                    if diff > 1440:
-                        diff = 0
-                else:
-                    diff = 0
-            elif today_playtime is None:
-                diff = 0
-            else:
-                diff = today_playtime - last_playtime
-                if diff < 0 or diff > 1440:
-                    diff = 0
-
-            daily_minutes[date_str] = diff
-
-            if today_playtime is not None:
-                last_playtime = today_playtime
-
-            current += timedelta(days=1)
-
-    # recent 30天資料
-    recent_daily_minutes = {}
+    # 最近30天資料
     today = datetime.today()
+    recent_daily_minutes = {}
     for i in range(30):
         date = (today - timedelta(days=29 - i)).strftime('%Y-%m-%d')
         recent_daily_minutes[date] = daily_minutes.get(date, 0)
 
+    # mode 支援
     mode = request.args.get('mode', 'day')
-
-    from collections import OrderedDict
     result = OrderedDict()
 
     if mode == 'day':
-        result = daily_minutes
+        result = OrderedDict(sorted(daily_minutes.items()))
     elif mode == 'month':
-        monthly = {}
-        for d, v in daily_minutes.items():
-            month = d[:7]
-            monthly[month] = monthly.get(month, 0) + v
-        result = OrderedDict(sorted(monthly.items()))
+        result = summarize_minutes(daily_minutes, mode='month')
     elif mode == 'year':
-        yearly = {}
-        for d, v in daily_minutes.items():
-            year = d[:4]
-            yearly[year] = yearly.get(year, 0) + v
-        result = OrderedDict(sorted(yearly.items()))
+        result = summarize_minutes(daily_minutes, mode='year')
 
     return render_template(
         'game_playtime.html',

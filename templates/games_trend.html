@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+
+{% block title %}{{ _('持有遊戲數趨勢') }}{% endblock %}
+
+{% block content %}
+<h1>{{ _('持有遊戲數趨勢圖') }}</h1>
+
+<div class="toggle-buttons" style="margin-bottom: 1em;">
+    <span>{{ _('顯示單位：') }}</span>
+    <a href="/games-trend?mode=day" class="{{ 'active' if mode == 'day' else '' }}">{{ _('日') }}</a>
+    <a href="/games-trend?mode=month" class="{{ 'active' if mode == 'month' else '' }}">{{ _('月') }}</a>
+    <a href="/games-trend?mode=year" class="{{ 'active' if mode == 'year' else '' }}">{{ _('年') }}</a>
+</div>
+
+<canvas id="gamesChart" class="chart-wrapper"></canvas>
+{% endblock %}
+
+{% block extra_script %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+const labels = {{ labels | safe }};
+const deltas = {{ deltas | safe }};
+const totals = {{ totals | safe }};
+
+const ctx = document.getElementById('gamesChart').getContext('2d');
+const chart = new Chart(ctx, {
+    type: 'line',
+    data: {
+        labels: labels,
+        datasets: [
+            {
+                label: '{{ _("每日持有變化數") }}',
+                data: deltas,
+                borderColor: 'green',
+                backgroundColor: 'transparent',
+                yAxisID: 'y',
+                pointRadius: 4,
+                pointHoverRadius: 6,
+                borderWidth: 2
+            },
+            {
+                label: '{{ _("持有總數") }}',
+                data: totals,
+                borderColor: '#3498db',
+                backgroundColor: 'transparent',
+                yAxisID: 'y1',
+                pointRadius: 4,
+                pointHoverRadius: 6,
+                borderWidth: 2
+            }
+        ]
+    },
+    options: {
+        responsive: true,
+        scales: {
+            y: {
+                type: 'linear',
+                position: 'left',
+                title: {
+                    display: true,
+                    text: '{{ _("每日持有變化數") }}'
+                },
+                beginAtZero: true
+            },
+            y1: {
+                type: 'linear',
+                position: 'right',
+                title: {
+                    display: true,
+                    text: '{{ _("持有總數") }}'
+                },
+                grid: {
+                    drawOnChartArea: false
+                },
+                beginAtZero: true
+            }
+        },
+        plugins: {
+            legend: {
+                display: true
+            }
+        }
+    }
+});
+</script>
+{% endblock %}

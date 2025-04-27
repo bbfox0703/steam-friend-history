@@ -26,6 +26,16 @@ def init_db():
         )
     ''')
 
+    # 建立 achievement_trend 表
+    c.execute('''
+        CREATE TABLE IF NOT EXISTS achievement_trend (
+            date TEXT NOT NULL,
+            appid INTEGER NOT NULL,
+            achievements INTEGER,
+            PRIMARY KEY (date, appid)
+        )
+    ''')
+
     conn.commit()
     conn.close()
 

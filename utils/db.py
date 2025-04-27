@@ -36,6 +36,14 @@ def init_db():
         )
     ''')
 
+    # 建立 level_history 表
+    c.execute('''
+        CREATE TABLE IF NOT EXISTS level_history (
+            date TEXT NOT NULL PRIMARY KEY,
+            level INTEGER
+        )
+    ''')
+
     conn.commit()
     conn.close()
 

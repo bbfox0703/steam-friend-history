@@ -3,11 +3,13 @@ load_dotenv()
 
 from flask import Flask, render_template, request, redirect, url_for, jsonify, send_from_directory, send_file, Blueprint, g
 import utils.steam_api as steam_api
-from utils.steam_api import get_friend_data
-from utils.steam_api import fetch_game_info
+
+from utils.steam_api import get_friend_data, fetch_game_info
 from utils.db import get_connection
 from utils.playtime_trend import get_playtime_by_appid, calculate_daily_minutes, summarize_minutes
 from utils.achievement_trend_db import get_playtime_by_date, get_achievements_by_date
+from utils.level_history_db import get_all_levels
+
 from utils.i18n import _, load_translations, get_locale
 import requests
 import utils.backup as backup
@@ -620,16 +622,14 @@ def achievement_trend(appid):
 
 @app.route("/level-trend")
 def level_trend():
-    import pandas as pd
-
-    path = "./database/level_history.json"
-    if not os.path.exists(path):
-        return render_template("level_trend.html", data=[], labels=[], mode="day")
-
-    with open(path, "r") as f:
-        raw = json.load(f)
-
     mode = request.args.get("mode", "day")  # 預設為日
+
+    # 改成從 SQLite 撈資料
+    raw = get_all_levels()  # {date: level}
+
+    if not raw:
+        return render_template("level_trend.html", data=[], labels=[], mode=mode)
+
     df = pd.DataFrame(list(raw.items()), columns=["date", "level"])
     df["date"] = pd.to_datetime(df["date"])
 
@@ -647,22 +647,17 @@ def level_trend():
     data = stat["level"].tolist()
 
     return render_template("level_trend.html", labels=labels, data=data, mode=mode)
-         
+
 @app.route('/level-history')
 def level_history():
-    import json
-    from datetime import datetime, timedelta
-    import os
+    # 改成從 SQLite 撈資料
+    history = get_all_levels()  # {date: level}
 
-    path = './database/level_history.json'
-    if not os.path.exists(path):
+    if not history:
         return "❌ No level data yet", 404
 
-    with open(path, 'r', encoding='utf-8') as f:
-        data = json.load(f)
-
     # 強制排序
-    history = dict(sorted(data.items()))
+    history = dict(sorted(history.items()))
 
     # recent 30天資料
     recent = {}

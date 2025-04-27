@@ -252,7 +252,11 @@ def fetch_store_name(appid: str, lang: str) -> str:
     try:
         r = requests.get(url, timeout=10)
         if r.status_code == 200:
-            return r.json().get(str(appid), {}).get("data", {}).get("name", "")
+            data = r.json()
+            app_info = data.get(str(appid), {})
+            if not app_info.get("success"):
+                return ""  # ⚡ 查詢失敗，直接返回空字串
+            return app_info.get("data", {}).get("name", "")
     except Exception as e:
         print(f"❌ {appid} ({lang}) 錯誤: {e}")
     return ""

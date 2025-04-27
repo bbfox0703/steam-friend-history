@@ -3,7 +3,7 @@
 import sqlite3
 from pathlib import Path
 
-# 資料庫路徑（你可以改成你想放的位置）
+# 資料庫路徑
 DB_PATH = Path('./database/steam_data.db')
 
 # 取得資料庫連線
@@ -41,6 +41,16 @@ def init_db():
         CREATE TABLE IF NOT EXISTS level_history (
             date TEXT NOT NULL PRIMARY KEY,
             level INTEGER
+        )
+    ''')
+
+    # 建立 game_titles 表
+    c.execute('''
+        CREATE TABLE IF NOT EXISTS game_titles (
+            appid INTEGER NOT NULL PRIMARY KEY,
+            en TEXT,
+            tchinese TEXT,
+            japanese TEXT
         )
     ''')
 

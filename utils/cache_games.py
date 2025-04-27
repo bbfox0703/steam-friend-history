@@ -1,86 +1,69 @@
-import os
-import json
-import time
+# utils/cache_games.py
+
 import argparse
-import functools
-from dotenv import load_dotenv
+import time
+from datetime import datetime
+from utils.steam_api import fetch_owned_games, fetch_store_name
+from utils.game_titles_db import save_game_title, get_all_game_titles
 
-print = functools.partial(print, flush=True)
-print(f"⏱ 開始於：{time.strftime('%Y-%m-%d %H:%M:%S')}")
+# 支援的語系
+LANGUAGES = {
+    'en': 'en',
+    'tchinese': 'zh-tw',
+    'japanese': 'ja'
+}
 
-# 動態引入 steam_api，兼容模組與獨立執行
-try:
-    from . import steam_api
-except ImportError:
-    import utils.steam_api as steam_api
+def update_cached_game_titles(langs, sleep_time):
+    print("🔍 讀取目前持有遊戲清單...")
+    owned_appids = fetch_owned_games()
+    print(f"✅ 共 {len(owned_appids)} 個遊戲將進行更新")
 
-# 自動載入環境變數
-load_dotenv()
+    # 從資料庫讀取已存在的標題資料
+    existing_data = get_all_game_titles()
 
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-CACHE_PATH = os.path.join(BASE_DIR, "database", "game_titles.json")
+    for idx, appid in enumerate(owned_appids):
+        appid_str = str(appid)
+        existing = existing_data.get(appid_str, {})
 
-# 語系對應 store API 的格式
-SUPPORTED_LANGS = ["en", "tchinese", "japanese"]
-
-def fetch_and_cache_games(lang="en", sleep_interval=1, existing_data=None):
-    print(f"🌐 正在抓取語言：{lang}")
-    start = time.time()
-    games = steam_api.fetch_owned_games()
-    print(f"📋 獲得 {len(games)} 筆遊戲（{lang}）")
-    print(f"⏳ 取得 owned games 耗時：{time.time() - start:.2f} 秒")
-
-    data = {}
-    for i, game in enumerate(games):
-        appid = str(game["appid"])
-
-        # 若已存在該語言快取，略過
-        if existing_data and appid in existing_data and lang in existing_data[appid]:
-            print(f"⏭️  [{i+1}/{len(games)}] {appid} ({lang}) 已存在，略過")
+        # 如果所有語系都存在，跳過
+        if all(existing.get(lang) for lang in langs):
+            print(f"✅ [{idx+1}/{len(owned_appids)}] AppID {appid} 所有語系已存在，跳過")
             continue
 
-        # 抓語系對應的名稱
-        if lang == "en":
-            name = game.get("name", "")
-        else:
-            name = steam_api.fetch_store_name(appid, lang)
+        # 建立更新後的標題資料
+        updated_titles = {
+            'en': existing.get('en'),
+            'tchinese': existing.get('tchinese'),
+            'japanese': existing.get('japanese')
+        }
 
-        if appid not in data:
-            data[appid] = {}
-        data[appid][lang] = name
-        print(f"✅ {time.strftime('%Y-%m-%d %H:%M:%S')} [{i+1}/{len(games)}] {appid} ({lang}): {name}")
-        time.sleep(sleep_interval)
+        for lang in langs:
+            if not updated_titles.get(lang):
+                store_lang = LANGUAGES.get(lang, 'en')
+                name = fetch_store_name(appid, store_lang)
+                timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+                if name:
+                    print(f"✅ {timestamp} [{idx+1}/{len(owned_appids)}] {appid} ({lang}): {name}")
+                    updated_titles[lang] = name
+                else:
+                    print(f"⚠️ {timestamp} [{idx+1}/{len(owned_appids)}] {appid} ({lang}): 無法取得標題")
+                time.sleep(sleep_time)
 
-    return data
-
-def build_game_title_cache(langs=["en"], sleep_interval=1.7):
-    print("🚀 開始建立遊戲名稱多語系快取...")
-
-    if os.path.exists(CACHE_PATH):
-        with open(CACHE_PATH, "r", encoding="utf-8") as f:
-            merged = json.load(f)
-    else:
-        merged = {}
-
-    for lang in langs:
-        partial = fetch_and_cache_games(lang=lang, sleep_interval=sleep_interval, existing_data=merged)
-        for appid, lang_dict in partial.items():
-            if not isinstance(merged.get(appid), dict):
-                merged[appid] = {}
-            merged[appid].update(lang_dict)
-
-    os.makedirs(os.path.dirname(CACHE_PATH), exist_ok=True)
-    with open(CACHE_PATH, "w", encoding="utf-8") as f:
-        json.dump(merged, f, indent=2, ensure_ascii=False)
-    print(f"📦 快取已儲存：{CACHE_PATH}")
+        # 寫入資料庫
+        save_game_title(appid,
+                        updated_titles.get('en'),
+                        updated_titles.get('tchinese'),
+                        updated_titles.get('japanese'))
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--lang", nargs="*", default=["en"], choices=SUPPORTED_LANGS + ["all"],
-                        help="指定要抓取的語言，例如 --lang en 或 --lang all")
-    parser.add_argument("--sleep", type=float, default=1.0,
-                        help="每筆遊戲間的延遲秒數，預設為 1")
+    parser = argparse.ArgumentParser(description='更新 Steam 遊戲標題快取')
+    parser.add_argument('--lang', type=str, default='all', help='語言選擇：en, tchinese, japanese, 或 all')
+    parser.add_argument('--sleep', type=float, default=1.0, help='每次API呼叫後睡眠秒數，避免被封鎖')
     args = parser.parse_args()
 
-    langs = SUPPORTED_LANGS if "all" in args.lang else args.lang
-    build_game_title_cache(langs=langs, sleep_interval=args.sleep)
+    if args.lang == 'all':
+        langs = list(LANGUAGES.keys())
+    else:
+        langs = [args.lang] if args.lang in LANGUAGES else ['en']
+
+    update_cached_game_titles(langs, args.sleep)

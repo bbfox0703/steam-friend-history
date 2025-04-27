@@ -1,4 +1,3 @@
-
 #!/bin/bash
 echo "[$(date '+%Y-%m-%d %H:%M:%S')] 🕒 achievement_daily.sh started" >> /var/log/cron_exec.log
 cd /app

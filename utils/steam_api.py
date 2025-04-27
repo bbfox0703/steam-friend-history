@@ -274,3 +274,21 @@ def fetch_achievement_count(appid):
         unlocked = [a for a in achievements if a.get('achieved', 0) == 1]
         return len(unlocked)
     return 0
+    
+def fetch_current_level():
+    url = f"https://api.steampowered.com/IPlayerService/GetSteamLevel/v1/?key={API_KEY}&steamid={STEAM_ID}"
+    try:
+        response = requests.get(url)
+        if response.status_code == 200:
+            data = response.json()
+            level = data.get('response', {}).get('player_level')
+            if level is not None:
+                return level
+            else:
+                print("⚠️ player_level not found.")
+        else:
+            print(f"⚠️ HTTP Error {response.status_code}")
+    except Exception as e:
+        print(f"⚠️ Fetch Error: {e}")
+
+    return None    

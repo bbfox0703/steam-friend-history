@@ -807,7 +807,40 @@ def game_playtime(appid):
         recent_daily_minutes=recent_daily_minutes,
         mode=mode
     )
-    
+
+@app.route("/games-trend")
+def games_trend():
+    mode = request.args.get("mode", "day")
+    try:
+        with open("./database/games_total_history.json", "r", encoding="utf-8") as f:
+            data = json.load(f)
+    except Exception:
+        data = {}
+
+    if not data:
+        return render_template("games_trend.html", labels=[], deltas=[], totals=[], mode=mode)
+
+    import pandas as pd
+    df = pd.DataFrame(list(data.items()), columns=["date", "total"])
+    df["date"] = pd.to_datetime(df["date"])
+
+    if mode == "month":
+        df["period"] = df["date"].dt.to_period("M")
+    elif mode == "year":
+        df["period"] = df["date"].dt.to_period("Y")
+    else:
+        df["period"] = df["date"].dt.to_period("D")
+
+    stat = df.groupby("period")["total"].max().reset_index()
+    stat["delta"] = stat["total"].diff().fillna(0).astype(int)
+    stat["period"] = stat["period"].astype(str)
+
+    labels = stat["period"].tolist()
+    totals = stat["total"].tolist()
+    deltas = stat["delta"].tolist()
+
+    return render_template("games_trend.html", labels=labels, totals=totals, deltas=deltas, mode=mode)
+
 @cached_games_bp.route("/cached-games")
 def cached_games():
     path = "./database/game_titles.json"

@@ -1,10 +1,11 @@
 import os
 import json
+import time
 from datetime import datetime
 from utils.steam_api import fetch_recent_games, fetch_achievement_count
 
-ACHIEVEMENT_PATH = '/app/database/achievement_trend.json'
-PLAYTIME_PATH = '/app/database/playtime_trend.json'
+ACHIEVEMENT_PATH = './database/achievement_trend.json'
+PLAYTIME_PATH = './database/playtime_trend.json'
 
 def load_json(path):
     if os.path.exists(path):
@@ -32,6 +33,7 @@ def update_trends():
         achievement_count = fetch_achievement_count(appid)
         today_achievements[appid] = achievement_count
         today_playtime[appid] = playtime
+        time.sleep(1.1)
 
     achievements_data[today] = today_achievements
     playtime_data[today] = today_playtime

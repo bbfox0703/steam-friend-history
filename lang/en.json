@@ -141,5 +141,15 @@
   "每日遊玩時間": "Daily Playtime",
   "累積總遊玩時間（分鐘）": "Total Accumulated Playtime (Minutes)",
   "開始查詢": "Start Search",
-  "載入失敗": "Failed to Load"  
+  "載入失敗": "Failed to Load",
+  "每日新增達成數": "New Achievements per Day",
+  "累積完成百分比": "Cumulative Completion Percentage",
+  "新增達成數": "New Completions",
+  "完成百分比 (%)": "Completion Percentage (%)",
+  "尚無任何成就達成紀錄": "No achievement records yet",
+  "該遊戲沒有成就資料": "No achievement data for this game",
+  "持有遊戲數趨勢": "Owned Games Trend",
+  "持有遊戲數趨勢圖": "Owned Games Trend Chart",
+  "每日持有變化數": "Daily Owned Games Change",
+  "持有總數": "Total Owned Games"  
 }

@@ -270,7 +270,7 @@ def fetch_achievement_count(appid):
     print(f"🔍 {time.strftime('%Y-%m-%d %H:%M:%S')} fetch_achievement_count(): {url}")
     resp = requests.get(url)
     if resp.status_code == 200:
-        achievements = resp.json().get('response', {}).get('achievements', [])
+        achievements = resp.json().get('playerstats', {}).get('achievements', [])
         unlocked = [a for a in achievements if a.get('achieved', 0) == 1]
         return len(unlocked)
     return 0

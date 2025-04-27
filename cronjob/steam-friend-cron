@@ -6,4 +6,4 @@
 5 11 * * * root /app/cronjob/cache_games_daily.sh >> /var/log/cron_exec.log 2>&1
 0 */2 * * * root /bin/bash /app/cronjob/achievement_daily.sh >> /var/log/cron_exec.log 2>&1
 58 23 * * * root /bin/bash /app/cronjob/achievement_daily.sh >> /var/log/cron_exec.log 2>&1
-59 23 * * * root /app/record_games_total.sh >> /var/log/cron_exec.log 2>&1
+57 23 * * * root /app/record_games_total.sh >> /var/log/cron_exec.log 2>&1

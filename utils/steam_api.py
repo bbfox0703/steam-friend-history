@@ -247,22 +247,40 @@ def fetch_game_info(appid, lang="en"):
         pass
     return {"name": "", "header_image": ""}
 
+
 # 查單個遊戲的Steam Store標題
 def fetch_store_name(appid: str, lang: str) -> str:
+    def query_store(appid, lang_code):
+        url = f"https://store.steampowered.com/api/appdetails?appids={appid}&l={lang_code}"
+        print(f"🔍 {time.strftime('%Y-%m-%d %H:%M:%S')} fetch_store_name(): {url}")
+        try:
+            r = requests.get(url, timeout=10)
+            if r.status_code == 200:
+                data = r.json()
+                app_info = data.get(str(appid), {})
+                if not app_info.get("success"):
+                    return None
+                return app_info.get("data", {}).get("name")
+        except Exception as e:
+            print(f"❌ {appid} ({lang_code}) 錯誤: {e}")
+        return None
+
     lang_code = STORE_LANG_MAP.get(lang, "en")
-    url = f"https://store.steampowered.com/api/appdetails?appids={appid}&l={lang_code}"
-    print(f"🔍 {time.strftime('%Y-%m-%d %H:%M:%S')} fetch_store_name(): {url}")
-    try:
-        r = requests.get(url, timeout=10)
-        if r.status_code == 200:
-            data = r.json()
-            app_info = data.get(str(appid), {})
-            if not app_info.get("success"):
-                return ""  # ⚡ 查詢失敗，直接返回空字串
-            return app_info.get("data", {}).get("name", "")
-    except Exception as e:
-        print(f"❌ {appid} ({lang}) 錯誤: {e}")
+
+    # 第一次用目標語言查
+    name = query_store(appid, lang_code)
+    if name:
+        return name
+
+    # 如果失敗，再用英文查
+    if lang_code != "en":
+        name = query_store(appid, "en")
+        if name:
+            return name
+
+    # 最後都查不到，返回空字串
     return ""
+
     
 def fetch_recent_games():
     url = f"https://api.steampowered.com/IPlayerService/GetRecentlyPlayedGames/v1/?key={API_KEY}&steamid={STEAM_ID}"

@@ -7,18 +7,21 @@
 .header-wrapper {
     display: flex;
     align-items: center;
+    justify-content: flex-start;
+    flex-wrap: nowrap;
     margin-bottom: 1em;
-    flex-wrap: wrap;
+    overflow-x: auto;
 }
+
 .header-wrapper img {
-    transform: scale(0.5);
-    transform-origin: left center;
-    display: inline-block;
+    height: 100px;
     margin-right: 1em;
 }
-.header-wrapper h2 {
+
+.header-wrapper h3 {
     margin: 0;
     font-size: 1.4em;
+    font-weight: bold;
 }
 
 @media (max-width: 600px) {

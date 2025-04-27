@@ -7,6 +7,7 @@ from utils.steam_api import get_friend_data
 from utils.steam_api import fetch_game_info
 from utils.db import get_connection
 from utils.playtime_trend import get_playtime_by_appid, calculate_daily_minutes, summarize_minutes
+from utils.achievement_trend_db import get_playtime_by_date, get_achievements_by_date
 from utils.i18n import _, load_translations, get_locale
 import requests
 import utils.backup as backup
@@ -676,11 +677,6 @@ def level_history():
         full_history=history,
         recent_history=recent.items()
     )
-
-from utils.achievement_trend_db import get_playtime_by_date, get_achievements_by_date
-from utils.db import get_connection
-import json
-from flask import request, render_template
 
 @app.route('/achievement-trend-overall')
 def achievement_trend_overall():

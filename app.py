@@ -677,18 +677,16 @@ def level_history():
         recent_history=recent.items()
     )
 
+from utils.achievement_trend_db import get_playtime_by_date, get_achievements_by_date
+from utils.db import get_connection
+import json
+from flask import request, render_template
+
 @app.route('/achievement-trend-overall')
 def achievement_trend_overall():
     mode = request.args.get('mode', 'day')
 
-    # 讀 achievements 資料 (仍然讀 JSON)
-    try:
-        with open('./database/achievement_trend.json', 'r', encoding='utf-8') as f:
-            achievement_data = json.load(f)
-    except Exception:
-        achievement_data = {}
-
-    # 讀 playtimes 資料 (改用 SQLite 查)
+    achievement_data = {}
     playtime_data = {}
 
     try:
@@ -699,9 +697,10 @@ def achievement_trend_overall():
         conn.close()
 
         for date in dates:
+            achievement_data[date] = get_achievements_by_date(date)
             playtime_data[date] = get_playtime_by_date(date)
-    except Exception:
-        playtime_data = {}
+    except Exception as e:
+        print(f"⚠️ Error loading trend data: {e}")
 
     return render_template(
         'achievement_trend_overall.html',
@@ -714,8 +713,19 @@ def achievement_trend_overall():
 def game_playtime_search():
     return render_template('game_playtime_search.html')
 
+from utils.achievement_trend_db import get_playtime_by_appid, calculate_daily_minutes, summarize_minutes
+from flask import request, render_template
+import json
+from datetime import datetime, timedelta
+from collections import OrderedDict
+
 @app.route('/game-playtime/<appid>')
 def game_playtime(appid):
+    try:
+        appid_int = int(appid)
+    except ValueError:
+        return "Invalid AppID", 400
+
     # 取得語言設定
     lang_override = request.cookies.get("lang_override")
     if lang_override in lang_map:
@@ -731,19 +741,16 @@ def game_playtime(appid):
     except Exception:
         game_titles = {}
 
-    game_info = game_titles.get(str(appid))
+    game_info = game_titles.get(str(appid_int))
     if game_info:
         game_name = game_info.get(steam_lang) or game_info.get('en') or f"AppID {appid}"
     else:
         game_name = f"AppID {appid}"
 
-    # 讀取指定 AppID 的時間序列資料（從 SQLite）
-    playtime_records = get_playtime_by_appid(int(appid))  # [{date: , playtime_minutes: }, ...]
-
-    # 計算每日新增遊玩時間
+    # 從 SQLite 讀取時間序列
+    playtime_records = get_playtime_by_appid(appid_int)
     daily_minutes = calculate_daily_minutes(playtime_records)
 
-    # 找出資料起始日與結束日
     dates = list(daily_minutes.keys())
     if dates:
         start_date = datetime.strptime(min(dates), '%Y-%m-%d')
@@ -751,14 +758,14 @@ def game_playtime(appid):
     else:
         start_date = end_date = None
 
-    # 重新建 recent 30天資料
-    recent_daily_minutes = {}
+    # 最近30天資料
     today = datetime.today()
+    recent_daily_minutes = {}
     for i in range(30):
         date = (today - timedelta(days=29 - i)).strftime('%Y-%m-%d')
         recent_daily_minutes[date] = daily_minutes.get(date, 0)
 
-    # 支援 mode = day / month / year
+    # mode 支援
     mode = request.args.get('mode', 'day')
     result = OrderedDict()
 

@@ -1,18 +1,15 @@
+# utils/record_games_total.py
+
 import os
 import json
 from datetime import datetime
+from utils.game_titles_db import get_all_game_titles
 
 def main():
-    titles_path = "./database/game_titles.json"
     history_path = "./database/games_total_history.json"
 
-    if not os.path.exists(titles_path):
-        print("⚠️ No game_titles.json found")
-        return
-
-    with open(titles_path, "r", encoding="utf-8") as f:
-        titles = json.load(f)
-
+    # 改成從 SQLite 撈 titles
+    titles = get_all_game_titles()
     today = datetime.today().strftime("%Y-%m-%d")
     total_games = len(titles.keys())
 
@@ -26,6 +23,8 @@ def main():
 
     with open(history_path, "w", encoding="utf-8") as f:
         json.dump(history, f, ensure_ascii=False, indent=2)
+
+    print(f"✅ {today}: {total_games} games recorded.")
 
 if __name__ == "__main__":
     main()

@@ -26,7 +26,7 @@ def update_trends():
         achievement_count = fetch_achievement_count(appid)
         today_achievements[appid] = achievement_count
         today_playtime[appid] = playtime
-        time.sleep(1.1)
+        time.sleep(1.2)
 
     # 補齊今天沒有資料的AppID (成就)
     for appid, count in yesterday_achievements.items():

@@ -31,8 +31,6 @@ a:visited:not(.menu-link) {
     max-width: 1200px;
 }
 
-
-
 .friend-list {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));

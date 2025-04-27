@@ -4,7 +4,7 @@ load_dotenv()
 from flask import Flask, render_template, request, redirect, url_for, jsonify, send_from_directory, send_file, Blueprint, g
 import utils.steam_api as steam_api
 
-from utils.steam_api import get_friend_data, fetch_game_info
+from utils.steam_api import get_friend_data, fetch_game_info, load_cached_titles, get_game_title
 from utils.db import get_connection
 from utils.playtime_trend import get_playtime_by_appid, calculate_daily_minutes, summarize_minutes
 from utils.achievement_trend_db import get_playtime_by_date, get_achievements_by_date
@@ -711,24 +711,25 @@ def game_playtime(appid):
     except ValueError:
         return "Invalid AppID", 400
 
-    # 取得語言設定
     lang_override = request.cookies.get("lang_override")
-    if lang_override in lang_map:
-        steam_lang = lang_map[lang_override]
+    if lang_override:
+        lang = lang_override
     else:
         lang = request.accept_languages.best_match(["zh-tw", "ja", "en"], default="en")
-        steam_lang = lang_map.get(lang, "en")
 
-    # 讀取遊戲名稱
-    try:
-        with open('./database/game_titles.json', 'r', encoding='utf-8') as f:
-            game_titles = json.load(f)
-    except Exception:
-        game_titles = {}
+    # 取得遊戲名稱
+    titles = load_cached_titles()
+    game_info = titles.get(str(appid))
 
-    game_info = game_titles.get(str(appid_int))
+    steam_lang_map = {
+        "zh-tw": "tchinese",
+        "ja": "japanese",
+        "en": "english"
+    }
+    steam_lang = steam_lang_map.get(lang.lower(), "english")
+
     if game_info:
-        game_name = game_info.get(steam_lang) or game_info.get('en') or f"AppID {appid}"
+        game_name = game_info.get(steam_lang) or game_info.get('en') or next(iter(game_info.values()), f"AppID {appid}")
     else:
         game_name = f"AppID {appid}"
 
@@ -805,15 +806,9 @@ def games_trend():
 
 @cached_games_bp.route("/cached-games")
 def cached_games():
-    path = "./database/game_titles.json"
-    if not os.path.exists(path):
-        return jsonify([])
+    titles = load_cached_titles()
 
-    with open(path, "r", encoding="utf-8") as f:
-        data = json.load(f)
-
-    # 使用 get_locale 統一語系來源
-    locale = get_locale().lower()  # zh-TW → zh-tw
+    locale = get_locale().lower()
     steam_lang_map = {
         "zh-tw": "tchinese",
         "ja": "japanese",
@@ -822,8 +817,8 @@ def cached_games():
     steam_lang = steam_lang_map.get(locale, "english")
 
     result = []
-    for appid, names in data.items():
-        name = names.get(steam_lang) or names.get("en") or list(names.values())[0]
+    for appid, names in titles.items():
+        name = names.get(steam_lang) or names.get("en") or next(iter(names.values()), "")
         result.append({
             "appid": appid,
             "name": name

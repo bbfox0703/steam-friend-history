@@ -1,0 +1,26 @@
+#!/bin/bash
+
+# 設定來源資料庫位置與備份目錄
+DB_FILE="./database/steam_data.db"
+BACKUP_DIR="./backups"
+
+# 確保備份目錄存在
+mkdir -p "$BACKUP_DIR"
+
+# 產生時間戳記
+TIMESTAMP=$(date +"%Y-%m-%d_%H%M%S")
+
+# 設定中繼備份檔名
+TEMP_BACKUP="$BACKUP_DIR/steam_data_$TIMESTAMP.db"
+ZIP_BACKUP="$BACKUP_DIR/steam_data_$TIMESTAMP.db.zip"
+
+# 複製資料庫
+cp "$DB_FILE" "$TEMP_BACKUP"
+
+# 壓縮成 zip
+zip -j "$ZIP_BACKUP" "$TEMP_BACKUP"
+
+# 刪除未壓縮的 db 檔案
+rm "$TEMP_BACKUP"
+
+echo "[$(date)] 資料庫已壓縮備份：$ZIP_BACKUP"

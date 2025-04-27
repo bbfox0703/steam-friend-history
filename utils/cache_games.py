@@ -16,7 +16,7 @@ LANGUAGES = {
     'japanese': 'ja'
 }
 
-def update_cached_game_titles(langs, sleep_time):
+def update_cached_game_titles(langs, sleep_time=1.7):
     print("🔍 讀取目前持有遊戲清單...")
     owned_appids = fetch_owned_games()
     print(f"✅ 共 {len(owned_appids)} 個遊戲將進行更新")

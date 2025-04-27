@@ -2,6 +2,7 @@
 
 import json
 import os
+import time
 from datetime import datetime, timedelta
 from utils.steam_api import fetch_store_name
 
@@ -39,6 +40,7 @@ def recheck_unavailable(days_threshold=30):
             else:
                 print(f"⚠️ AppID {appid} 仍然無法取得，保留")
                 updated[appid] = today.strftime("%Y-%m-%d")
+            time.sleep(2)    
         except Exception as e:
             print(f"❌ AppID {appid} 檢查失敗: {e}")
             updated[appid] = today.strftime("%Y-%m-%d")

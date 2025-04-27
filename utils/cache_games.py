@@ -10,15 +10,11 @@ import functools
 print = functools.partial(print, flush=True)
 
 # 支援的語系
-LANGUAGES = {
-    'en': 'en',
-    'tchinese': 'zh-tw',
-    'japanese': 'ja'
-}
+LANGUAGES = ['en', 'tchinese', 'japanese']
 
 def update_cached_game_titles(langs, sleep_time=1.7):
     print("🔍 讀取目前持有遊戲清單...")
-    owned_games = fetch_owned_games()  # ⚠️ 是 dict列表
+    owned_games = fetch_owned_games()
     print(f"✅ 共 {len(owned_games)} 個遊戲將進行更新")
 
     # 讀取目前資料庫已經有的資料
@@ -33,9 +29,8 @@ def update_cached_game_titles(langs, sleep_time=1.7):
         appid_str = str(appid)
         existing = existing_data.get(appid_str, {})
 
-        # 建立更新後的標題資料
         updated_titles = {
-            'en': existing.get('en') or en_name,  # 優先保留db的，否則拿owned的英文名
+            'en': existing.get('en') or en_name,
             'tchinese': existing.get('tchinese'),
             'japanese': existing.get('japanese')
         }
@@ -49,7 +44,7 @@ def update_cached_game_titles(langs, sleep_time=1.7):
             if lang == 'en':
                 continue  # en直接用 owned的，不再查詢API
             if not updated_titles.get(lang):
-                store_lang = LANGUAGES.get(lang, 'en')
+                store_lang = lang  # ⚡ 正確: 直接用 lang 本身（en/tchinese/japanese）
                 name = fetch_store_name(appid, store_lang)
                 timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
                 if name:
@@ -72,7 +67,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     if args.lang == 'all':
-        langs = list(LANGUAGES.keys())
+        langs = LANGUAGES
     else:
         langs = [args.lang] if args.lang in LANGUAGES else ['en']
 

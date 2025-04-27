@@ -3,8 +3,8 @@ import json
 from datetime import datetime
 from utils.steam_api import fetch_recent_games, fetch_achievement_count
 
-ACHIEVEMENT_PATH = '/app/database/achievement_trend.json'
-PLAYTIME_PATH = '/app/database/playtime_trend.json'
+ACHIEVEMENT_PATH = './database/achievement_trend.json'
+PLAYTIME_PATH = './database/playtime_trend.json'
 
 def load_json(path):
     if os.path.exists(path):

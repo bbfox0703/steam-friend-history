@@ -2,6 +2,8 @@
 
 import json
 from utils.db import get_connection, init_db
+from datetime import datetime, timedelta
+from collections import OrderedDict
 
 # 匯入現有 JSON 檔案，轉存進 SQLite 資料庫
 def import_playtime_json(json_path):
@@ -46,7 +48,7 @@ def get_playtime_by_date(date):
     ''', (date,))
     rows = c.fetchall()
     conn.close()
-    
+
     return {str(appid): playtime_minutes for appid, playtime_minutes in rows}
 
 # 查詢某遊戲的所有日期資料 (回傳 list of dict)
@@ -63,6 +65,37 @@ def get_playtime_by_appid(appid):
     conn.close()
 
     return [{"date": date, "playtime_minutes": playtime_minutes} for date, playtime_minutes in rows]
+
+# 計算每日新增遊玩時間
+def calculate_daily_minutes(playtime_records):
+    daily_minutes = {}
+    last_playtime = None
+
+    for record in playtime_records:
+        date = record["date"]
+        today_playtime = record["playtime_minutes"]
+
+        if last_playtime is None:
+            diff = today_playtime if today_playtime and today_playtime <= 1440 else 0
+        else:
+            diff = today_playtime - last_playtime if today_playtime is not None else 0
+            if diff < 0 or diff > 1440:
+                diff = 0
+
+        daily_minutes[date] = diff
+
+        if today_playtime is not None:
+            last_playtime = today_playtime
+
+    return daily_minutes
+
+# 匯總成月或年資料
+def summarize_minutes(daily_minutes, mode='month'):
+    summary = {}
+    for d, v in daily_minutes.items():
+        key = d[:7] if mode == 'month' else d[:4]
+        summary[key] = summary.get(key, 0) + v
+    return OrderedDict(sorted(summary.items()))
 
 # 測試用 (單獨執行時)
 if __name__ == "__main__":

@@ -25,7 +25,7 @@ const totals = {{ totals | safe }};
 const ctx = document.getElementById('gamesChart').getContext('2d');
 
 const minTotal = Math.min(...totals);
-const suggestedMin = Math.max(0, Math.floor(minTotal * 0.9));  // 或自己改成 minTotal - 10
+const suggestedMin = Math.max(0, Math.floor(minTotal * 0.95));  // 或自己改成 minTotal - 10
 
 const chart = new Chart(ctx, {
     type: 'line',

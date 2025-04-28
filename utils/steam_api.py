@@ -53,7 +53,7 @@ def fetch_friend_profiles(steam_ids):
         response = requests.get(url)
         print(f"🔍 {time.strftime('%Y-%m-%d %H:%M:%S')} fetch_friend_profiles(): {url}")
 
-        time.sleep(1)
+        time.sleep(5)
 
         if response.status_code == 200:
             players = response.json().get('response', {}).get('players', [])

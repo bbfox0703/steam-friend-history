@@ -46,12 +46,12 @@ def fetch_friend_profiles(steam_ids):
         return {}
 
     result = {}
-    for i in range(0, len(steam_ids), 100):
-        batch = steam_ids[i:i + 100]
+    for i in range(0, len(steam_ids), 50):
+        batch = steam_ids[i:i + 50]
         ids_str = ','.join(batch)
         url = f"https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v2/?key={API_KEY}&steamids={ids_str}"
         response = requests.get(url)
-        print(f"🔍 {time.strftime('%Y-%m-%d %H:%M:%S')} fetch_friend_profiles(): {url}")
+        #print(f"🔍 {time.strftime('%Y-%m-%d %H:%M:%S')} fetch_friend_profiles(): {url}")
 
         time.sleep(0.5)
 

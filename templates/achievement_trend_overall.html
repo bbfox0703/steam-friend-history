@@ -18,7 +18,7 @@
 <canvas id="playtimeChart" height="100" style="margin-top: 50px;"></canvas>
 
 <div>
-  <label>{{ _('顯示單位變更') }}:</label>
+  <label>{{ _('顯示單位') }}:</label>
   <select id="modeSelect">
     <option value="day">{{ _('天') }}</option>
     <option value="month">{{ _('月') }}</option>
@@ -98,7 +98,7 @@ function drawAchievementTrend(forceZeroFirstPoint = true) {
     data: {
       labels: labels,
       datasets: [{
-        label: '{{ _('每日成就增量') }}',
+        label: '{{ _('成就趨勢') }}',
         data: data,
         borderWidth: 2,
         tension: 0.3
@@ -130,7 +130,7 @@ function drawPlaytimeTrend() {
     data: {
       labels: labels,
       datasets: [{
-        label: '{{ _('每日遊玩時間變化') }}',
+        label: '{{ _('每日新增遊玩時間（分鐘）') }}',
         data: data,
         borderWidth: 2,
         tension: 0.3

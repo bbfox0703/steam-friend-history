@@ -38,7 +38,7 @@ let mode = '{{ mode }}';
 function processDailyChange(data, granularity, forceZeroFirstPoint = true) {
   const sortedDates = Object.keys(data).sort();
   const result = {};
-  let prevTotal = 0;
+  let prevTotal = null; // ❗️注意，這裡不是0，而是null
   let isFirst = true;
 
   for (const date of sortedDates) {
@@ -52,7 +52,12 @@ function processDailyChange(data, granularity, forceZeroFirstPoint = true) {
       todayTotal += appData[appid];
     }
 
-    const diff = todayTotal - prevTotal;
+    let diff = 0;
+    if (prevTotal === null) {
+      diff = todayTotal; // ❗️如果是第一天或沒有前一天，直接用 todayTotal
+    } else {
+      diff = todayTotal - prevTotal;
+    }
 
     if (!(key in result)) result[key] = 0;
 
@@ -72,6 +77,7 @@ function processDailyChange(data, granularity, forceZeroFirstPoint = true) {
 
   return result;
 }
+
 
 function drawAchievementTrend(forceZeroFirstPoint = true) {
   const dailyData = processDailyChange(achievements, mode, forceZeroFirstPoint);

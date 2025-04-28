@@ -249,7 +249,4 @@ docker exec -it steam-friend-history-web-1 cat /etc/cron.d/steam-friend-cron
 ```bash
 */10 * * * * root /app/cronjob/update.sh >> /var/log/cron_exec.log 2>&1
 0 * * * * root echo "✅ Ping cron at $(date)" >> /var/log/cron_exec.log
-0 11 * * * root /usr/sbin/logrotate /etc/logrotate.d/steam-friend-logs >> /var/log/cron_exec.log 2>&1
-5 11 * * * root /app/cronjob/daily.sh >> /var/log/cron_exec.log 2>&1
-2 11 * * * root /app/cronjob/daily_level.sh >> /var/log/cron_exec.log 2>&1
 ```

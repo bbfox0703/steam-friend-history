@@ -1,8 +1,9 @@
-![Steam Friend Info](./docs/Steam%20Friend%20Info.png)
+![Steam Friend Info]./../Steam%20Friend%20Info.png)
 # 🎮 Steam Friend Info（自前ホスト版）
 
 Raspberry Pi 5 または Linux 仮想マシン上で動作する、軽量な Steam フレンド記録分析システムです。Docker を使用して簡単にデプロイ可能。すべてのデータはローカルに保存され、Steam API Key を第三者サービスにアップロードする必要がないため、プライバシーを重視するユーザーに最適です。
-
+  
+ウェブインターフェース上のメッセージについては、日本語ブラウザ向けに機械翻訳を適用しておりますが、サーバー側で実行されるバックグラウンドプログラムには適用しておりません。
 ---
 
 ## 🌟 システム機能
@@ -49,22 +50,22 @@ Raspberry Pi 5 または Linux 仮想マシン上で動作する、軽量な Ste
 - 実績トレンドグラフは初期段階では正確ではないことがあります。これは Steam API が直近14日間プレイしたゲームしか返却しない仕様によるものです。
 
 ## 画面例：フレンドリスト
-![ホーム画面プレビュー](./docs/index.png)
+![ホーム画面プレビュー]./../index.png)
 ## 画面例：国別分析
-![国別分析](./docs/country.png)
+![国別分析]./../country.png)
 ## 画面例：フレンドトレンド
-![フレンドトレンド](./docs/trend.png)
+![フレンドトレンド]./../trend.png)
 ## 画面例：フレンドステータスボード
-![フレンドステータスボード](./docs/status_board.png)
+![フレンドステータスボード]./../status_board.png)
 ## 画面例：変更履歴
 相手が何度名前を変えても、誰か一目で分かる
-![変更履歴](./docs/history.png)
+![変更履歴]./../history.png)
 ## 画面例：実績達成トレンド
-![実績達成トレンド](./docs/achievement_trend.png)
+![実績達成トレンド]./../achievement_trend.png)
 ### AppIDの入力が必要
-![appid](./docs/appid.png)
+![appid]./../appid.png)
 ### 単一ゲームのプレイ時間情報（常時起動が必要）
-![game time](./docs/game_play_time.png)
+![game time]./../game_play_time.png)
 
 ---
 
@@ -133,7 +134,7 @@ http://192.168.1.100:3000
 ```bash
 docker ps
 ```
-![docker ps](./docs/docker_ps.png)
+![docker ps]./../docker_ps.png)
 
 ### docker bash 実行
 コンテナ名を自分の環境に合わせて変更
@@ -143,14 +144,14 @@ cd /app
 PYTHONPATH="." python3 utils/cache_games.py --lang all --sleep 1
 ```
 問題なければゲームキャッシュが開始されます  
-![Cache game](./docs/cache_game.png)
+![Cache game]./../cache_game.png)
 - ゲーム1本あたり約10〜15秒かかります
 - 初回は必ずすべて完了させる必要があります
 - 2回目以降は不足分のみ更新
 - ゲーム名変更は自動反映されません
 
 実績トレンドグラフ作成のためにゲームリストが必要です。  
-![Game search](./docs/game_search.png)
+![Game search]./../game_search.png)
 
 ---
 
@@ -197,7 +198,7 @@ docker version
 docker info
 docker run hello-world
 ```
-![Hello Docker](./docs/hello_docker.png)
+![Hello Docker]./../hello_docker.png)
 
 ```bash
 cd

@@ -12,6 +12,8 @@ print = functools.partial(print, flush=True)
 # 確保資料表存在
 init_db()
 
+DB_PATH = "./database/steam_data.db"
+
 BATCH_SIZE = 10
 SLEEP_TIME = 2  # seconds
 MAX_RETRY = 3
@@ -51,22 +53,22 @@ def process_appid(appid):
     print(f"🔍 {time.strftime('%Y-%m-%d %H:%M:%S')} 開始補資料 AppID: {appid}")
     achievements = fetch_achievements(appid)
     if not achievements:
-        print(f"⚠️ {time.strftime('%Y-%m-%d %H:%M:%S')} 沒取得成就資料 AppID: {appid}")
+        print(f"⚠️ {time.strftime('%Y-%m-%d %H:%M:%S')} AppID {appid} 沒有回傳任何成就資料")
         return False
 
-    # 按解鎖時間整理每天成就數
     date_counts = {}
     for item in achievements:
-        unlock_time = item.get('unlock_time')
-        if unlock_time:
-            date = datetime.utcfromtimestamp(unlock_time).strftime('%Y-%m-%d')
-            date_counts[date] = date_counts.get(date, 0) + 1
+        if item.get('achieved', 0) == 1:
+            unlocktime = item.get('unlocktime')  # 🔥 正確欄位名
+            if unlocktime:
+                date = datetime.utcfromtimestamp(unlocktime).strftime('%Y-%m-%d')
+                date_counts[date] = date_counts.get(date, 0) + 1
 
     if not date_counts:
         print(f"⚠️ {time.strftime('%Y-%m-%d %H:%M:%S')} AppID {appid} 沒有有效成就解鎖紀錄")
         return False
 
-    # 累積成就數
+    # 按日期累積成就數
     sorted_dates = sorted(date_counts.keys())
     cumulative = 0
     cumulative_counts = {}
@@ -79,9 +81,10 @@ def process_appid(appid):
     return True
 
 def main():
+    init_db()  # 確保資料表存在
     pending_rows = fetch_pending_queue()
     if not pending_rows:
-        print("✅ {time.strftime('%Y-%m-%d %H:%M:%S')} 沒有 pending 成就需要補資料")
+        print("✅ 沒有 pending 成就需要補資料")
         return
 
     for row in pending_rows:

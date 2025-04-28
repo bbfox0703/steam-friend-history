@@ -38,6 +38,7 @@ def fetch_friend_list():
     response = requests.get(url)
     if response.status_code != 200:
         raise Exception(f"Steam API Error: {response.status_code} {response.text}")
+    time.sleep(0.2)
     return response.json().get('friendslist', {}).get('friends', [])
 
 def fetch_friend_profiles(steam_ids):
@@ -45,11 +46,14 @@ def fetch_friend_profiles(steam_ids):
         return {}
 
     result = {}
-    for i in range(0, len(steam_ids), 100):
-        batch = steam_ids[i:i + 100]
+    for i in range(0, len(steam_ids), 20):
+        batch = steam_ids[i:i + 20]
         ids_str = ','.join(batch)
         url = f"https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v2/?key={API_KEY}&steamids={ids_str}"
         response = requests.get(url)
+        print(f"🔍 {time.strftime('%Y-%m-%d %H:%M:%S')} fetch_friend_profiles(), batch {i}: {url}")
+
+        time.sleep(4)
 
         if response.status_code == 200:
             players = response.json().get('response', {}).get('players', [])
@@ -64,8 +68,6 @@ def fetch_friend_profiles(steam_ids):
                 }
         else:
             print(f"⚠️ Failed batch {i} - Status {response.status_code} {response.text}")
-
-        time.sleep(0.5)
 
     return result
 
@@ -192,15 +194,38 @@ def update_friend_list():
     backup_friend_data(enriched_friends)
     return len(enriched_friends)
 
-def fetch_achievements(appid, steam_id=None):
-    if steam_id is None:
-        steam_id = STEAM_ID
-    url = f"https://api.steampowered.com/ISteamUserStats/GetPlayerAchievements/v1/?key={API_KEY}&steamid={steam_id}&appid={appid}"
+#def fetch_achievements(appid, steam_id=None):
+#    if steam_id is None:
+#        steam_id = STEAM_ID
+#    url = f"https://api.steampowered.com/ISteamUserStats/GetPlayerAchievements/v1/?key={API_KEY}&steamid={steam_id}&appid={appid}"
+#    print(f"🔍 {time.strftime('%Y-%m-%d %H:%M:%S')} fetch_achievements()")
+#    response = requests.get(url)
+#    if response.status_code != 200:
+#        raise Exception(f"Steam API Error: {response.status_code} {response.text}")
+#    return response.json().get("playerstats", {}).get("achievements", [])
+
+def fetch_achievements(appid):
+    url = f"https://api.steampowered.com/ISteamUserStats/GetPlayerAchievements/v1/?key={API_KEY}&steamid={STEAM_ID}&appid={appid}"
     print(f"🔍 {time.strftime('%Y-%m-%d %H:%M:%S')} fetch_achievements()")
-    response = requests.get(url)
-    if response.status_code != 200:
-        raise Exception(f"Steam API Error: {response.status_code} {response.text}")
-    return response.json().get("playerstats", {}).get("achievements", [])
+    try:
+        response = requests.get(url, timeout=10)
+        if response.status_code == 200:
+            data = response.json()
+            achievements = data.get('playerstats', {}).get('achievements', [])
+            return achievements
+        elif response.status_code == 400:
+            # ⚡ 特別處理無成就遊戲
+            err_data = response.json()
+            if 'error' in err_data.get('playerstats', {}):
+                print(f"⚠️ {time.strftime('%Y-%m-%d %H:%M:%S')} AppID {appid} 無成就，跳過")
+                return []
+            else:
+                raise Exception(f"Steam API Error: {response.status_code} {response.text}")
+        else:
+            raise Exception(f"Steam API Error: {response.status_code} {response.text}")
+    except Exception as e:
+        print(f"❌ {time.strftime('%Y-%m-%d %H:%M:%S')} Fetch achievements failed: {e}")
+        return []
 
 
 def fetch_achievement_data(appid, steam_id=None):

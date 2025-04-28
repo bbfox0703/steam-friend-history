@@ -23,6 +23,26 @@ const deltas = {{ deltas | safe }};
 const totals = {{ totals | safe }};
 
 const ctx = document.getElementById('gamesChart').getContext('2d');
+
+//const totals = Object.values(totalsByDate); // 持有總數陣列
+const minTotal = Math.min(...totals);
+const maxTotal = Math.max(...totals);
+
+// 最小值
+const suggestedMin = Math.max(0, minTotal - 10);
+
+// 最大值留點空間
+const suggestedMax = maxTotal + 10;
+
+// 自動計算ticks stepSize
+let stepSize = 10; // 預設每格10
+const range = suggestedMax - suggestedMin;
+if (range > 1000) stepSize = 100;
+else if (range > 500) stepSize = 50;
+else if (range > 200) stepSize = 20;
+else if (range > 100) stepSize = 10;
+else if (range > 50) stepSize = 5;
+
 const chart = new Chart(ctx, {
     type: 'line',
     data: {
@@ -31,22 +51,26 @@ const chart = new Chart(ctx, {
             {
                 label: '{{ _("每日持有變化數") }}',
                 data: deltas,
-                borderColor: 'green',
+                borderColor: 'rgba(75, 192, 192, 1)',
                 backgroundColor: 'transparent',
                 yAxisID: 'y',
                 pointRadius: 4,
                 pointHoverRadius: 6,
-                borderWidth: 2
+                borderWidth: 2,
+				tension: 0.3,
+				hoverBorderWidth: 4,
             },
             {
                 label: '{{ _("持有總數") }}',
                 data: totals,
-                borderColor: '#3498db',
+                borderColor: 'rgba(255, 99, 132, 1)',
                 backgroundColor: 'transparent',
                 yAxisID: 'y1',
                 pointRadius: 4,
                 pointHoverRadius: 6,
-                borderWidth: 2
+                borderWidth: 2,
+				tension: 0.3,
+				hoverBorderWidth: 4,
             }
         ]
     },
@@ -72,7 +96,12 @@ const chart = new Chart(ctx, {
                 grid: {
                     drawOnChartArea: false
                 },
-                beginAtZero: true
+                beginAtZero: false,
+                suggestedMin: suggestedMin,
+                suggestedMax: suggestedMax,
+                ticks: {
+                    stepSize: stepSize
+                }
             }
         },
         plugins: {

@@ -1,0 +1,7 @@
+將成就歷史資料存起來
+
+add_to_achievement_queue.py	把指定 appid 加入 queue，等待補資料
+achievement_backfill.py	從 queue 取出 appid，向 Steam API 查資料，寫入 history
+achievement_backfill.sh	定時呼叫 achievement_backfill.py 的 shell script
+
+目前無前端界面

@@ -118,7 +118,7 @@
   "Steam 等級走勢": "Steam Level Trend",
   "Steam 等級": "Steam Level",
   "Steam 等級紀錄": "Steam Level History",
-  "每10分鐘自動更新": "Refresh every 10 minutes",
+  "每20分鐘自動更新": "Refresh every 15 minutes",
   "線上好友": "Online", 
   "離線好友": "Offline",
   "最後更新時間：": "Last updated:",
@@ -152,5 +152,6 @@
   "持有遊戲數趨勢圖": "Owned Games Trend Chart",
   "每日持有變化數": "Daily Owned Games Change",
   "持有總數": "Total Owned Games",
-  "遊玩時間趨勢": "Playtime Trend"  
+  "遊玩時間趨勢": "Playtime Trend",
+  "第一筆成就趨勢強制為0": "Force the first achievement trend point to 0"  
 }

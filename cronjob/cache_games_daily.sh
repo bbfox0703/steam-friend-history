@@ -1,4 +1,7 @@
 #!/bin/bash
+# 1) 取得持有遊戲名稱：繁中、日文、英文
+# 2) 下架或是不存在的遊戲30天內不再抓取
+# 3) 取得持有遊戲總數
 (
   flock -n 9 || { echo "[$(date '+%Y-%m-%d %H:%M:%S')] 🔒 cache_games_daily.sh skipped, another instance running" >> /var/log/cron_exec.log; exit 1; }
   echo "[$(date '+%Y-%m-%d %H:%M:%S')] 🕒 cache_games_daily.sh started at $(date)" >> /var/log/cron_exec.log

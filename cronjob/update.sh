@@ -1,7 +1,9 @@
 #!/bin/bash
+# 取得好友列表及更名歷史資料；此指令使用大量api call
 
 # 記錄開始時間
-echo "[$(date '+%Y-%m-%d %H:%M:%S')] 🔍 Working dir: $(pwd)" >> /var/log/cron_exec.log
+echo "[$(date '+%Y-%m-%d %H:%M:%S')] 🕒 update.sh started at $(date)" >> /var/log/cron_exec.log
+echo "[$(date '+%Y-%m-%d %H:%M:%S')] 🔍 update.sh cron: Working dir: $(pwd)" >> /var/log/cron_exec.log
 
 # Flask 更新資料
 curl -s http://localhost:3000/update

@@ -1,21 +1,25 @@
-FROM python:3.11-slim
+FROM python:3.11-slim-bookworm
+
+# 停用互動模式，避免 tzdata 等卡住
+ENV DEBIAN_FRONTEND=noninteractive
 
 WORKDIR /app
 
+# 更新 & 安裝必要套件
+RUN apt-get update && \
+    apt-get upgrade -y && \
+    apt-get install -y cron curl supervisor logrotate procps tzdata jq zip && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
+# 複製需求並安裝 Python 套件
 COPY requirements.txt ./
 RUN pip install --no-cache-dir -r requirements.txt
 
-# 停用 「互動模式要求選時區」
-ENV DEBIAN_FRONTEND=noninteractive
+# 恢復互動模式（可選）
+ENV DEBIAN_FRONTEND=dialog
 
-# 安裝 cron + curl + supervisor + logrotate + ps
-RUN apt-get update && \
-    apt-get install -y cron curl supervisor logrotate procps tzdata jq zip && \
-    rm -rf /var/lib/apt/lists/*	
-	
-ENV DEBIAN_FRONTEND=dialog	
-
-# 複製專案
+# 複製專案本體
 COPY . .
 
 # 確保 utils 是模組（解決 ModuleNotFoundError）
@@ -23,8 +27,6 @@ RUN touch /app/utils/__init__.py
 
 # 複製 cronjob 目錄（內含 shell script 與排程設定）
 COPY cronjob /app/cronjob
-
-# 設定 cronjob 目錄下的所有 .sh 都有執行權限
 RUN chmod +x /app/cronjob/*.sh
 
 # 複製 logrotate 設定檔

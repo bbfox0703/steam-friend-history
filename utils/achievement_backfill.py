@@ -38,14 +38,28 @@ def update_queue_status(appid, status, retry_count=0):
     conn.commit()
     conn.close()
 
-def insert_achievement_history(appid, date_counts):
+def insert_or_update_achievement_history(appid, date_counts):
     conn = get_connection()
     c = conn.cursor()
-    for date, count in date_counts.items():
-        c.execute("""
-            INSERT INTO achievement_history (date, appid, cumulative_achievements)
-            VALUES (?, ?, ?)
-        """, (date, appid, count))
+    for date, cumulative in date_counts.items():
+        # 先檢查是否已有這天這個appid的紀錄
+        c.execute("SELECT id FROM achievement_history WHERE date = ? AND appid = ?", (date, appid))
+        row = c.fetchone()
+        if row:
+            # 有的話更新
+            c.execute("""
+                UPDATE achievement_history
+                SET cumulative_achievements = ?
+                WHERE id = ?
+            """, (cumulative, row['id']))
+            print(f"🔄 更新 {appid} | {date} ➔ {cumulative}")
+        else:
+            # 沒有的話插入
+            c.execute("""
+                INSERT INTO achievement_history (date, appid, cumulative_achievements)
+                VALUES (?, ?, ?)
+            """, (date, appid, cumulative))
+            print(f"➕ 插入 {appid} | {date} ➔ {cumulative}")
     conn.commit()
     conn.close()
 
@@ -76,7 +90,7 @@ def process_appid(appid):
         cumulative += date_counts[date]
         cumulative_counts[date] = cumulative
 
-    insert_achievement_history(appid, cumulative_counts)
+    insert_or_update_achievement_history(appid, cumulative_counts)
     print(f"✅ {time.strftime('%Y-%m-%d %H:%M:%S')} 完成補資料 AppID: {appid}")
     return True
 

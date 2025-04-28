@@ -56,4 +56,4 @@ def get_achievements_by_date(date):
 
 # 測試用 (單獨執行時)
 if __name__ == "__main__":
-    print("測試：今日成就資料：", get_achievements_by_date("2025-04-27"))
+    print("測試：今日成就資料：", get_achievements_by_date("2025-04-25"))

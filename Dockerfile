@@ -8,7 +8,7 @@ WORKDIR /app
 # 更新 & 安裝必要套件
 RUN apt-get update && \
     apt-get upgrade -y && \
-    apt-get install -y cron curl supervisor logrotate procps tzdata jq zip && \
+    apt-get install -y cron curl supervisor logrotate procps tzdata jq zip sqlite3 && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 

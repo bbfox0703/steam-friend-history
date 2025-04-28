@@ -69,7 +69,9 @@ const chart = new Chart(ctx, {
                 yAxisID: 'y',
                 pointRadius: 4,
                 pointHoverRadius: 6,
-                borderWidth: 2
+                borderWidth: 2,
+				tension: 0.3,
+				hoverBorderWidth: 4,
             },
             {
                 label: '{{ _("累積完成百分比") }}',
@@ -79,7 +81,9 @@ const chart = new Chart(ctx, {
                 yAxisID: 'y1',
                 pointRadius: 4,
                 pointHoverRadius: 6,
-                borderWidth: 2
+                borderWidth: 2,
+				tension: 0.3,
+				hoverBorderWidth: 4,
             }
         ]
     },

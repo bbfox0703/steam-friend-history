@@ -2,5 +2,5 @@
 
 PYTHONPATH="/app"
 
-python3 -m utils.add_to_achievement_queue_batch ./utils/appid_list.txt
+python3 -m utils.add_to_achievement_queue_batch ./utils/queue_appid_list.txt
 

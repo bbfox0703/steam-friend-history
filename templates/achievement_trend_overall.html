@@ -38,7 +38,7 @@ let mode = '{{ mode }}';
 function processDailyChange(data, granularity, forceZeroFirstPoint = true) {
   const sortedDates = Object.keys(data).sort();
   const result = {};
-  let prevAppTotals = {};
+  let prevTotal = 0;
   let isFirst = true;
 
   for (const date of sortedDates) {
@@ -47,13 +47,12 @@ function processDailyChange(data, granularity, forceZeroFirstPoint = true) {
     else if (granularity === 'year') key = date.slice(0, 4);
 
     const appData = data[date];
-    let diffTotal = 0;
-
+    let todayTotal = 0;
     for (const appid in appData) {
-      const current = appData[appid];
-      const previous = prevAppTotals[appid] || 0;
-      diffTotal += (current - previous);
+      todayTotal += appData[appid];
     }
+
+    const diff = todayTotal - prevTotal;
 
     if (!(key in result)) result[key] = 0;
 
@@ -61,14 +60,14 @@ function processDailyChange(data, granularity, forceZeroFirstPoint = true) {
       if (forceZeroFirstPoint) {
         result[key] = 0;
       } else {
-        result[key] += diffTotal;
+        result[key] = diff;
       }
       isFirst = false;
     } else {
-      result[key] += diffTotal;
+      result[key] += diff;
     }
 
-    prevAppTotals = appData;
+    prevTotal = todayTotal;
   }
 
   return result;

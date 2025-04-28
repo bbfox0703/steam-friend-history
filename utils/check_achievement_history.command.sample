@@ -1,0 +1,5 @@
+#!/bin/bash
+
+PYTHONPATH="/app"
+
+python3 -m utils.check_achievement_history 1044720

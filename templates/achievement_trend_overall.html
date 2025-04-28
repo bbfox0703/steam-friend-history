@@ -1,30 +1,30 @@
 {% extends "base.html" %}
+
 {% block content %}
 
 <h1>{{ _('成就及遊玩時間總趨勢') }}</h1>
 
-<!-- 🔥 成就趨勢 Toggle 控制器 -->
-<div style="margin-bottom: 10px;">
+<!-- 顯示單位切換 -->
+<div class="toggle-buttons" style="margin-bottom: 15px;">
+  <span>{{ _('顯示單位') }}：</span>
+  <a href="javascript:void(0);" id="modeDay" class="mode-btn">{{ _('日') }}</a>
+  <a href="javascript:void(0);" id="modeMonth" class="mode-btn">{{ _('月') }}</a>
+  <a href="javascript:void(0);" id="modeYear" class="mode-btn">{{ _('年') }}</a>
+</div>
+
+<!-- 成就趨勢 Toggle 控制器 -->
+<div style="margin-bottom: 20px;">
   <label>
     <input type="checkbox" id="firstZeroToggle">
     {{ _('第一筆成就趨勢強制為0') }}
   </label>
 </div>
 
-<!-- 🔥 成就趨勢圖表 -->
+<!-- 成就趨勢圖表 -->
 <canvas id="achievementChart" height="100"></canvas>
 
-<!-- 🔥 遊玩時間趨勢圖表 -->
+<!-- 遊玩時間趨勢圖表 -->
 <canvas id="playtimeChart" height="100" style="margin-top: 50px;"></canvas>
-
-<div>
-  <label>{{ _('顯示單位') }}:</label>
-  <select id="modeSelect">
-    <option value="day">{{ _('天') }}</option>
-    <option value="month">{{ _('月') }}</option>
-    <option value="year">{{ _('年') }}</option>
-  </select>
-</div>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
@@ -46,13 +46,12 @@ function processDailyChange(data, granularity, forceZeroFirstPoint = true) {
     if (granularity === 'month') key = date.slice(0, 7);
     else if (granularity === 'year') key = date.slice(0, 4);
 
-    const appData = data[date] || {};  // 🔥 保險，即使是 undefined
+    const appData = data[date] || {};
     let todayTotal = 0;
     for (const appid in appData) {
       todayTotal += appData[appid];
     }
 
-    // 🔥 如果今天資料是空的就直接跳過，不畫！
     if (todayTotal === 0 && prevTotal === null) {
       continue;
     }
@@ -88,9 +87,7 @@ function drawAchievementTrend(forceZeroFirstPoint = true) {
   const labels = Object.keys(dailyData);
   const data = Object.values(dailyData);
 
-  if (achievementChartInstance) {
-    achievementChartInstance.destroy();
-  }
+  if (achievementChartInstance) achievementChartInstance.destroy();
 
   const ctx = document.getElementById('achievementChart').getContext('2d');
   achievementChartInstance = new Chart(ctx, {
@@ -107,9 +104,7 @@ function drawAchievementTrend(forceZeroFirstPoint = true) {
     options: {
       responsive: true,
       scales: {
-        y: {
-          beginAtZero: true
-        }
+        y: { beginAtZero: true }
       }
     }
   });
@@ -120,9 +115,7 @@ function drawPlaytimeTrend() {
   const labels = Object.keys(dailyData);
   const data = Object.values(dailyData);
 
-  if (playtimeChartInstance) {
-    playtimeChartInstance.destroy();
-  }
+  if (playtimeChartInstance) playtimeChartInstance.destroy();
 
   const ctx = document.getElementById('playtimeChart').getContext('2d');
   playtimeChartInstance = new Chart(ctx, {
@@ -139,38 +132,66 @@ function drawPlaytimeTrend() {
     options: {
       responsive: true,
       scales: {
-        y: {
-          beginAtZero: true
-        }
+        y: { beginAtZero: true }
       }
     }
   });
 }
 
+function updateCharts() {
+  const forceZero = document.getElementById('firstZeroToggle').checked;
+  drawAchievementTrend(forceZero);
+  drawPlaytimeTrend();
+}
+
 window.addEventListener('DOMContentLoaded', function() {
   const toggle = document.getElementById('firstZeroToggle');
   const savedToggle = localStorage.getItem('forceZeroFirstPoint');
+
   if (savedToggle !== null) {
     toggle.checked = savedToggle === 'true';
   } else {
     toggle.checked = true;
   }
 
-  drawAchievementTrend(toggle.checked);
-  drawPlaytimeTrend();
+  updateCharts();
 
   toggle.addEventListener('change', function() {
-    const forceZero = this.checked;
-    localStorage.setItem('forceZeroFirstPoint', forceZero);
-    drawAchievementTrend(forceZero);
+    localStorage.setItem('forceZeroFirstPoint', this.checked);
+    updateCharts();
   });
 
-  document.getElementById('modeSelect').addEventListener('change', function() {
-    mode = this.value;
-    drawAchievementTrend(document.getElementById('firstZeroToggle').checked);
-    drawPlaytimeTrend();
-  });
+  document.getElementById('modeDay').addEventListener('click', () => { mode = 'day'; updateCharts(); updateActiveMode(); });
+  document.getElementById('modeMonth').addEventListener('click', () => { mode = 'month'; updateCharts(); updateActiveMode(); });
+  document.getElementById('modeYear').addEventListener('click', () => { mode = 'year'; updateCharts(); updateActiveMode(); });
+
+  updateActiveMode();
 });
+
+function updateActiveMode() {
+  document.getElementById('modeDay').classList.remove('active');
+  document.getElementById('modeMonth').classList.remove('active');
+  document.getElementById('modeYear').classList.remove('active');
+
+  if (mode === 'day') document.getElementById('modeDay').classList.add('active');
+  else if (mode === 'month') document.getElementById('modeMonth').classList.add('active');
+  else if (mode === 'year') document.getElementById('modeYear').classList.add('active');
+}
 </script>
+
+<style>
+.mode-btn {
+  padding: 6px 12px;
+  border: 1px solid #ccc;
+  margin: 0 4px;
+  text-decoration: none;
+  color: #000;
+  border-radius: 4px;
+}
+.mode-btn.active {
+  background-color: #007bff;
+  color: white;
+}
+</style>
 
 {% endblock %}

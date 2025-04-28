@@ -3,12 +3,17 @@ FROM python:3.11-slim
 WORKDIR /app
 
 COPY requirements.txt ./
-RUN pip install -r requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
+
+# 停用 「互動模式要求選時區」
+ENV DEBIAN_FRONTEND=noninteractive
 
 # 安裝 cron + curl + supervisor + logrotate + ps
 RUN apt-get update && \
     apt-get install -y cron curl supervisor logrotate procps tzdata jq zip && \
     rm -rf /var/lib/apt/lists/*	
+	
+ENV DEBIAN_FRONTEND=dialog	
 
 # 複製專案
 COPY . .

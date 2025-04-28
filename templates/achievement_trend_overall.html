@@ -1,37 +1,32 @@
-<!DOCTYPE html>
-<html lang="zh-TW">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>{{ _('成就及遊玩時間總趨勢') }}</title>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-</head>
-<body>
-  <h1>{{ _('成就及遊玩時間總趨勢') }}</h1>
+{% extends "base.html" %}
+{% block content %}
 
-  <!-- 🔥 成就趨勢 Toggle 控制器 -->
-  <div style="margin-bottom: 10px;">
-    <label>
-      <input type="checkbox" id="firstZeroToggle">
-      {{ _('第一筆成就趨勢強制為0') }}
-    </label>
-  </div>
+<h1>{{ _('成就及遊玩時間總趨勢') }}</h1>
 
-  <!-- 🔥 成就趨勢圖表 -->
-  <canvas id="achievementChart" height="100"></canvas>
+<!-- 🔥 成就趨勢 Toggle 控制器 -->
+<div style="margin-bottom: 10px;">
+  <label>
+    <input type="checkbox" id="firstZeroToggle">
+    {{ _('第一筆成就趨勢強制為0') }}
+  </label>
+</div>
 
-  <!-- 🔥 遊玩時間趨勢圖表 -->
-  <canvas id="playtimeChart" height="100" style="margin-top: 50px;"></canvas>
+<!-- 🔥 成就趨勢圖表 -->
+<canvas id="achievementChart" height="100"></canvas>
 
-  <div>
-    <label>{{ _('顯示單位變更') }}:</label>
-    <select id="modeSelect">
-      <option value="day">{{ _('天') }}</option>
-      <option value="month">{{ _('月') }}</option>
-      <option value="year">{{ _('年') }}</option>
-    </select>
-  </div>
+<!-- 🔥 遊玩時間趨勢圖表 -->
+<canvas id="playtimeChart" height="100" style="margin-top: 50px;"></canvas>
 
+<div>
+  <label>{{ _('顯示單位變更') }}:</label>
+  <select id="modeSelect">
+    <option value="day">{{ _('天') }}</option>
+    <option value="month">{{ _('月') }}</option>
+    <option value="year">{{ _('年') }}</option>
+  </select>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
 let achievementChartInstance = null;
 let playtimeChartInstance = null;
@@ -169,5 +164,4 @@ window.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 
-</body>
-</html>
+{% endblock %}

@@ -205,7 +205,7 @@ def update_friend_list():
 #    return response.json().get("playerstats", {}).get("achievements", [])
 
 def fetch_achievements(appid):
-    url = f"https://api.steampowered.com/ISteamUserStats/GetPlayerAchievements/v1/?key={STEAM_API_KEY}&steamid={STEAM_ID}&appid={appid}"
+    url = f"https://api.steampowered.com/ISteamUserStats/GetPlayerAchievements/v1/?key={API_KEY}&steamid={STEAM_ID}&appid={appid}"
     print(f"🔍 {time.strftime('%Y-%m-%d %H:%M:%S')} fetch_achievements()")
     try:
         response = requests.get(url, timeout=10)

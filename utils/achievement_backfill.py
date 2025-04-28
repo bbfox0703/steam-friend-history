@@ -2,9 +2,12 @@
 
 import sqlite3
 import time
+import functools
 from datetime import datetime
 from utils.steam_api import fetch_achievements
 from utils.db import get_connection, init_db
+
+print = functools.partial(print, flush=True)
 
 # 確保資料表存在
 init_db()
@@ -45,10 +48,10 @@ def insert_achievement_history(appid, date_counts):
     conn.close()
 
 def process_appid(appid):
-    print(f"🔍 開始補資料 AppID: {appid}")
+    print(f"🔍 {time.strftime('%Y-%m-%d %H:%M:%S')} 開始補資料 AppID: {appid}")
     achievements = fetch_achievements(appid)
     if not achievements:
-        print(f"⚠️ 沒取得成就資料 AppID: {appid}")
+        print(f"⚠️ {time.strftime('%Y-%m-%d %H:%M:%S')} 沒取得成就資料 AppID: {appid}")
         return False
 
     # 按解鎖時間整理每天成就數
@@ -60,7 +63,7 @@ def process_appid(appid):
             date_counts[date] = date_counts.get(date, 0) + 1
 
     if not date_counts:
-        print(f"⚠️ AppID {appid} 沒有有效成就解鎖紀錄")
+        print(f"⚠️ {time.strftime('%Y-%m-%d %H:%M:%S')} AppID {appid} 沒有有效成就解鎖紀錄")
         return False
 
     # 累積成就數
@@ -72,13 +75,13 @@ def process_appid(appid):
         cumulative_counts[date] = cumulative
 
     insert_achievement_history(appid, cumulative_counts)
-    print(f"✅ 完成補資料 AppID: {appid}")
+    print(f"✅ {time.strftime('%Y-%m-%d %H:%M:%S')} 完成補資料 AppID: {appid}")
     return True
 
 def main():
     pending_rows = fetch_pending_queue()
     if not pending_rows:
-        print("✅ 沒有 pending 成就需要補資料")
+        print("✅ {time.strftime('%Y-%m-%d %H:%M:%S')} 沒有 pending 成就需要補資料")
         return
 
     for row in pending_rows:
@@ -92,10 +95,10 @@ def main():
         else:
             if retry_count + 1 >= MAX_RETRY:
                 update_queue_status(appid, "error", retry_count + 1)
-                print(f"❌ AppID {appid} 多次失敗，標記為 error")
+                print(f"❌ {time.strftime('%Y-%m-%d %H:%M:%S')} AppID {appid} 多次失敗，標記為 error")
             else:
                 update_queue_status(appid, "pending", retry_count + 1)
-                print(f"🔁 AppID {appid} 重試次數增加 {retry_count + 1}")
+                print(f"🔁 {time.strftime('%Y-%m-%d %H:%M:%S')} AppID {appid} 重試次數增加 {retry_count + 1}")
 
         time.sleep(SLEEP_TIME)
 

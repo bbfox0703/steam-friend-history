@@ -14,7 +14,7 @@
     </form>
     <label>
         <input type="checkbox" id="auto-refresh-toggle" checked>
-        {{ _('每10分鐘自動更新') }}
+        {{ _('每15分鐘自動更新') }}
     </label>
     <label>
         ✅ {{ _('線上好友') }}：{{ total_online }}｜{{ _('離線好友') }}：{{ total_offline }}
@@ -135,7 +135,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (checkbox.checked) {
                     location.reload();
                 }
-            }, 600000); // 10 分鐘
+            }, 900000); // 15 分鐘
         }
     }
 

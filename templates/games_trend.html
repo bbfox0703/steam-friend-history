@@ -56,7 +56,9 @@ const chart = new Chart(ctx, {
                 yAxisID: 'y',
                 pointRadius: 4,
                 pointHoverRadius: 6,
-                borderWidth: 2
+                borderWidth: 2,
+				tension: 0.3,
+				hoverBorderWidth: 4,
             },
             {
                 label: '{{ _("持有總數") }}',
@@ -66,7 +68,9 @@ const chart = new Chart(ctx, {
                 yAxisID: 'y1',
                 pointRadius: 4,
                 pointHoverRadius: 6,
-                borderWidth: 2
+                borderWidth: 2,
+				tension: 0.3,
+				hoverBorderWidth: 4,
             }
         ]
     },

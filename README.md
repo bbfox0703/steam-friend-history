@@ -15,11 +15,11 @@
 - 📈**等級趨勢圖**
 - 📋**等級變化紀錄**
 - 📈**成就及遊玩時間總趨勢**
-- 📋**每日遊玩時間**
+- 📋**遊戲每日遊玩時間**
 - 💾 **自動備份 / ZIP 匯出 / 快照保留**
 - 🐧 **可執行於 Raspberry Pi 5 / Linux 虛擬機（Debian / Ubuntu）**
 - 🐳 **使用 Docker 快速部署，可運行於Raspberry Pi 5 (使用SSD裝置)**
-- 🔄 **每日 11:05 AM 快取 Steam 遊戲列表（可手動執行）**
+- 🔄 **每日自動快取 Steam 遊戲列表**
   
 ## ❌ 不支援功能
 - 多Steam帳號
@@ -30,21 +30,23 @@
 
 ## ⚙️ 運行環境建議
 
-你可以在以下平台運行此系統：
+📢 你可以在以下平台運行此系統：
 
-- Raspberry Pi 5（建議接 SSD）
-- VMWare / VirtualBox / Hyper-V 等虛擬機（建議記憶體 2GB 以上）
-- 或 Windows WSL2（不建議，一些設定需額外調整及測試，請自己測試）
+- ✅ Raspberry Pi 5（建議接 SSD）
+- ✅ VMWare / VirtualBox / Hyper-V 等虛擬機上建立的Debian / Ubuntu（建議記憶體 2GB 以上）
+- 使用其它種Linux如SUSE、CentOS、RHEL則要自行修改相關設定
+- Windows WSL2（不建議，一些設定需額外調整及測試，Windwos環境又特別麻煩，請自己測試）
 
 ---
 
 ## 💡 補充注意事項
 
 - 你的 Steam 帳號需設為「好友清單」與「遊戲庫公開」，否則資料將無法擷取。
-- 若擁有遊戲太多（上千款），快取名稱作業將耗時甚久（Steam API 有頻率限制），請留意資源。
-- 快取過後的遊戲名稱不會自動隨 Steam 名稱異動，僅當每日 11:05 或你手動快取時、才會補上新遊戲。
-- 定時自動抓取Steam好友清單；設計上是每10分鐘更新一次，好友如果太多更新不完可能造成系統報錯，則需要自行調整cron job。時間如果拉太長，會影響好友名字變更的資料精度、及上線狀況精度。
-- 有些資料如遊玩時間、等級走勢等，皆必需此程式一直在伺服器執行、長期下來才有效果。
+- 若擁有遊戲太多（上千款），快取名稱作業將耗時甚久（Steam API 有頻率限制），系統不會跑太內而動覆執行此動作，但是第一次要等它跑完、寫入後才算成功。
+- 快取過後的遊戲名稱不會自動隨 Steam 名稱異動，僅當自動排程或你進系統底層手動下指令更新快取時、才會補上新遊戲。
+- 定時自動抓取Steam好友清單；設計上是每10分鐘更新一次，好友如果太多更新不完可能造成系統報錯，則需要自行調整cron job。時間如果拉太長，只會影響好友名字變更的資料精度、及上線狀況精度。
+- 有些資料如遊玩時間、等級走勢、成就總趨勢等，皆必需此程式一直在伺服器或是VM中執行、長期下來才有效果。
+- 成就趨勢的圖前期會不太正常，例如你一年前玩了三套遊戲，得到200個成就，在這一年間都沒玩、而裝了此系統後的某一天，你又開它們來玩，在圖上就會看來有幾面個成就。這是因為 Steam api 只回覆最近 14 天玩的遊戲之成就總數。
 
 ## 圖例：好友清單
 ![首頁預覽](./docs/index.png)
@@ -210,60 +212,6 @@ vi .env
 ```
 ### 接上方的 Raspberry Pi 5步驟的 3.1
 [跳到該處](#31-修改-env-的api-key及id)
-  
-  
-## 🛠️ Windows WSL安裝方法未完成版 (使用Windwos 11 Home)
-需要安裝元件：WSL2  
-WSL要改的地方不少，例如cron jobs等，還有Python venv問題。這邊不會說明。  
-
-### WSL2 安裝
-使用管理員模式開啟命令提示字元 (cmd.exe)  
-輸入：  
-```powershell
-wsl --install
-```
-![wsl2 ](./docs/wsl2.png)
-重開機  
-
-### Windows Store 安裝 Debian
-確認WSL版本是 v2
-```powershell
-wsl -l -v
-```
-
-#### 執行 Debian
-```powershell
-wsl
-```
-  
-Linux OS中：
-```bash
-sudo apt update
-sudo apt upgrade -y
-sudo apt install git curl procps -y
-sudo apt install python3-venv -y
-sudo apt install cron -y
-sudo service cron start
-cd
-git clone https://github.com/bbfox0703/steam-friend-history.git
-cd steam-friend-history/
-cp .env.example .env
-```
-
-修改 .env ，填入steam api key & steam id  
-
-```bash
-python3 -m venv venv
-source venv/bin/activate
-pip install -r requirements.txt
-python app.py
-```
-到此網頁應該會起來
-
-### 其它系統定
-背景 cronjobs ，請參考steam-friend-cron-wsl、update_wsl.sh、daily_wsl.sh  
-如果沒設定背景程式，好友資料和遊戲名稱是不會抓取的，基本上就是整個沒有什麼作用。  
-  
   
   
   

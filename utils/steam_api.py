@@ -38,6 +38,7 @@ def fetch_friend_list():
     response = requests.get(url)
     if response.status_code != 200:
         raise Exception(f"Steam API Error: {response.status_code} {response.text}")
+    time.sleep(0.2)
     return response.json().get('friendslist', {}).get('friends', [])
 
 def fetch_friend_profiles(steam_ids):
@@ -50,6 +51,8 @@ def fetch_friend_profiles(steam_ids):
         ids_str = ','.join(batch)
         url = f"https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v2/?key={API_KEY}&steamids={ids_str}"
         response = requests.get(url)
+
+        time.sleep(0.5)
 
         if response.status_code == 200:
             players = response.json().get('response', {}).get('players', [])
@@ -64,8 +67,6 @@ def fetch_friend_profiles(steam_ids):
                 }
         else:
             print(f"⚠️ Failed batch {i} - Status {response.status_code} {response.text}")
-
-        time.sleep(0.5)
 
     return result
 

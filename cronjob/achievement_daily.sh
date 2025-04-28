@@ -1,4 +1,5 @@
 #!/bin/bash
+# 每日成就和遊玩時間記錄
 (
   flock -n 9 || { echo "[$(date '+%Y-%m-%d %H:%M:%S')] 🔒 achievement_daily.sh skipped, another instance running" >> /var/log/cron_exec.log; exit 1; }
   echo "[$(date '+%Y-%m-%d %H:%M:%S')] 🕒 achievement_daily.sh started" >> /var/log/cron_exec.log

@@ -1,4 +1,5 @@
 #!/bin/bash
+# 備份 json
 
 echo "[$(date '+%Y-%m-%d %H:%M:%S')] 🕒 daily.sh started at $(date)" >> /var/log/cron_exec.log
 echo "[$(date '+%Y-%m-%d %H:%M:%S')] 🔍 daily cron: Working dir: $(pwd)" >> /var/log/cron_exec.log

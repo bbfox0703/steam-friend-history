@@ -1,4 +1,5 @@
 #!/bin/bash
+# 取得持有遊戲總數
 (
   flock -n 9 || { echo "[$(date '+%Y-%m-%d %H:%M:%S')] 🔒 record_games_total.sh skipped, another instance running" >> /var/log/cron_exec.log; exit 1; }
   echo "[$(date '+%Y-%m-%d %H:%M:%S')] 🕒 record_games_total.sh started" >> /var/log/cron_exec.log

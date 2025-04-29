@@ -21,13 +21,15 @@ def log(msg):
         f.write(full_msg + "\n")
 
 def backfill_one_appid(appid: str, date_list: list[str]):
-    achievements = fetch_achievements(appid)
-    if achievements is None:
-        log(f"⚠️ AppID {appid} 抓取成就失敗，略過")
-        return False
+    achievement_list = fetch_achievements(appid)
+
+    if achievement_list is None or not achievement_list:
+        log(f"⚠️ AppID {appid} 沒有成就或抓取失敗")
+        return
 
     unlock_dates = []
-    for unlock_time in achievements.values():
+    for achievement in achievement_list:
+        unlock_time = achievement.get("unlocktime", 0)
         if unlock_time > 0:
             dt = datetime.utcfromtimestamp(unlock_time)
             unlock_dates.append(dt)

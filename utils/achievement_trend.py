@@ -1,51 +1,139 @@
-# utils/achievement_trend.py
-
+import os
 import time
 from datetime import datetime, timedelta
-from utils.steam_api import fetch_recent_games, fetch_achievement_count
-from utils.achievement_trend_db import save_playtime, save_achievement, get_playtime_by_date, get_achievements_by_date
+from utils.db import (
+    get_achievements_by_date,
+    get_playtime_by_date,
+    get_all_dates,
+    insert_or_update_achievement,
+    insert_or_update_playtime,
+    get_connection
+)
+from utils.steam_api import fetch_recent_games, fetch_achievements
 
-# 每日更新成就與遊玩時間，並補齊資料
+LOG_DIR = "./logs"
+LOG_FILE = os.path.join(LOG_DIR, "achievement_trend.log")
+
+def log(msg):
+    timestamp = time.strftime('%Y-%m-%d %H:%M:%S')
+    full_msg = f"[{timestamp}] {msg}"
+    print(full_msg)
+    os.makedirs(LOG_DIR, exist_ok=True)
+    with open(LOG_FILE, "a", encoding="utf-8") as f:
+        f.write(full_msg + "\n")
+
+def find_nearest_available_day(table: str, before_day: str) -> str | None:
+    conn = get_connection()
+    c = conn.cursor()
+
+    check_day = datetime.strptime(before_day, "%Y-%m-%d")
+    while True:
+        day_str = check_day.strftime("%Y-%m-%d")
+        c.execute(f'SELECT COUNT(*) FROM {table} WHERE date = ?', (day_str,))
+        count = c.fetchone()[0]
+        if count > 0:
+            conn.close()
+            return day_str
+        check_day -= timedelta(days=1)
+        if check_day.year < 2000:
+            conn.close()
+            return None  # 保險：找不到任何資料
+
 def update_trends():
-    today = datetime.now().strftime('%Y-%m-%d')
-    yesterday = (datetime.now() - timedelta(days=1)).strftime('%Y-%m-%d')
+    today = datetime.today().strftime('%Y-%m-%d')
+    yesterday = (datetime.today() - timedelta(days=1)).strftime('%Y-%m-%d')
 
-    # 從DB讀取昨天的成就與遊玩時間資料
-    yesterday_achievements = get_achievements_by_date(yesterday)
-    yesterday_playtimes = get_playtime_by_date(yesterday)
+    log(f"📈 更新成就與遊玩時間趨勢 - {today}")
 
-    # 取得今天從Steam API拉回的資料
-    games = fetch_recent_games()
+    # 成就資料
+    try:
+        nearest_day_achievements = find_nearest_available_day('achievement_trend', yesterday)
+        if nearest_day_achievements:
+            yesterday_achievements = get_achievements_by_date(nearest_day_achievements) or {}
+            log(f"📅 成就資料使用最近的 {nearest_day_achievements}")
+        else:
+            yesterday_achievements = {}
+            log(f"⚠️ 沒有任何成就歷史資料，視為空集合")
+    except Exception as e:
+        yesterday_achievements = {}
+        log(f"⚠️ 成就資料讀取錯誤: {e}，使用空集合")
 
-    today_achievements = {}
-    today_playtime = {}
+    # 遊玩時間資料
+    try:
+        nearest_day_playtimes = find_nearest_available_day('playtime_trend', yesterday)
+        if nearest_day_playtimes:
+            yesterday_playtimes = get_playtime_by_date(nearest_day_playtimes) or {}
+            log(f"📅 遊玩時間資料使用最近的 {nearest_day_playtimes}")
+        else:
+            yesterday_playtimes = {}
+            log(f"⚠️ 沒有任何遊玩時間歷史資料，視為空集合")
+    except Exception as e:
+        yesterday_playtimes = {}
+        log(f"⚠️ 遊玩時間資料讀取錯誤: {e}，使用空集合")
 
-    for game in games:
-        appid = str(game.get('appid'))
+    # 抓今天 Steam 資料
+    recent_games = fetch_recent_games() or []
+    log(f"🎮 抓到最近遊玩 {len(recent_games)} 款遊戲")
+
+    achievements_today = {}
+    playtimes_today = {}
+
+    for idx, game in enumerate(recent_games):
+        appid = game['appid']
         playtime = game.get('playtime_forever', 0)
-        achievement_count = fetch_achievement_count(appid)
-        today_achievements[appid] = achievement_count
-        today_playtime[appid] = playtime
-        time.sleep(1.2)
 
-    # 補齊今天沒有資料的AppID (成就)
-    for appid, count in yesterday_achievements.items():
-        if appid not in today_achievements:
-            today_achievements[appid] = count
+        try:
+            achievement_list = fetch_achievements(appid) or {}
+            unlocked_count = sum(1 for _, unlocked_at in achievement_list.items() if unlocked_at > 0)
+            achievements_today[str(appid)] = unlocked_count
+        except Exception as e:
+            log(f"⚠️ AppID {appid} 抓成就失敗: {e}")
+            achievements_today[str(appid)] = 0
 
-    # 補齊今天沒有資料的AppID (遊玩時間)
-    for appid, minutes in yesterday_playtimes.items():
-        if appid not in today_playtime:
-            today_playtime[appid] = minutes
+        playtimes_today[str(appid)] = playtime
 
-    # 寫入DB
-    for appid_str, achievements in today_achievements.items():
-        save_achievement(today, int(appid_str), achievements)
+        if idx % 5 == 0:
+            time.sleep(1)
 
-    for appid_str, minutes in today_playtime.items():
-        save_playtime(today, int(appid_str), minutes)
+    log(f"🎯 成就 {len(achievements_today)} 筆，遊玩時間 {len(playtimes_today)} 筆")
 
-    print(f"✅ Trends updated for {today}.")
+    # 新出現 AppID
+    new_achievement_apps = set(achievements_today.keys()) - set(yesterday_achievements.keys())
+    new_playtime_apps = set(playtimes_today.keys()) - set(yesterday_playtimes.keys())
 
-if __name__ == '__main__':
+    if new_achievement_apps:
+        log(f"➕ 新成就AppID: {', '.join(map(str, new_achievement_apps))}")
+    if new_playtime_apps:
+        log(f"➕ 新遊玩時間AppID: {', '.join(map(str, new_playtime_apps))}")
+
+    all_dates = get_all_dates()
+    if not all_dates:
+        all_dates = [yesterday]
+        log(f"📅 資料庫無歷史日期，初始化為昨日 {yesterday}")
+
+    log(f"🔄 對歷史日期回填: {', '.join(all_dates)}")
+
+    for date in all_dates:
+        for appid in new_achievement_apps:
+            insert_or_update_achievement(date, appid, 0)
+        for appid in new_playtime_apps:
+            insert_or_update_playtime(date, appid, 0)
+
+    for appid in yesterday_achievements:
+        if appid not in achievements_today:
+            achievements_today[appid] = yesterday_achievements[appid]
+
+    for appid in yesterday_playtimes:
+        if appid not in playtimes_today:
+            playtimes_today[appid] = yesterday_playtimes[appid]
+
+    for appid, value in achievements_today.items():
+        insert_or_update_achievement(today, appid, value)
+
+    for appid, value in playtimes_today.items():
+        insert_or_update_playtime(today, appid, value)
+
+    log("✅ 今日資料更新完成")
+
+if __name__ == "__main__":
     update_trends()

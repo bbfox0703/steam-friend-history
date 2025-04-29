@@ -92,6 +92,23 @@ def init_db():
     conn.commit()
     conn.close()
 
+def get_appids_from_playtime_trend():
+    conn = get_connection()
+    c = conn.cursor()
+    c.execute('SELECT DISTINCT appid FROM playtime_trend')
+    appids = [str(row[0]) for row in c.fetchall()]
+    conn.close()
+    return appids
+
+def count_appid_entries(appid: str) -> int:
+    conn = get_connection()
+    c = conn.cursor()
+    c.execute('SELECT COUNT(*) FROM playtime_trend WHERE appid = ?', (appid,))
+    count = c.fetchone()[0]
+    conn.close()
+    return count
+
+
 # 第一次執行用來建表
 if __name__ == "__main__":
     init_db()

@@ -33,7 +33,6 @@ def log(msg):
     timestamp = time.strftime('%Y-%m-%d %H:%M:%S')
     full_msg = f"[{timestamp}] {msg}"
     print(full_msg)
-    print(LOG_FILE)
     os.makedirs(LOG_DIR, exist_ok=True)
     with open(LOG_FILE, "a", encoding="utf-8") as f:
         f.write(full_msg + "\n")
@@ -59,8 +58,8 @@ def fetch_friend_profiles(steam_ids):
         return {}
 
     result = {}
-    for i in range(0, len(steam_ids), 50):
-        batch = steam_ids[i:i + 50]
+    for i in range(0, len(steam_ids), 100):
+        batch = steam_ids[i:i + 100]
         ids_str = ','.join(batch)
         url = f"https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v2/?key={API_KEY}&steamids={ids_str}"
         response = requests.get(url)

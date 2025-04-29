@@ -108,6 +108,31 @@ def count_appid_entries(appid: str) -> int:
     conn.close()
     return count
 
+# 查詢某日所有 AppID 的成就數
+def get_achievements_by_date(date: str) -> dict:
+    conn = get_connection()
+    c = conn.cursor()
+    c.execute('''
+        SELECT appid, achievements
+        FROM achievement_trend
+        WHERE date = ?
+    ''', (date,))
+    rows = c.fetchall()
+    conn.close()
+    return {str(row["appid"]): row["achievements"] for row in rows}
+
+# 查詢某日所有 AppID 的遊玩分鐘數
+def get_playtime_by_date(date: str) -> dict:
+    conn = get_connection()
+    c = conn.cursor()
+    c.execute('''
+        SELECT appid, playtime_minutes
+        FROM playtime_trend
+        WHERE date = ?
+    ''', (date,))
+    rows = c.fetchall()
+    conn.close()
+    return {str(row["appid"]): row["playtime_minutes"] for row in rows}
 
 # 第一次執行用來建表
 if __name__ == "__main__":

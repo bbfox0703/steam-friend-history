@@ -83,9 +83,13 @@ def update_trends():
         playtime = game.get('playtime_forever', 0)
 
         try:
-            achievement_list = fetch_achievement_summary(appid) or {}
-            unlocked_count = sum(1 for _, unlocked_at in achievement_list.items() if unlocked_at > 0)
+            achievement_summary = fetch_achievement_summary(appid)
+            if achievement_summary:
+                unlocked_count = achievement_summary.get('unlocked', 0)
+            else:
+                unlocked_count = 0
             achievements_today[str(appid)] = unlocked_count
+
         except Exception as e:
             log(f"⚠️ AppID {appid} 抓成就失敗: {e}")
             achievements_today[str(appid)] = 0

@@ -2,6 +2,7 @@
 
 import requests
 import os
+import time
 from datetime import datetime
 from utils.level_history_db import save_level
 from utils.steam_api import fetch_current_level

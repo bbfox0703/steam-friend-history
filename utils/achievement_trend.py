@@ -132,7 +132,15 @@ def update_trends():
             playtimes_today[appid] = yesterday_playtimes[appid]
 
     for appid, value in achievements_today.items():
-        insert_or_update_achievement(today, appid, value)
+        current = get_achievements_by_date(today).get(str(appid), None)
+
+        if current is None:
+            insert_or_update_achievement(today, appid, value)
+        else:
+            if value != current:
+                insert_or_update_achievement(today, appid, value)
+            else:
+                log(f"🛑 AppID {appid} 成就數未變 ({value})，跳過更新")
 
     for appid, value in playtimes_today.items():
         insert_or_update_playtime(today, appid, value)

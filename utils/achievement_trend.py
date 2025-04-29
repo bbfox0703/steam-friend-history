@@ -9,7 +9,7 @@ from utils.db import (
     insert_or_update_playtime,
     get_connection
 )
-from utils.steam_api import fetch_recent_games, fetch_achievements
+from utils.steam_api import fetch_recent_games, fetch_achievement_summary
 
 LOG_DIR = "./logs"
 LOG_FILE = os.path.join(LOG_DIR, "achievement_trend.log")
@@ -83,7 +83,7 @@ def update_trends():
         playtime = game.get('playtime_forever', 0)
 
         try:
-            achievement_list = fetch_achievements(appid) or {}
+            achievement_list = fetch_achievement_summary(appid) or {}
             unlocked_count = sum(1 for _, unlocked_at in achievement_list.items() if unlocked_at > 0)
             achievements_today[str(appid)] = unlocked_count
         except Exception as e:

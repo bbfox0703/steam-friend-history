@@ -5,7 +5,7 @@ from utils.db import (
     get_all_dates,
     insert_or_update_achievement
 )
-from utils.steam_api import fetch_achievement_summary
+from utils.steam_api import fetch_achievements
 
 LOG_DIR = "./logs"
 LOG_FILE = os.path.join(LOG_DIR, "achievement_trend_backfill.log")
@@ -31,14 +31,15 @@ def backfill_appid(appid: int):
     trend_start = datetime.strptime(dates[0], "%Y-%m-%d")
 
     # 抓這個遊戲所有成就解鎖資料
-    achievements = fetch_achievement_summary(appid)
+    achievements = fetch_achievements(appid)
     if achievements is None:
         log(f"⚠️ AppID {appid} 抓取成就失敗")
         return
 
     # 整理每個成就的解鎖時間
     unlock_dates = []
-    for unlock_time in achievements.values():
+    for achievement in achievement_list:
+        unlock_time = achievement.get("unlocktime", 0)
         if unlock_time > 0:
             dt = datetime.utcfromtimestamp(unlock_time)
             unlock_dates.append(dt)

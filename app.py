@@ -114,6 +114,17 @@ lang_map = {
     "en": "english"
 }
 
+LOG_DIR = "./logs"
+LOG_FILE = os.path.join(LOG_DIR, "daily_level_update.log")
+
+def log(msg):
+    timestamp = time.strftime('%Y-%m-%d %H:%M:%S')
+    full_msg = f"[{timestamp}] {msg}"
+    print(full_msg)
+    os.makedirs(LOG_DIR, exist_ok=True)
+    with open(LOG_FILE, "a", encoding="utf-8") as f:
+        f.write(full_msg + "\n")
+
 def load_data():
     path = os.path.join('database', 'friends.json')
     if os.path.exists(path):
@@ -248,7 +259,7 @@ def history():
                     ts = int(dt.timestamp())  # Unix timestamp 秒數
                     changes[ts] = change
                 except Exception as e:
-                    print(f"⚠️ 時間字串格式錯誤：{time_str}, error: {e}")
+                    log(f"⚠️ 時間字串格式錯誤：{time_str}, error: {e}")
     except:
         changes = {}
 
@@ -275,13 +286,13 @@ def history():
     for ts, change in changes.items():
         for sid in change.get("added", []):
             if sid not in friend_map:
-                print(f"❗️ {sid} not found in friend_map (added)")      
+                log(f"❗️ {sid} not found in friend_map (added)")      
                 
         added_info = []
         for sid in change.get("added", []):
             f = friend_map.get(sid)
             if f:
-                print(f"🧪 SID: {sid} name: {f.get('persona_name')}")
+                log(f"🧪 SID: {sid} name: {f.get('persona_name')}")
                 added_info.append(f)
         added_info.sort(key=lambda f: int(f.get("friend_since", 0)), reverse=reverse)
         change["added_info"] = added_info
@@ -552,7 +563,7 @@ def achievement_trend(appid):
                 playtime_minutes = g.get("playtime_forever", 0)
                 break
     except Exception as e:
-        print(f"⚠️ 無法取得遊玩時間: {e}")
+        log(f"⚠️ 無法取得遊玩時間: {e}")
 
     try:
         achievements = steam_api.fetch_achievements(appid)
@@ -691,7 +702,7 @@ def achievement_trend_overall():
             achievement_data[date] = get_achievements_by_date(date)
             playtime_data[date] = get_playtime_by_date(date)
     except Exception as e:
-        print(f"⚠️ Error loading trend data: {e}")
+        log(f"⚠️ Error loading trend data: {e}")
 
     return render_template(
         'achievement_trend_overall.html',

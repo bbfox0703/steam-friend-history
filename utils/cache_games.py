@@ -15,6 +15,17 @@ UNAVAILABLE_FILE = "./database/unavailable_titles.json"
 
 LANGUAGES = ['en', 'tchinese', 'japanese']
 
+LOG_DIR = "./logs"
+LOG_FILE = os.path.join(LOG_DIR, "cache_games.log")
+
+def log(msg):
+    timestamp = time.strftime('%Y-%m-%d %H:%M:%S')
+    full_msg = f"[{timestamp}] {msg}"
+    print(full_msg)
+    os.makedirs(LOG_DIR, exist_ok=True)
+    with open(LOG_FILE, "a", encoding="utf-8") as f:
+        f.write(full_msg + "\n")
+
 def load_unavailable_titles():
     if os.path.exists(UNAVAILABLE_FILE):
         with open(UNAVAILABLE_FILE, "r", encoding="utf-8") as f:
@@ -27,9 +38,9 @@ def save_unavailable_titles(unavailable):
         json.dump(unavailable, f, ensure_ascii=False, indent=2)
 
 def update_cached_game_titles(langs, sleep_time=1.7):
-    print("🔍 讀取目前持有遊戲清單...")
+    log("🔍 讀取目前持有遊戲清單...")
     owned_games = fetch_owned_games()
-    print(f"✅ 共 {len(owned_games)} 個遊戲將進行更新")
+    log(f"✅ 共 {len(owned_games)} 個遊戲將進行更新")
 
     existing_data = get_all_game_titles()
     unavailable = load_unavailable_titles()
@@ -43,7 +54,7 @@ def update_cached_game_titles(langs, sleep_time=1.7):
         appid_str = str(appid)
 
         if appid_str in unavailable:
-            print(f"⚡ [{idx+1}/{len(owned_games)}] AppID {appid} 已列為unavailable，跳過")
+            log(f"⚡ [{idx+1}/{len(owned_games)}] AppID {appid} 已列為unavailable，跳過")
             continue
 
         existing = existing_data.get(appid_str, {})
@@ -55,7 +66,7 @@ def update_cached_game_titles(langs, sleep_time=1.7):
         }
 
         if all(updated_titles.get(lang) for lang in langs):
-            print(f"✅ [{idx+1}/{len(owned_games)}] AppID {appid} 所有語系已存在，跳過")
+            log(f"✅ [{idx+1}/{len(owned_games)}] AppID {appid} 所有語系已存在，跳過")
             continue
 
         for lang in langs:
@@ -66,10 +77,10 @@ def update_cached_game_titles(langs, sleep_time=1.7):
                 name = fetch_store_name(appid, store_lang)
                 timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
                 if name:
-                    print(f"✅ {timestamp} [{idx+1}/{len(owned_games)}] {appid} ({lang}): {name}")
+                    log(f"✅ {timestamp} [{idx+1}/{len(owned_games)}] {appid} ({lang}): {name}")
                     updated_titles[lang] = name
                 else:
-                    print(f"⚠️ {timestamp} [{idx+1}/{len(owned_games)}] {appid} ({lang}): 無法取得標題")
+                    log(f"⚠️ {timestamp} [{idx+1}/{len(owned_games)}] {appid} ({lang}): 無法取得標題")
                     unavailable[appid_str] = datetime.today().strftime("%Y-%m-%d")
                 time.sleep(sleep_time)
 

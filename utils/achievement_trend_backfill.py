@@ -5,7 +5,7 @@ from utils.db import (
     get_all_dates,
     insert_or_update_achievement
 )
-from utils.steam_api import fetch_achievements
+from utils.steam_api import fetch_achievement_summary
 
 LOG_DIR = "./logs"
 LOG_FILE = os.path.join(LOG_DIR, "achievement_trend_backfill.log")
@@ -31,7 +31,7 @@ def backfill_appid(appid: int):
     trend_start = datetime.strptime(dates[0], "%Y-%m-%d")
 
     # 抓這個遊戲所有成就解鎖資料
-    achievements = fetch_achievements(appid)
+    achievements = fetch_achievement_summary(appid)
     if achievements is None:
         log(f"⚠️ AppID {appid} 抓取成就失敗")
         return

@@ -2,7 +2,7 @@
 # 所有資料大部份需要經Steam api來取得
 
 # 取得好友列表及更名歷史資料；此指令使用大量api call
-30 0,12 * * * root /app/cronjob/update.sh >> /var/log/cron_exec.log 2>&1
+30 4,16 * * * root /app/cronjob/update.sh >> /var/log/cron_exec.log 2>&1
 #20 1,4,7,8,23 * * * root /app/cronjob/update.sh >> /var/log/cron_exec.log 2>&1
 
 # 測試 cron 是否活著
@@ -18,13 +18,13 @@
 5 3 * * * root /app/cronjob/backup_sqlite.sh >> /var/log/cron_exec.log 2>&1
 
 # Steam 等級記錄
-2 11,23 * * * root /app/cronjob/daily_level.sh >> /var/log/cron_exec.log 2>&1
+2 21 * * * root /app/cronjob/daily_level.sh >> /var/log/cron_exec.log 2>&1
 
 # 1) 取得持有遊戲名稱：繁中、日文、英文
 # 2) 下架或是不存在的遊戲30天內不再抓取
 # 3) 取得持有遊戲總數
-30 11,23 * * * root /app/cronjob/cache_games_daily.sh >> /var/log/cron_exec.log 2>&1
-45 23 * * * root /app/cronjob/cache_games_daily.sh >> /var/log/cron_exec.log 2>&1
+30 22 * * * root /app/cronjob/cache_games_daily.sh >> /var/log/cron_exec.log 2>&1
+#45 23 * * * root /app/cronjob/cache_games_daily.sh >> /var/log/cron_exec.log 2>&1
 
 # 每日成就和遊玩時間記錄
 # 成就趨勢批次回填

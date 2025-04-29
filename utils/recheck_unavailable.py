@@ -51,7 +51,7 @@ def recheck_unavailable(days_threshold=30):
             else:
                 log(f"⚠️ AppID {appid} 仍然無法取得，保留")
                 updated[appid] = today.strftime("%Y-%m-%d")
-            time.sleep(2)    
+            time.sleep(5)    
         except Exception as e:
             log(f"❌ AppID {appid} 檢查失敗: {e}")
             updated[appid] = today.strftime("%Y-%m-%d")

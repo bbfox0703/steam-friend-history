@@ -238,6 +238,31 @@ def fetch_achievement_data(appid, steam_id=None):
         raise Exception(f"Steam API Error: {response.status_code} {response.text}")
     return response.json().get("playerstats", {})
 
+def fetch_achievement_summary(appid):
+    url = f"https://api.steampowered.com/ISteamUserStats/GetPlayerAchievements/v1/?key={API_KEY}&steamid={STEAM_ID}&appid={appid}"
+    print(f"🔍 {time.strftime('%Y-%m-%d %H:%M:%S')} fetch_achievement_summary()")
+    try:
+        response = requests.get(url, timeout=10)
+        if response.status_code == 200:
+            data = response.json()
+            achievements = data.get('playerstats', {}).get('achievements', [])
+            if not achievements:
+                return None
+            unlocked = sum(1 for a in achievements if a.get('achieved', 0) == 1)
+            total = len(achievements)
+            return {"unlocked": unlocked, "total": total}
+        elif response.status_code == 400:
+            err_data = response.json()
+            if 'error' in err_data.get('playerstats', {}):
+                print(f"⚠️ {time.strftime('%Y-%m-%d %H:%M:%S')} AppID {appid} 無成就，跳過")
+                return None
+            else:
+                raise Exception(f"Steam API Error: {response.status_code} {response.text}")
+        else:
+            raise Exception(f"Steam API Error: {response.status_code} {response.text}")
+    except Exception as e:
+        print(f"❌ {time.strftime('%Y-%m-%d %H:%M:%S')} Fetch achievement summary failed: {e}")
+        return None
 
 # 查目前持有的遊戲 (原本 fetch_owned_games 保留)
 def fetch_owned_games(lang="en"):

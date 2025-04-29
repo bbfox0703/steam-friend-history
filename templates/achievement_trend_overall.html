@@ -41,6 +41,26 @@ const achievements = {{ achievements|tojson }};
 const playtimes = {{ playtimes|tojson }};
 let mode = '{{ mode }}';
 
+function fillMissingDates(data, startDate, endDate) {
+  const filled = {};
+  let current = new Date(startDate);
+  const last = new Date(endDate);
+
+  while (current <= last) {
+    const dateStr = current.toISOString().slice(0, 10);
+    filled[dateStr] = data[dateStr] || {};
+    current.setDate(current.getDate() + 1);
+  }
+  return filled;
+}
+
+function getDateRange(data1, data2) {
+  const dates1 = Object.keys(data1);
+  const dates2 = Object.keys(data2);
+  const allDates = [...new Set([...dates1, ...dates2])].sort();
+  return [allDates[0], allDates[allDates.length - 1]];
+}
+
 function processDailyChange(data, granularity, forceZeroFirstPoint = true) {
   const sortedDates = Object.keys(data).sort();
   const result = {};
@@ -101,7 +121,9 @@ function cleanFirstPoint(data, forceZeroFirstPoint) {
 }
 
 function drawAchievementTrend(forceZeroFirstPoint = true) {
-  const dailyDataRaw = processDailyChange(achievements, mode, forceZeroFirstPoint);
+  const [startDate, endDate] = getDateRange(achievements, playtimes);
+  const filledAchievements = fillMissingDates(achievements, startDate, endDate);
+  const dailyDataRaw = processDailyChange(filledAchievements, mode, forceZeroFirstPoint);
   const dailyData = cleanFirstPoint(dailyDataRaw, forceZeroFirstPoint);
 
   const labels = Object.keys(dailyData);
@@ -133,7 +155,10 @@ function drawAchievementTrend(forceZeroFirstPoint = true) {
 }
 
 function drawPlaytimeTrend() {
-  const dailyData = processDailyChange(playtimes, mode, true);
+  const [startDate, endDate] = getDateRange(achievements, playtimes);
+  const filledPlaytimes = fillMissingDates(playtimes, startDate, endDate);
+  const dailyData = processDailyChange(filledPlaytimes, mode, true);
+
   const labels = Object.keys(dailyData);
   const data = Object.values(dailyData);
 

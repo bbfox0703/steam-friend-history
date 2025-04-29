@@ -96,8 +96,8 @@ def update_trends():
 
         playtimes_today[str(appid)] = playtime
 
-        if idx % 5 == 0:
-            time.sleep(1)
+        if idx % 3 == 0:
+            time.sleep(3)
 
     log(f"🎯 成就 {len(achievements_today)} 筆，遊玩時間 {len(playtimes_today)} 筆")
 

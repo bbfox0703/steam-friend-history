@@ -37,7 +37,7 @@ def save_unavailable_titles(unavailable):
     with open(UNAVAILABLE_FILE, "w", encoding="utf-8") as f:
         json.dump(unavailable, f, ensure_ascii=False, indent=2)
 
-def update_cached_game_titles(langs, sleep_time=1.7):
+def update_cached_game_titles(langs, sleep_time=4):
     log("🔍 讀取目前持有遊戲清單...")
     owned_games = fetch_owned_games()
     log(f"✅ 共 {len(owned_games)} 個遊戲將進行更新")
@@ -94,7 +94,7 @@ def update_cached_game_titles(langs, sleep_time=1.7):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='更新 Steam 遊戲標題快取')
     parser.add_argument('--lang', type=str, default='all', help='語言選擇：en, tchinese, japanese, 或 all')
-    parser.add_argument('--sleep', type=float, default=1.7, help='每次API呼叫後睡眠秒數，避免被封鎖')
+    parser.add_argument('--sleep', type=float, default=4, help='每次API呼叫後睡眠秒數，避免被封鎖')
     args = parser.parse_args()
 
     if args.lang == 'all':

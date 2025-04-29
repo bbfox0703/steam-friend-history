@@ -16,6 +16,9 @@ HISTORY_PATH = './database/name_history.json'
 CHANGELOG_PATH = './database/friend_changes.json'
 BACKUP_DIR = './backups'
 
+LOG_DIR = "./logs"
+LOG_FILE = os.path.join(LOG_DIR, "steam_api.log")
+
 print = functools.partial(print, flush=True)
 
 STORE_LANG_MAP = {
@@ -26,6 +29,14 @@ STORE_LANG_MAP = {
 
 _cached_titles = None
 
+def log(msg):
+    timestamp = time.strftime('%Y-%m-%d %H:%M:%S')
+    full_msg = f"[{timestamp}] {msg}"
+    print(full_msg)
+    os.makedirs(LOG_DIR, exist_ok=True)
+    with open(LOG_FILE, "a", encoding="utf-8") as f:
+        f.write(full_msg + "\n")
+
 # 抓所有遊戲標題 cache
 def load_cached_titles():
     global _cached_titles
@@ -35,6 +46,7 @@ def load_cached_titles():
 
 def fetch_friend_list():
     url = f"https://api.steampowered.com/ISteamUser/GetFriendList/v1/?key={API_KEY}&steamid={STEAM_ID}&relationship=friend"
+    log(f" fetch_friend_list(): {url}")
     response = requests.get(url)
     if response.status_code != 200:
         raise Exception(f"Steam API Error: {response.status_code} {response.text}")
@@ -51,7 +63,7 @@ def fetch_friend_profiles(steam_ids):
         ids_str = ','.join(batch)
         url = f"https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v2/?key={API_KEY}&steamids={ids_str}"
         response = requests.get(url)
-        print(f"🔍 {time.strftime('%Y-%m-%d %H:%M:%S')} fetch_friend_profiles(), batch {i}: {url}")
+        log(f"🔍 fetch_friend_profiles(), batch {i}: {url}")
 
         time.sleep(4)
 
@@ -67,7 +79,7 @@ def fetch_friend_profiles(steam_ids):
                     'personastate': p.get('personastate', 0)
                 }
         else:
-            print(f"⚠️ Failed batch {i} - Status {response.status_code} {response.text}")
+            log(f"⚠️ Failed batch {i} - Status {response.status_code} {response.text}")
 
     return result
 
@@ -86,7 +98,7 @@ def try_restore_from_backup(sid, fields=("persona_name", "avatar", "lastlogoff",
                         if all(entry.get(k) is not None and entry.get(k) != '' for k in fields):
                             return {k: entry[k] for k in fields if k in entry}
         except Exception as e:
-            print(f"⚠️ 無法從備份 {filename} 讀取 {sid}：{e}")
+            log(f"⚠️ 無法從備份 {filename} 讀取 {sid}：{e}")
             continue
     return {}
 
@@ -206,7 +218,7 @@ def update_friend_list():
 
 def fetch_achievements(appid):
     url = f"https://api.steampowered.com/ISteamUserStats/GetPlayerAchievements/v1/?key={API_KEY}&steamid={STEAM_ID}&appid={appid}"
-    print(f"🔍 {time.strftime('%Y-%m-%d %H:%M:%S')} fetch_achievements()")
+    log(f"🔍 fetch_achievements()")
     try:
         response = requests.get(url, timeout=10)
         if response.status_code == 200:
@@ -217,14 +229,14 @@ def fetch_achievements(appid):
             # ⚡ 特別處理無成就遊戲
             err_data = response.json()
             if 'error' in err_data.get('playerstats', {}):
-                print(f"⚠️ {time.strftime('%Y-%m-%d %H:%M:%S')} AppID {appid} 無成就，跳過")
+                log(f"⚠️ AppID {appid} 無成就，跳過")
                 return []
             else:
                 raise Exception(f"Steam API Error: {response.status_code} {response.text}")
         else:
             raise Exception(f"Steam API Error: {response.status_code} {response.text}")
     except Exception as e:
-        print(f"❌ {time.strftime('%Y-%m-%d %H:%M:%S')} Fetch achievements failed: {e}")
+        log(f"❌ Fetch achievements failed: {e}")
         return []
 
 
@@ -232,7 +244,7 @@ def fetch_achievement_data(appid, steam_id=None):
     if steam_id is None:
         steam_id = STEAM_ID
     url = f"https://api.steampowered.com/ISteamUserStats/GetPlayerAchievements/v1/?key={API_KEY}&steamid={steam_id}&appid={appid}"
-    print(f"🔍 {time.strftime('%Y-%m-%d %H:%M:%S')} fetch_achievement_data()")
+    log(f"🔍 fetch_achievement_data()")
     response = requests.get(url)
     if response.status_code != 200:
         raise Exception(f"Steam API Error: {response.status_code} {response.text}")
@@ -240,7 +252,7 @@ def fetch_achievement_data(appid, steam_id=None):
 
 def fetch_achievement_summary(appid):
     url = f"https://api.steampowered.com/ISteamUserStats/GetPlayerAchievements/v1/?key={API_KEY}&steamid={STEAM_ID}&appid={appid}"
-    print(f"🔍 {time.strftime('%Y-%m-%d %H:%M:%S')} fetch_achievement_summary()")
+    log(f"🔍 fetch_achievement_summary()")
     try:
         response = requests.get(url, timeout=10)
         if response.status_code == 200:
@@ -254,27 +266,27 @@ def fetch_achievement_summary(appid):
         elif response.status_code == 400:
             err_data = response.json()
             if 'error' in err_data.get('playerstats', {}):
-                print(f"⚠️ {time.strftime('%Y-%m-%d %H:%M:%S')} AppID {appid} 無成就，跳過")
+                log(f"⚠️ AppID {appid} 無成就，跳過")
                 return None
             else:
                 raise Exception(f"Steam API Error: {response.status_code} {response.text}")
         else:
             raise Exception(f"Steam API Error: {response.status_code} {response.text}")
     except Exception as e:
-        print(f"❌ {time.strftime('%Y-%m-%d %H:%M:%S')} Fetch achievement summary failed: {e}")
+        log(f"❌ Fetch achievement summary failed: {e}")
         return None
 
 # 查目前持有的遊戲 (原本 fetch_owned_games 保留)
 def fetch_owned_games(lang="en"):
     url = f"https://api.steampowered.com/IPlayerService/GetOwnedGames/v1/?key={API_KEY}&steamid={STEAM_ID}&include_appinfo=true&l={lang}"
-    print(f"🔍 {time.strftime('%Y-%m-%d %H:%M:%S')} fetch_owned_games()")
+    log(f"🔍 fetch_owned_games()")
     try:
         response = requests.get(url, timeout=10)
         if response.status_code == 200:
             data = response.json()
             return data.get('response', {}).get('games', [])
     except Exception as e:
-        print(f"⚠️ Fetch owned games error: {e}")
+        log(f"⚠️ Fetch owned games error: {e}")
     return []    
 
 # 查單個遊戲標題
@@ -284,7 +296,7 @@ def get_game_title(appid, lang='en'):
 
 def fetch_game_info(appid, lang="en"):
     url = f"https://store.steampowered.com/api/appdetails?appids={appid}&l={lang}"
-    print(f"🔍 {time.strftime('%Y-%m-%d %H:%M:%S')} fetch_game_info(): {url}")
+    log(f"🔍 fetch_game_info(): {url}")
     try:
         r = requests.get(url)
         if r.status_code == 200:
@@ -302,7 +314,7 @@ def fetch_game_info(appid, lang="en"):
 def fetch_store_name(appid: str, lang: str) -> str:
     def query_store(appid, lang_code):
         url = f"https://store.steampowered.com/api/appdetails?appids={appid}&l={lang_code}"
-        print(f"🔍 {time.strftime('%Y-%m-%d %H:%M:%S')} fetch_store_name(): {url}")
+        log(f"🔍 fetch_store_name(): {url}")
         try:
             r = requests.get(url, timeout=10)
             if r.status_code == 200:
@@ -312,7 +324,7 @@ def fetch_store_name(appid: str, lang: str) -> str:
                     return None
                 return app_info.get("data", {}).get("name")
         except Exception as e:
-            print(f"❌ {appid} ({lang_code}) 錯誤: {e}")
+            log(f"❌ {appid} ({lang_code}) 錯誤: {e}")
         return None
 
     lang_code = STORE_LANG_MAP.get(lang, "en")
@@ -335,7 +347,7 @@ def fetch_store_name(appid: str, lang: str) -> str:
     
 def fetch_recent_games():
     url = f"https://api.steampowered.com/IPlayerService/GetRecentlyPlayedGames/v1/?key={API_KEY}&steamid={STEAM_ID}"
-    print(f"🔍 {time.strftime('%Y-%m-%d %H:%M:%S')} fetch_recent_games(): {url}")
+    log(f"🔍 fetch_recent_games(): {url}")
     resp = requests.get(url)
     if resp.status_code == 200:
         return resp.json().get('response', {}).get('games', [])
@@ -343,7 +355,7 @@ def fetch_recent_games():
 
 def fetch_achievement_count(appid):
     url = f"https://api.steampowered.com/ISteamUserStats/GetPlayerAchievements/v1/?key={API_KEY}&steamid={STEAM_ID}&appid={appid}"
-    print(f"🔍 {time.strftime('%Y-%m-%d %H:%M:%S')} fetch_achievement_count(): {url}")
+    log(f"🔍 fetch_achievement_count(): {url}")
     resp = requests.get(url)
     if resp.status_code == 200:
         achievements = resp.json().get('playerstats', {}).get('achievements', [])
@@ -361,10 +373,10 @@ def fetch_current_level():
             if level is not None:
                 return level
             else:
-                print("⚠️ player_level not found.")
+                log("⚠️ player_level not found.")
         else:
-            print(f"⚠️ HTTP Error {response.status_code}")
+            log(f"⚠️ HTTP Error {response.status_code}")
     except Exception as e:
-        print(f"⚠️ Fetch Error: {e}")
+        log(f"⚠️ Fetch Error: {e}")
 
     return None    

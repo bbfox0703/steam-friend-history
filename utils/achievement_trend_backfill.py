@@ -20,12 +20,12 @@ def log(msg):
         f.write(full_msg + "\n")
 
 def backfill_appid(appid: int):
-    log(f"🔍 開始回填 AppID {appid}")
+    log(f"🔍 backfill_appid(): 開始回填 AppID {appid}")
 
     # 取得 trend中所有日期
     dates = get_all_dates()
     if not dates:
-        log("⚠️ 找不到趨勢資料，無法回填")
+        log("⚠️ backfill_appid(): 找不到趨勢資料，無法回填")
         return
 
     trend_start = datetime.strptime(dates[0], "%Y-%m-%d")
@@ -33,7 +33,7 @@ def backfill_appid(appid: int):
     # 抓這個遊戲所有成就解鎖資料
     achievements = fetch_achievements(appid)
     if achievements is None:
-        log(f"⚠️ AppID {appid} 抓取成就失敗")
+        log(f"⚠️ backfill_appid(): AppID {appid} 抓取成就失敗")
         return
 
     # 整理每個成就的解鎖時間
@@ -45,7 +45,7 @@ def backfill_appid(appid: int):
             unlock_dates.append(dt)
 
     if not unlock_dates:
-        log(f"⚠️ AppID {appid} 沒有任何成就解鎖記錄")
+        log(f"⚠️ backfill_appid(): AppID {appid} 沒有任何成就解鎖記錄")
         return
 
     # 計算每天累積成就數
@@ -62,7 +62,7 @@ def backfill_appid(appid: int):
     for date, total in cumulative_by_day.items():
         insert_or_update_achievement(date, appid, total)
 
-    log(f"✅ 回填完成 AppID {appid}，補齊 {len(dates)} 天資料")
+    log(f"✅ backfill_appid(): 回填完成 AppID {appid}，補齊 {len(dates)} 天資料")
 
 def main():
     # 這邊可改成讀一個app list

@@ -113,6 +113,19 @@ def init_db():
             PRIMARY KEY (steamid, appid, achievement_name)
         )
     """)
+    # 📦 遊戲資訊快取表
+    c.execute("""
+        CREATE TABLE IF NOT EXISTS game_info_cache (
+            appid INTEGER,
+            lang TEXT,
+            name TEXT,
+            header_image TEXT,
+            raw_json TEXT,
+            last_updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            PRIMARY KEY (appid, lang)
+        )
+    """)
+
     conn.commit()
     conn.close()
 
@@ -224,3 +237,49 @@ def insert_or_update_playtime(date: str, appid: str, playtime_minutes: int):
 if __name__ == "__main__":
     init_db()
     print("資料表建立完成！")
+
+(appid, lang):
+    conn = get_connection()
+    conn.row_factory = sqlite3.Row
+    c = conn.cursor()
+    c.execute("""
+        SELECT name, header_image, raw_json
+        FROM game_info_cache
+        WHERE appid = ? AND lang = ?
+    """, (appid, lang))
+    row = c.fetchone()
+    conn.close()
+    return dict(row) if row else None
+
+def save_game_info_cache(appid, lang, name, header_image, raw_json):
+    conn = get_connection()
+    c = conn.cursor()
+    c.execute("""
+        INSERT OR REPLACE INTO game_info_cache (appid, lang, name, header_image, raw_json, last_updated)
+        VALUES (?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+    """, (appid, lang, name, header_image, raw_json))
+    conn.commit()
+    conn.close()
+
+def get_game_info_cache(appid, lang):
+    conn = get_connection()
+    conn.row_factory = sqlite3.Row
+    c = conn.cursor()
+    c.execute("""
+        SELECT name, header_image, raw_json
+        FROM game_info_cache
+        WHERE appid = ? AND lang = ?
+    """, (appid, lang))
+    row = c.fetchone()
+    conn.close()
+    return dict(row) if row else None
+
+def save_game_info_cache(appid, lang, name, header_image, raw_json):
+    conn = get_connection()
+    c = conn.cursor()
+    c.execute("""
+        INSERT OR REPLACE INTO game_info_cache (appid, lang, name, header_image, raw_json, last_updated)
+        VALUES (?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+    """, (appid, lang, name, header_image, raw_json))
+    conn.commit()
+    conn.close()

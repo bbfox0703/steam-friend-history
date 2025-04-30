@@ -260,6 +260,8 @@ def fetch_achievements(appid):
         log(f"❌ Fetch achievements failed: {e}")
         return []
 
+# ****** fetch_achievement_data 並未使用到 
+# ****** 如有使用到時移除此註解
 def fetch_achievement_data(appid, steam_id=None):
     if steam_id is None:
         steam_id = STEAM_ID
@@ -272,28 +274,15 @@ def fetch_achievement_data(appid, steam_id=None):
     return response.json().get("playerstats", {})
 
 def fetch_achievement_summary(appid):
-    url = f"https://api.steampowered.com/ISteamUserStats/GetPlayerAchievements/v1/?key={API_KEY}&steamid={STEAM_ID}&appid={appid}"
-    log(f"🔍 fetch_achievement_summary()")
-    # time.sleep(4)  # ← 檢查是否仍需要
+    log(f"🔄 fetch_achievement_summary(appid={appid})")
     try:
-        response = safe_api_get(url, timeout=10)
-        if response.status_code == 200:
-            data = response.json()
-            achievements = data.get('playerstats', {}).get('achievements', [])
-            if not achievements:
-                return None
-            unlocked = sum(1 for a in achievements if a.get('achieved', 0) == 1)
-            total = len(achievements)
-            return {"unlocked": unlocked, "total": total}
-        elif response.status_code == 400:
-            err_data = response.json()
-            if 'error' in err_data.get('playerstats', {}):
-                log(f"⚠️ AppID {appid} 無成就，跳過")
-                return None
-            else:
-                raise Exception(f"Steam API Error: {response.status_code} {response.text}")
-        else:
-            raise Exception(f"Steam API Error: {response.status_code} {response.text}")
+        achievements = fetch_achievements(appid)  # ✅ 會使用快取
+        if not achievements:
+            return None
+        unlocked = sum(1 for a in achievements if a.get("achieved", 0) == 1)
+        total = len(achievements)
+        log(f"✅ appid={appid}, unlocked={unlocked}, total={total}")
+        return {"unlocked": unlocked, "total": total}
     except Exception as e:
         log(f"❌ Fetch achievement summary failed: {e}")
         return None

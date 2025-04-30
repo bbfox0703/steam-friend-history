@@ -24,7 +24,7 @@ def backfill_one_appid(appid: str, date_list: list[str]):
     achievement_list = fetch_achievements(appid)
 
     if achievement_list is None or not achievement_list:
-        log(f"⚠️ AppID {appid} 沒有成就或抓取失敗")
+        log(f"⚠️ backfill_one_appid(): AppID {appid} 沒有成就或抓取失敗")
         return
 
     unlock_dates = []
@@ -35,7 +35,7 @@ def backfill_one_appid(appid: str, date_list: list[str]):
             unlock_dates.append(dt)
 
     if not unlock_dates:
-        log(f"ℹ️ AppID {appid} 沒有解鎖成就，視為 0 不處理")
+        log(f"ℹ️ backfill_one_appid() AppID {appid} 沒有解鎖成就，視為 0 不處理")
         return False
 
     unlock_dates.sort()
@@ -49,7 +49,7 @@ def backfill_one_appid(appid: str, date_list: list[str]):
     for date, total in cumulative_by_day.items():
         insert_or_update_achievement(date, appid, total)
 
-    log(f"✅ AppID {appid} 回填完成，共補 {len(date_list)} 天")
+    log(f"✅ backfill_one_appid() AppID {appid} 回填完成，共補 {len(date_list)} 天")
     return True
 
 def main():

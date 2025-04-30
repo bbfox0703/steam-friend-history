@@ -115,14 +115,6 @@ def update_trends():
         all_dates = [yesterday]
         log(f"📅 資料庫無歷史日期，初始化為昨日 {yesterday}")
 
-    log(f"🔄 對歷史日期回填: {', '.join(all_dates)}")
-
-    for date in all_dates:
-        for appid in new_achievement_apps:
-            insert_or_update_achievement(date, appid, 0)
-        for appid in new_playtime_apps:
-            insert_or_update_playtime(date, appid, 0)
-
     for appid in yesterday_achievements:
         if appid not in achievements_today:
             achievements_today[appid] = yesterday_achievements[appid]
@@ -130,6 +122,17 @@ def update_trends():
     for appid in yesterday_playtimes:
         if appid not in playtimes_today:
             playtimes_today[appid] = yesterday_playtimes[appid]
+
+    log(f"🔄 對歷史日期回填: {', '.join(all_dates)}")
+
+    # ✅ 用今天的值補過去日期（避免補 0）
+    for date in all_dates:
+        for appid in new_achievement_apps:
+            value = achievements_today.get(appid, 0)
+            insert_or_update_achievement(date, appid, value)
+        for appid in new_playtime_apps:
+            value = playtimes_today.get(appid, 0)
+            insert_or_update_playtime(date, appid, value)
 
     for appid, value in achievements_today.items():
         current = get_achievements_by_date(today).get(str(appid), None)

@@ -1,6 +1,7 @@
 import os
 import json
 import requests
+from utils.api_utils import safe_api_get
 import time
 import functools
 from datetime import datetime
@@ -47,10 +48,10 @@ def load_cached_titles():
 def fetch_friend_list():
     url = f"https://api.steampowered.com/ISteamUser/GetFriendList/v1/?key={API_KEY}&steamid={STEAM_ID}&relationship=friend"
     log(f" fetch_friend_list(): {url}")
-    response = requests.get(url)
+    response = safe_api_get(url)
     if response.status_code != 200:
         raise Exception(f"Steam API Error: {response.status_code} {response.text}")
-    time.sleep(4)
+    # time.sleep(4)  # ← 檢查是否仍需要
     return response.json().get('friendslist', {}).get('friends', [])
 
 def fetch_friend_profiles(steam_ids):
@@ -62,10 +63,10 @@ def fetch_friend_profiles(steam_ids):
         batch = steam_ids[i:i + 100]
         ids_str = ','.join(batch)
         url = f"https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v2/?key={API_KEY}&steamids={ids_str}"
-        response = requests.get(url)
+        response = safe_api_get(url)
         log(f"🔍 fetch_friend_profiles(), batch {i}: {url}")
 
-        time.sleep(5)
+        # time.sleep(5)  # ← 檢查是否仍需要
 
         if response.status_code == 200:
             players = response.json().get('response', {}).get('players', [])
@@ -211,7 +212,7 @@ def update_friend_list():
 #        steam_id = STEAM_ID
 #    url = f"https://api.steampowered.com/ISteamUserStats/GetPlayerAchievements/v1/?key={API_KEY}&steamid={steam_id}&appid={appid}"
 #    print(f"🔍 {time.strftime('%Y-%m-%d %H:%M:%S')} fetch_achievements()")
-#    response = requests.get(url)
+#    response = safe_api_get(url)
 #    if response.status_code != 200:
 #        raise Exception(f"Steam API Error: {response.status_code} {response.text}")
 #    return response.json().get("playerstats", {}).get("achievements", [])
@@ -219,9 +220,9 @@ def update_friend_list():
 def fetch_achievements(appid):
     url = f"https://api.steampowered.com/ISteamUserStats/GetPlayerAchievements/v1/?key={API_KEY}&steamid={STEAM_ID}&appid={appid}"
     log(f"🔍 fetch_achievements()")
-    time.sleep(4)
+    # time.sleep(4)  # ← 檢查是否仍需要
     try:
-        response = requests.get(url, timeout=10)
+        response = safe_api_get(url, timeout=10)
         if response.status_code == 200:
             data = response.json()
             achievements = data.get('playerstats', {}).get('achievements', [])
@@ -246,8 +247,8 @@ def fetch_achievement_data(appid, steam_id=None):
         steam_id = STEAM_ID
     url = f"https://api.steampowered.com/ISteamUserStats/GetPlayerAchievements/v1/?key={API_KEY}&steamid={steam_id}&appid={appid}"
     log(f"🔍 fetch_achievement_data()")
-    time.sleep(4)
-    response = requests.get(url)
+    # time.sleep(4)  # ← 檢查是否仍需要
+    response = safe_api_get(url)
     if response.status_code != 200:
         raise Exception(f"Steam API Error: {response.status_code} {response.text}")
     return response.json().get("playerstats", {})
@@ -255,9 +256,9 @@ def fetch_achievement_data(appid, steam_id=None):
 def fetch_achievement_summary(appid):
     url = f"https://api.steampowered.com/ISteamUserStats/GetPlayerAchievements/v1/?key={API_KEY}&steamid={STEAM_ID}&appid={appid}"
     log(f"🔍 fetch_achievement_summary()")
-    time.sleep(4)
+    # time.sleep(4)  # ← 檢查是否仍需要
     try:
-        response = requests.get(url, timeout=10)
+        response = safe_api_get(url, timeout=10)
         if response.status_code == 200:
             data = response.json()
             achievements = data.get('playerstats', {}).get('achievements', [])
@@ -284,7 +285,7 @@ def fetch_owned_games(lang="en"):
     url = f"https://api.steampowered.com/IPlayerService/GetOwnedGames/v1/?key={API_KEY}&steamid={STEAM_ID}&include_appinfo=true&l={lang}"
     log(f"🔍 fetch_owned_games()")
     try:
-        response = requests.get(url, timeout=10)
+        response = safe_api_get(url, timeout=10)
         if response.status_code == 200:
             data = response.json()
             return data.get('response', {}).get('games', [])
@@ -301,7 +302,7 @@ def fetch_game_info(appid, lang="en"):
     url = f"https://store.steampowered.com/api/appdetails?appids={appid}&l={lang}"
     log(f"🔍 fetch_game_info(): {url}")
     try:
-        r = requests.get(url)
+        r = safe_api_get(url)
         if r.status_code == 200:
             data = r.json().get(str(appid), {}).get("data", {})
             return {
@@ -319,7 +320,7 @@ def fetch_store_name(appid: str, lang: str) -> str:
         url = f"https://store.steampowered.com/api/appdetails?appids={appid}&l={lang_code}"
         log(f"🔍 fetch_store_name(): {url}")
         try:
-            r = requests.get(url, timeout=10)
+            r = safe_api_get(url, timeout=10)
             if r.status_code == 200:
                 data = r.json()
                 app_info = data.get(str(appid), {})
@@ -339,7 +340,7 @@ def fetch_store_name(appid: str, lang: str) -> str:
 
     # 如果失敗，再用英文查
     if lang_code != "en":
-        time.sleep(2)
+        # time.sleep(2)  # ← 檢查是否仍需要
         name = query_store(appid, "en")
         if name:
             return name
@@ -351,7 +352,7 @@ def fetch_store_name(appid: str, lang: str) -> str:
 def fetch_recent_games():
     url = f"https://api.steampowered.com/IPlayerService/GetRecentlyPlayedGames/v1/?key={API_KEY}&steamid={STEAM_ID}"
     log(f"🔍 fetch_recent_games(): {url}")
-    resp = requests.get(url)
+    resp = safe_api_get(url)
     if resp.status_code == 200:
         return resp.json().get('response', {}).get('games', [])
     return []
@@ -359,8 +360,8 @@ def fetch_recent_games():
 def fetch_achievement_count(appid):
     url = f"https://api.steampowered.com/ISteamUserStats/GetPlayerAchievements/v1/?key={API_KEY}&steamid={STEAM_ID}&appid={appid}"
     log(f"🔍 fetch_achievement_count(): {url}")
-    time.sleep(4)
-    resp = requests.get(url)
+    # time.sleep(4)  # ← 檢查是否仍需要
+    resp = safe_api_get(url)
     if resp.status_code == 200:
         achievements = resp.json().get('playerstats', {}).get('achievements', [])
         unlocked = [a for a in achievements if a.get('achieved', 0) == 1]
@@ -370,7 +371,7 @@ def fetch_achievement_count(appid):
 def fetch_current_level():
     url = f"https://api.steampowered.com/IPlayerService/GetSteamLevel/v1/?key={API_KEY}&steamid={STEAM_ID}"
     try:
-        response = requests.get(url)
+        response = safe_api_get(url)
         if response.status_code == 200:
             data = response.json()
             level = data.get('response', {}).get('player_level')

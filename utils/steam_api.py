@@ -327,13 +327,13 @@ def fetch_game_info(appid, lang="en"):
         if last_updated_str:
             last_updated = datetime.fromisoformat(last_updated_str)
             if datetime.now() - last_updated <= timedelta(days=30):
-                log(f"✅ 使用快取遊戲資料 appid={appid} lang={lang}")
+                log(f"✅ fetch_game_info(): 使用快取遊戲資料 appid={appid} lang={lang}")
                 return {
                     "name": cached["name"],
                     "header_image": cached["header_image"]
                 }
             else:
-                log(f"♻️ 快取過期（超過30天） appid={appid} lang={lang}")
+                log(f"♻️ fetch_game_info(): 快取過期（超過30天） appid={appid} lang={lang}")
 
     url = f"https://store.steampowered.com/api/appdetails?appids={appid}&l={api_lang}"
     try:
@@ -359,7 +359,7 @@ def fetch_game_info(appid, lang="en"):
             if datetime.now() - en_updated <= timedelta(days=30):
                 need_en = False
         if need_en:
-            log(f"🈯 同步英文名稱快取 appid={appid}")
+            log(f"🈯 fetch_game_info(): 同步英文名稱快取 appid={appid}")
             try:
                 time.sleep(1)
                 r_en = safe_api_get(f"https://store.steampowered.com/api/appdetails?appids={appid}&l=english")

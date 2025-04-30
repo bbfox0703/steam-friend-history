@@ -28,6 +28,9 @@ from collections import defaultdict, Counter, OrderedDict
 # 🌐 載入翻譯字典
 load_translations()
 
+API_KEY = os.getenv('STEAM_API_KEY')
+STEAM_ID = os.getenv('STEAM_USER_ID')
+
 tz = ZoneInfo("Asia/Taipei")
 
 print = functools.partial(print, flush=True)

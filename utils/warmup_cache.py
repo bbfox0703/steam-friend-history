@@ -29,3 +29,6 @@ def warmup_game_info_cache(langs=["en", "tchinese", "japanese"], sleep_time=1):
             except Exception as e:
                 log(f"⚠️ 無法快取 AppID {appid} lang={lang} - {e}")
     log("✅ 快取建構完成")
+
+if __name__ == "__main__":
+    warmup_game_info_cache()

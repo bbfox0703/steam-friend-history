@@ -373,39 +373,22 @@ def fetch_game_info(appid, lang="en"):
 
     return {"name": name, "header_image": header_image}
 
-def fetch_store_name(appid: str, lang: str) -> str:
-    def query_store(appid, lang_code):
-        url = f"https://store.steampowered.com/api/appdetails?appids={appid}&l={lang_code}"
-        log(f"🔍 fetch_store_name(): {url}")
-        try:
-            r = safe_api_get(url, timeout=10)
-            if r.status_code == 200:
-                data = r.json()
-                app_info = data.get(str(appid), {})
-                if not app_info.get("success"):
-                    return None
-                return app_info.get("data", {}).get("name")
-        except Exception as e:
-            log(f"❌ {appid} ({lang_code}) 錯誤: {e}")
-        return None
+def fetch_store_name(appid, lang="en"):
+    log(f"🔍 fetch_store_name(appid={appid}, lang={lang})")
 
-    lang_code = STORE_LANG_MAP.get(lang, "en")
+    # 優先查詢目標語言快取
+    cached = get_game_info_cache(appid, lang)
+    if cached and cached.get("name"):
+        return cached["name"]
 
-    # 第一次用目標語言查
-    name = query_store(appid, lang_code)
-    if name:
-        return name
+    # fallback 查詢英文快取
+    fallback = get_game_info_cache(appid, "en")
+    if fallback and fallback.get("name"):
+        log(f"↩️ 使用英文名稱 fallback appid={appid}")
+        return fallback["name"]
 
-    # 如果失敗，再用英文查
-    if lang_code != "en":
-        # time.sleep(2)  # ← 檢查是否仍需要
-        name = query_store(appid, "en")
-        if name:
-            return name
-
-    # 最後都查不到，返回空字串
+    # 查無資料
     return ""
-
     
 def fetch_recent_games():
     url = f"https://api.steampowered.com/IPlayerService/GetRecentlyPlayedGames/v1/?key={API_KEY}&steamid={STEAM_ID}"

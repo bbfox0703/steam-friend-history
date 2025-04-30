@@ -121,7 +121,7 @@ lang_map = {
 }
 
 LOG_DIR = "./logs"
-LOG_FILE = os.path.join(LOG_DIR, "daily_level_update.log")
+LOG_FILE = os.path.join(LOG_DIR, "app.log")
 
 def log(msg):
     timestamp = time.strftime('%Y-%m-%d %H:%M:%S')

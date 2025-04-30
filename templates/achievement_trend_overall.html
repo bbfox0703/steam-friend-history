@@ -12,6 +12,12 @@
   <a href="javascript:void(0);" id="modeYear" class="mode-btn">{{ _('年') }}</a>
 </div>
 
+<!-- 圖表切換按鈕 -->
+<div class="toggle-buttons" style="margin-bottom: 15px;">
+  <a href="javascript:void(0);" id="showAchievement" class="mode-btn">{{ _('成就趨勢') }}</a>
+  <a href="javascript:void(0);" id="showPlaytime" class="mode-btn">{{ _('遊玩時間趨勢') }}</a>
+</div>
+
 <!-- 成就趨勢 Toggle 控制器 -->
 <div style="margin-bottom: 20px;">
   <label>
@@ -34,6 +40,26 @@ let playtimeChartInstance = null;
 const achievements = {{ achievements|tojson }};
 const playtimes = {{ playtimes|tojson }};
 let mode = '{{ mode }}';
+
+function fillMissingDates(data, startDate, endDate) {
+  const filled = {};
+  let current = new Date(startDate);
+  const last = new Date(endDate);
+
+  while (current <= last) {
+    const dateStr = current.toISOString().slice(0, 10);
+    filled[dateStr] = data[dateStr] || {};
+    current.setDate(current.getDate() + 1);
+  }
+  return filled;
+}
+
+function getDateRange(data1, data2) {
+  const dates1 = Object.keys(data1);
+  const dates2 = Object.keys(data2);
+  const allDates = [...new Set([...dates1, ...dates2])].sort();
+  return [allDates[0], allDates[allDates.length - 1]];
+}
 
 function processDailyChange(data, granularity, forceZeroFirstPoint = true) {
   const sortedDates = Object.keys(data).sort();
@@ -82,8 +108,24 @@ function processDailyChange(data, granularity, forceZeroFirstPoint = true) {
   return result;
 }
 
+function cleanFirstPoint(data, forceZeroFirstPoint) {
+  const newData = { ...data };
+  if (!forceZeroFirstPoint) {
+    const keys = Object.keys(newData);
+    if (keys.length > 0) {
+      const firstKey = keys[0];
+      newData[firstKey] = null;
+    }
+  }
+  return newData;
+}
+
 function drawAchievementTrend(forceZeroFirstPoint = true) {
-  const dailyData = processDailyChange(achievements, mode, forceZeroFirstPoint);
+  const [startDate, endDate] = getDateRange(achievements, playtimes);
+  const filledAchievements = fillMissingDates(achievements, startDate, endDate);
+  const dailyDataRaw = processDailyChange(filledAchievements, mode, forceZeroFirstPoint);
+  const dailyData = cleanFirstPoint(dailyDataRaw, forceZeroFirstPoint);
+
   const labels = Object.keys(dailyData);
   const data = Object.values(dailyData);
 
@@ -98,7 +140,9 @@ function drawAchievementTrend(forceZeroFirstPoint = true) {
         label: '{{ _('成就趨勢') }}',
         data: data,
         borderWidth: 2,
-        tension: 0.3
+        tension: 0.3,
+        spanGaps: false,
+        hoverBorderWidth: 4
       }]
     },
     options: {
@@ -111,7 +155,10 @@ function drawAchievementTrend(forceZeroFirstPoint = true) {
 }
 
 function drawPlaytimeTrend() {
-  const dailyData = processDailyChange(playtimes, mode, true);
+  const [startDate, endDate] = getDateRange(achievements, playtimes);
+  const filledPlaytimes = fillMissingDates(playtimes, startDate, endDate);
+  const dailyData = processDailyChange(filledPlaytimes, mode, true);
+
   const labels = Object.keys(dailyData);
   const data = Object.values(dailyData);
 
@@ -126,7 +173,9 @@ function drawPlaytimeTrend() {
         label: '{{ _('每日新增遊玩時間（分鐘）') }}',
         data: data,
         borderWidth: 2,
-        tension: 0.3
+        tension: 0.3,
+        spanGaps: false,
+        hoverBorderWidth: 4
       }]
     },
     options: {
@@ -165,6 +214,16 @@ window.addEventListener('DOMContentLoaded', function() {
   document.getElementById('modeMonth').addEventListener('click', () => { mode = 'month'; updateCharts(); updateActiveMode(); });
   document.getElementById('modeYear').addEventListener('click', () => { mode = 'year'; updateCharts(); updateActiveMode(); });
 
+  document.getElementById('showAchievement').addEventListener('click', function() {
+    document.getElementById('achievementChart').style.display = 'block';
+    document.getElementById('playtimeChart').style.display = 'none';
+  });
+
+  document.getElementById('showPlaytime').addEventListener('click', function() {
+    document.getElementById('achievementChart').style.display = 'none';
+    document.getElementById('playtimeChart').style.display = 'block';
+  });
+
   updateActiveMode();
 });
 
@@ -187,6 +246,7 @@ function updateActiveMode() {
   text-decoration: none;
   color: #000;
   border-radius: 4px;
+  transition: all 0.25s ease;
 }
 .mode-btn.active {
   background-color: #007bff;

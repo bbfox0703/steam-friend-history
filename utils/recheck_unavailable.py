@@ -8,6 +8,17 @@ from utils.steam_api import fetch_store_name
 
 UNAVAILABLE_FILE = "./database/unavailable_titles.json"
 
+LOG_DIR = "./logs"
+LOG_FILE = os.path.join(LOG_DIR, "recheck_unavailable.log")
+
+def log(msg):
+    timestamp = time.strftime('%Y-%m-%d %H:%M:%S')
+    full_msg = f"[{timestamp}] {msg}"
+    print(full_msg)
+    os.makedirs(LOG_DIR, exist_ok=True)
+    with open(LOG_FILE, "a", encoding="utf-8") as f:
+        f.write(full_msg + "\n")
+
 def load_unavailable_titles():
     if os.path.exists(UNAVAILABLE_FILE):
         with open(UNAVAILABLE_FILE, "r", encoding="utf-8") as f:
@@ -24,7 +35,7 @@ def recheck_unavailable(days_threshold=30):
     today = datetime.today()
     updated = {}
 
-    print(f"🔍 開始重新檢查 unavailable appids（超過 {days_threshold} 天）...")
+    log(f"🔍 開始重新檢查 unavailable appids（超過 {days_threshold} 天）...")
 
     for appid, date_str in unavailable.items():
         try:
@@ -36,17 +47,17 @@ def recheck_unavailable(days_threshold=30):
             # recheck
             name = fetch_store_name(appid, "en")
             if name:
-                print(f"✅ AppID {appid} 已恢復！標題：{name}")
+                log(f"✅ AppID {appid} 已恢復！標題：{name}")
             else:
-                print(f"⚠️ AppID {appid} 仍然無法取得，保留")
+                log(f"⚠️ AppID {appid} 仍然無法取得，保留")
                 updated[appid] = today.strftime("%Y-%m-%d")
-            time.sleep(2)    
+            time.sleep(5)    
         except Exception as e:
-            print(f"❌ AppID {appid} 檢查失敗: {e}")
+            log(f"❌ AppID {appid} 檢查失敗: {e}")
             updated[appid] = today.strftime("%Y-%m-%d")
 
     save_unavailable_titles(updated)
-    print("✅ unavailable_titles.json 已更新完成！")
+    log("✅ unavailable_titles.json 已更新完成！")
 
 if __name__ == "__main__":
     recheck_unavailable(30)

@@ -92,6 +92,84 @@ def init_db():
     conn.commit()
     conn.close()
 
+def get_appids_from_playtime_trend():
+    conn = get_connection()
+    c = conn.cursor()
+    c.execute('SELECT DISTINCT appid FROM playtime_trend')
+    appids = [str(row[0]) for row in c.fetchall()]
+    conn.close()
+    return appids
+
+def count_appid_entries(appid: str) -> int:
+    conn = get_connection()
+    c = conn.cursor()
+    c.execute('SELECT COUNT(*) FROM playtime_trend WHERE appid = ?', (appid,))
+    count = c.fetchone()[0]
+    conn.close()
+    return count
+
+# 查詢某日所有 AppID 的成就數
+def get_achievements_by_date(date: str) -> dict:
+    conn = get_connection()
+    c = conn.cursor()
+    c.execute('''
+        SELECT appid, achievements
+        FROM achievement_trend
+        WHERE date = ?
+    ''', (date,))
+    rows = c.fetchall()
+    conn.close()
+    return {str(row["appid"]): row["achievements"] for row in rows}
+
+# 查詢某日所有 AppID 的遊玩分鐘數
+def get_playtime_by_date(date: str) -> dict:
+    conn = get_connection()
+    c = conn.cursor()
+    c.execute('''
+        SELECT appid, playtime_minutes
+        FROM playtime_trend
+        WHERE date = ?
+    ''', (date,))
+    rows = c.fetchall()
+    conn.close()
+    return {str(row["appid"]): row["playtime_minutes"] for row in rows}
+
+# 查詢成就趨勢資料中，所有存在的日期（升冪排序）
+def get_all_dates() -> list[str]:
+    conn = get_connection()
+    c = conn.cursor()
+    c.execute('''
+        SELECT DISTINCT date
+        FROM achievement_trend
+        ORDER BY date ASC
+    ''')
+    rows = c.fetchall()
+    conn.close()
+    return [row["date"] for row in rows]
+
+def insert_or_update_achievement(date: str, appid: str, achievements: int):
+    conn = get_connection()
+    c = conn.cursor()
+    c.execute('''
+        INSERT INTO achievement_trend (date, appid, achievements)
+        VALUES (?, ?, ?)
+        ON CONFLICT(date, appid) DO UPDATE SET achievements=excluded.achievements
+    ''', (date, appid, achievements))
+    conn.commit()
+    conn.close()
+
+def insert_or_update_playtime(date: str, appid: str, playtime_minutes: int):
+    conn = get_connection()
+    c = conn.cursor()
+    c.execute('''
+        INSERT INTO playtime_trend (date, appid, playtime_minutes)
+        VALUES (?, ?, ?)
+        ON CONFLICT(date, appid) DO UPDATE SET playtime_minutes=excluded.playtime_minutes
+    ''', (date, appid, playtime_minutes))
+    conn.commit()
+    conn.close()
+
+
 # 第一次執行用來建表
 if __name__ == "__main__":
     init_db()

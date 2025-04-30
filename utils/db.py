@@ -4,7 +4,7 @@ import sqlite3
 import os
 import time
 import random
-from datetime import datetime
+from datetime import datetime, timedelta
 from pathlib import Path
 
 LOG_DIR = "./logs"

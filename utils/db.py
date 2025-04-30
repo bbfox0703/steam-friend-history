@@ -117,7 +117,8 @@ def init_db():
     conn.close()
 
 def get_cached_achievements(steamid, appid):
-    conn = sqlite3.connect(DB_FILE)
+    # conn = sqlite3.connect(DB_FILE)
+    conn = get_connection()
     c = conn.cursor()
     c.execute("""
         SELECT achievement_name, unlock_time
@@ -130,7 +131,8 @@ def get_cached_achievements(steamid, appid):
     return [{"name": row[0], "unlock_time": row[1]} for row in result]
 
 def save_achievement_cache(steamid, appid, achievements):
-    conn = sqlite3.connect(DB_FILE)
+    # conn = sqlite3.connect(DB_FILE)
+    conn = get_connection()
     c = conn.cursor()
     c.executemany("""
         INSERT OR REPLACE INTO achievement_cache (steamid, appid, achievement_name, unlock_time)

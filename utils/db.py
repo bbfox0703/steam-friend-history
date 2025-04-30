@@ -1,10 +1,25 @@
 # utils/db.py
 
 import sqlite3
+import os
+import time
 from pathlib import Path
+
+LOG_DIR = "./logs"
+LOG_FILE = os.path.join(LOG_DIR, "db.log")
+
 
 # 資料庫路徑
 DB_PATH = Path('./database/steam_data.db')
+
+def log(msg):
+    timestamp = time.strftime('%Y-%m-%d %H:%M:%S')
+    full_msg = f"[{timestamp}] {msg}"
+    print(full_msg)
+    os.makedirs(LOG_DIR, exist_ok=True)
+    with open(LOG_FILE, "a", encoding="utf-8") as f:
+        f.write(full_msg + "\n")
+
 
 # 取得資料庫連線
 def get_connection():
@@ -98,6 +113,8 @@ def init_db():
             PRIMARY KEY (steamid, appid, achievement_name)
         )
     """)
+    conn.commit()
+    conn.close()
 
 def get_cached_achievements(steamid, appid):
     conn = sqlite3.connect(DB_FILE)
@@ -109,6 +126,7 @@ def get_cached_achievements(steamid, appid):
     """, (steamid, appid))
     result = c.fetchall()
     conn.close()
+    log(f"🧪 快取查詢結果: {result}")
     return [{"name": row[0], "unlock_time": row[1]} for row in result]
 
 def save_achievement_cache(steamid, appid, achievements):
@@ -120,10 +138,7 @@ def save_achievement_cache(steamid, appid, achievements):
     """, [(steamid, appid, a["name"], a["unlock_time"]) for a in achievements])
     conn.commit()
     conn.close()
-
-
-    conn.commit()
-    conn.close()
+    log(f"🧪 快取寫入結果: {steamid}, {appid}, {achievements}")
 
 def get_appids_from_playtime_trend():
     conn = get_connection()

@@ -239,7 +239,7 @@ def get_game_info_cache(appid, lang):
     conn.row_factory = sqlite3.Row
     c = conn.cursor()
     c.execute("""
-        SELECT name, header_image, raw_json
+        SELECT name, header_image, raw_json, last_updated
         FROM game_info_cache
         WHERE appid = ? AND lang = ?
     """, (appid, lang))

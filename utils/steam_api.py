@@ -2,6 +2,7 @@ import os
 import json
 import requests
 from utils.api_utils import safe_api_get
+from utils.db import get_cached_achievements, save_achievement_cache
 import time
 import functools
 from datetime import datetime
@@ -217,16 +218,34 @@ def update_friend_list():
 #        raise Exception(f"Steam API Error: {response.status_code} {response.text}")
 #    return response.json().get("playerstats", {}).get("achievements", [])
 
+
 def fetch_achievements(appid):
+    log(f"🔍 fetch_achievements(appid={appid})")
+
+    # 先查快取
+    cached = get_cached_achievements(STEAM_ID, appid)
+    if cached:
+        log(f"✅ 快取命中 appid={appid}")
+        return [{"apiname": a["name"], "unlocktime": a["unlock_time"], "achieved": 1} for a in cached]
+
+    # 沒命中則呼叫 API
     url = f"https://api.steampowered.com/ISteamUserStats/GetPlayerAchievements/v1/?key={API_KEY}&steamid={STEAM_ID}&appid={appid}"
-    log(f"🔍 fetch_achievements()")
-    # time.sleep(4)  # ← 檢查是否仍需要
     try:
         response = safe_api_get(url, timeout=10)
+        time.sleep(0.2)
         if response.status_code == 200:
             data = response.json()
             achievements = data.get('playerstats', {}).get('achievements', [])
+
+            unlocked = [a for a in achievements if a.get("achieved") == 1 and a.get("unlocktime", 0) > 0]
+            if achievements and len(unlocked) == len(achievements):
+                save_achievement_cache(STEAM_ID, appid, [
+                    {"name": a["apiname"], "unlock_time": a.get("unlocktime", 0)} for a in unlocked
+                ])
+                log(f"📝 已快取全成就 appid={appid}")
+
             return achievements
+
         elif response.status_code == 400:
             # ⚡ 特別處理無成就遊戲
             err_data = response.json()
@@ -240,7 +259,6 @@ def fetch_achievements(appid):
     except Exception as e:
         log(f"❌ Fetch achievements failed: {e}")
         return []
-
 
 def fetch_achievement_data(appid, steam_id=None):
     if steam_id is None:

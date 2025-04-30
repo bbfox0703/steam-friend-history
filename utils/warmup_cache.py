@@ -16,9 +16,10 @@ def log(msg):
     with open(LOG_FILE, "a", encoding="utf-8") as f:
         f.write(full_msg + "\n")
 
-def warmup_game_info_cache(langs=["en", "tchinese", "japanese"], sleep_time=1):
+def warmup_game_info_cache(langs=["en", "tchinese", "japanese"], sleep_time=5):
     log("♨️ 開始批次快取遊戲名稱...")
     owned_games = fetch_owned_games()
+    time.sleep(1)
     for idx, game in enumerate(owned_games):
         appid = game.get("appid")
         for lang in langs:

@@ -12,3 +12,19 @@
         supervisorctl signal HUP flask || true
     endscript
 }
+
+/app/app_logs/*.log {
+    daily
+    rotate 15
+    compress
+    delaycompress
+    missingok
+    notifempty
+    create 644 root root
+    sharedscripts
+    postrotate
+        supervisorctl signal HUP cron || true
+        supervisorctl signal HUP flask || true
+    endscript
+}
+

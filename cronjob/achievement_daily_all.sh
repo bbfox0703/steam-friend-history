@@ -1,9 +1,9 @@
 #!/bin/bash
-# 每日成就和遊玩時間記錄 - 增強版
+# 每日成就和遊玩時間記錄 - 連同成就backfill
 (
-  flock -n 9 || { echo "[$(date '+%Y-%m-%d %H:%M:%S')] 🔒 achievement_daily.sh skipped, another instance running" >> /var/log/cron_exec.log; exit 1; }
+  flock -n 9 || { echo "[$(date '+%Y-%m-%d %H:%M:%S')] 🔒 achievement_daily_all.sh skipped, another instance running" >> /var/log/cron_exec.log; exit 1; }
 
-  echo "[$(date '+%Y-%m-%d %H:%M:%S')] 🕒 achievement_daily.sh started" >> /var/log/cron_exec.log
+  echo "[$(date '+%Y-%m-%d %H:%M:%S')] 🕒 achievement_daily_all.sh started" >> /var/log/cron_exec.log
   cd /app
 
   # 跑成就及遊玩時間更新
@@ -24,4 +24,4 @@
     echo "[$(date '+%Y-%m-%d %H:%M:%S')] ❌ achievement_trend_batch_backfill.py failed or timeout" >> /var/log/cron_exec.log
   fi
 
-) 9>/tmp/achievement_daily.lock
+) 9>/tmp/achievement_daily_all.lock

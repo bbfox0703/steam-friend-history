@@ -5,7 +5,7 @@ from flask import Flask, render_template, request, redirect, url_for, jsonify, s
 import utils.steam_api as steam_api
 
 from utils.steam_api import get_friend_data, fetch_game_info, load_cached_titles, get_game_title
-from utils.db import get_connection
+from utils.db import get_connection, get_cached_achievements, save_achievement_cache, init_db
 from utils.playtime_trend import get_playtime_by_appid, calculate_daily_minutes, summarize_minutes
 from utils.achievement_trend_db import get_playtime_by_date, get_achievements_by_date
 from utils.level_history_db import get_all_levels
@@ -31,6 +31,8 @@ load_translations()
 tz = ZoneInfo("Asia/Taipei")
 
 print = functools.partial(print, flush=True)
+
+init_db()
 
 # 國碼對照英文名稱表（完整）
 country_name_map = {
@@ -555,7 +557,7 @@ def achievement_trend(appid):
     header_image = game_info["header_image"]
     mode = request.args.get("mode", "day")
 
-    # 🔍 查詢總遊玩時間
+    # 查詢總遊玩時間
     playtime_minutes = 0
     try:
         owned_games = steam_api.fetch_owned_games()
@@ -566,8 +568,20 @@ def achievement_trend(appid):
     except Exception as e:
         log(f"⚠️ 無法取得遊玩時間: {e}")
 
+    # 🔁 插入快取邏輯
     try:
-        achievements = steam_api.fetch_achievements(appid)
+        cached = get_cached_achievements(STEAM_ID, appid)
+        if cached:
+            log(f"✅ 使用快取的成就資料 appid={appid}")
+            achievements = [{"apiname": a["name"], "unlocktime": a["unlock_time"], "achieved": 1} for a in cached]
+        else:
+            achievements = steam_api.fetch_achievements(appid)
+            unlocked = [a for a in achievements if a.get("achieved") == 1]
+            if achievements and len(unlocked) == len(achievements):
+                save_achievement_cache(STEAM_ID, appid, [
+                    {"name": a["apiname"], "unlock_time": a.get("unlocktime", 0)} for a in unlocked
+                ])
+                log(f"📝 已快取全成就 appid={appid}")
     except Exception as e:
         msg = str(e)
         if "no stats" in msg:

@@ -306,18 +306,35 @@ def get_game_title(appid, lang='en'):
 
 
 def fetch_game_info(appid, lang="en"):
+    log(f"🔍 fetch_game_info(appid={appid}, lang={lang})")
+
+    # 查詢快取
+    cached = get_game_info_cache(appid, lang)
+    if cached:
+        log(f"✅ 使用快取遊戲資料 appid={appid}")
+        return {
+            "name": cached["name"],
+            "header_image": cached["header_image"]
+        }
+
+    # 沒快取則打 API
     url = f"https://store.steampowered.com/api/appdetails?appids={appid}&l={lang}"
-    log(f"🔍 fetch_game_info(): {url}")
     try:
         r = safe_api_get(url)
         if r.status_code == 200:
             data = r.json().get(str(appid), {}).get("data", {})
+            name = data.get("name", "")
+            header_image = data.get("header_image", "")
+            log(f"api return: name: {name}") 
+            raw_json = json.dumps(data)
+            save_game_info_cache(appid, lang, name, header_image, raw_json)
             return {
-                "name": data.get("name", ""),
-                "header_image": data.get("header_image", "")
+                "name": name,
+                "header_image": header_image
             }
-    except:
-        pass
+    except Exception as e:
+        log(f"❌ fetch_game_info failed: {e}")
+
     return {"name": "", "header_image": ""}
 
 

@@ -50,30 +50,30 @@ def update_trends():
         nearest_day_achievements = find_nearest_available_day('achievement_trend', yesterday)
         if nearest_day_achievements:
             yesterday_achievements = get_achievements_by_date(nearest_day_achievements) or {}
-            log(f"📅 成就資料使用最近的 {nearest_day_achievements}")
+            log(f"📅 update_trends(): 成就資料使用最近的 {nearest_day_achievements}")
         else:
             yesterday_achievements = {}
-            log(f"⚠️ 沒有任何成就歷史資料，視為空集合")
+            log(f"⚠️ update_trends(): 沒有任何成就歷史資料，視為空集合")
     except Exception as e:
         yesterday_achievements = {}
-        log(f"⚠️ 成就資料讀取錯誤: {e}，使用空集合")
+        log(f"⚠️ update_trends(): 成就資料讀取錯誤: {e}，使用空集合")
 
     # 遊玩時間資料
     try:
         nearest_day_playtimes = find_nearest_available_day('playtime_trend', yesterday)
         if nearest_day_playtimes:
             yesterday_playtimes = get_playtime_by_date(nearest_day_playtimes) or {}
-            log(f"📅 遊玩時間資料使用最近的 {nearest_day_playtimes}")
+            log(f"📅 update_trends(): 遊玩時間資料使用最近的 {nearest_day_playtimes}")
         else:
             yesterday_playtimes = {}
-            log(f"⚠️ 沒有任何遊玩時間歷史資料，視為空集合")
+            log(f"⚠️ update_trends(): 沒有任何遊玩時間歷史資料，視為空集合")
     except Exception as e:
         yesterday_playtimes = {}
-        log(f"⚠️ 遊玩時間資料讀取錯誤: {e}，使用空集合")
+        log(f"⚠️ update_trends(): 遊玩時間資料讀取錯誤: {e}，使用空集合")
 
     # 抓今天 Steam 資料
     recent_games = fetch_recent_games() or []
-    log(f"🎮 抓到最近遊玩 {len(recent_games)} 款遊戲")
+    log(f"🎮 update_trends(): 抓到最近遊玩 {len(recent_games)} 款遊戲")
 
     achievements_today = {}
     playtimes_today = {}
@@ -91,7 +91,7 @@ def update_trends():
             achievements_today[str(appid)] = unlocked_count
 
         except Exception as e:
-            log(f"⚠️ AppID {appid} 抓成就失敗: {e}")
+            log(f"⚠️ update_trends(): AppID {appid} 抓成就失敗: {e}")
             achievements_today[str(appid)] = 0
 
         playtimes_today[str(appid)] = playtime
@@ -99,21 +99,21 @@ def update_trends():
         if idx % 3 == 0:
             time.sleep(3)
 
-    log(f"🎯 成就 {len(achievements_today)} 筆，遊玩時間 {len(playtimes_today)} 筆")
+    log(f"🎯 update_trends(): 成就 {len(achievements_today)} 筆，遊玩時間 {len(playtimes_today)} 筆")
 
     # 新出現 AppID
     new_achievement_apps = set(achievements_today.keys()) - set(yesterday_achievements.keys())
     new_playtime_apps = set(playtimes_today.keys()) - set(yesterday_playtimes.keys())
 
     if new_achievement_apps:
-        log(f"➕ 新成就AppID: {', '.join(map(str, new_achievement_apps))}")
+        log(f"➕ update_trends(): 新成就AppID: {', '.join(map(str, new_achievement_apps))}")
     if new_playtime_apps:
-        log(f"➕ 新遊玩時間AppID: {', '.join(map(str, new_playtime_apps))}")
+        log(f"➕ update_trends(): 新遊玩時間AppID: {', '.join(map(str, new_playtime_apps))}")
 
     all_dates = get_all_dates()
     if not all_dates:
         all_dates = [yesterday]
-        log(f"📅 資料庫無歷史日期，初始化為昨日 {yesterday}")
+        log(f"📅 update_trends(): 資料庫無歷史日期，初始化為昨日 {yesterday}")
 
     ###for appid in yesterday_achievements:
     ###    if appid not in achievements_today:
@@ -123,7 +123,7 @@ def update_trends():
         if appid not in playtimes_today:
             playtimes_today[appid] = yesterday_playtimes[appid]
 
-    log(f"🔄 對歷史日期回填: {', '.join(all_dates)}")
+    log(f"🔄 update_trends(): 對歷史日期回填: {', '.join(all_dates)}")
 
     # ✅ 用今天的值補過去日期（避免補 0）
     for date in all_dates:
@@ -143,12 +143,12 @@ def update_trends():
             if value != current:
                 insert_or_update_achievement(today, appid, value)
             else:
-                log(f"🛑 AppID {appid} 成就數未變 ({value})，跳過更新")
+                log(f"🛑 update_trends(): AppID {appid} 成就數未變 ({value})，跳過更新")
 
     for appid, value in playtimes_today.items():
         insert_or_update_playtime(today, appid, value)
 
-    log("✅ 今日資料更新完成")
+    log("✅ update_trends(): 今日資料更新完成")
 
 if __name__ == "__main__":
     update_trends()

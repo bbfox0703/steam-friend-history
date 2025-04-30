@@ -248,10 +248,16 @@ def get_game_info_cache(appid, lang):
 def save_game_info_cache(appid, lang, name, header_image, raw_json):
     conn = get_connection()
     c = conn.cursor()
+    
+    # 👇 分散 last_updated 寫入時間
+    random_offset_days = random.randint(0, 6)
+    adjusted_time = (datetime.now() - timedelta(days=random_offset_days)).isoformat()
+    
     c.execute("""
         INSERT OR REPLACE INTO game_info_cache (appid, lang, name, header_image, raw_json, last_updated)
-        VALUES (?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
-    """, (appid, lang, name, header_image, raw_json))
+        VALUES (?, ?, ?, ?, ?, ?)
+    """, (appid, lang, name, header_image, raw_json, adjusted_time))
+    
     conn.commit()
     conn.close()
 

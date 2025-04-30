@@ -53,8 +53,6 @@
 ![國別分析](./docs/country.png)
 ## 圖例：好友趨勢圖
 ![好友趨勢圖](./docs/trend.png)
-## 圖例：好友狀態看板 
-![好友狀態看板](./docs/status_board.png)
 ## 圖例：變更記錄 
 從此對方再怎改，也不會改到認不得娘親
 ![變更記錄](./docs/history.png)

@@ -115,9 +115,9 @@ def update_trends():
         all_dates = [yesterday]
         log(f"📅 資料庫無歷史日期，初始化為昨日 {yesterday}")
 
-    for appid in yesterday_achievements:
-        if appid not in achievements_today:
-            achievements_today[appid] = yesterday_achievements[appid]
+    ###for appid in yesterday_achievements:
+    ###    if appid not in achievements_today:
+    ###        achievements_today[appid] = yesterday_achievements[appid]
 
     for appid in yesterday_playtimes:
         if appid not in playtimes_today:

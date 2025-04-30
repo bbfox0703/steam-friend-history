@@ -82,7 +82,7 @@ def update_cached_game_titles(langs, sleep_time=4):
                 else:
                     log(f"⚠️ {timestamp} [{idx+1}/{len(owned_games)}] {appid} ({lang}): 無法取得標題")
                     unavailable[appid_str] = datetime.today().strftime("%Y-%m-%d")
-                time.sleep(sleep_time)
+                time.sleep(sleep_time)  # ← 檢查是否仍需要
 
         save_game_title(appid,
                         updated_titles.get('en'),

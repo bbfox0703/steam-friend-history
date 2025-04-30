@@ -7,8 +7,9 @@ services:
     volumes:
       - ./backups:/app/backups
       - ./database:/app/database
-      - ./logs:/var/log     
-      - ./utils:/app/utils      
+      - ./logs:/var/log
+      - ./utils:/app/utils
+      - ./app_logs:/app/logs
     env_file:
       - .env
     environment:

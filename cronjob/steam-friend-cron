@@ -23,11 +23,11 @@
 # 1) 取得持有遊戲名稱：繁中、日文、英文
 # 2) 下架或是不存在的遊戲30天內不再抓取
 # 3) 取得持有遊戲總數
-30 22 * * * root /app/cronjob/cache_games_daily.sh >> /var/log/cache_games_daily 2>&1
+30 6 * * * root /app/cronjob/cache_games_daily.sh >> /var/log/cache_games_daily 2>&1
 #45 23 * * * root /app/cronjob/cache_games_daily.sh >> /var/log/cache_games_daily 2>&1
 
 # 持有遊戲名稱預先快取
-5 15 * * * root /app/cronjob/daily_warmup.sh >> /var/log/cwarmup.log 2>&1
+5 20 * * * root /app/cronjob/daily_warmup.sh >> /var/log/cwarmup.log 2>&1
 
 # 每日成就和遊玩時間記錄
 # 成就趨勢批次回填

@@ -3,8 +3,18 @@
 import time
 import os
 
-from utils.api_utils import log
 from utils.steam_api import fetch_game_info, fetch_owned_games
+
+LOG_DIR = "./logs"
+LOG_FILE = os.path.join(LOG_DIR, "warmup_cache.log")
+
+def log(msg):
+    timestamp = time.strftime('%Y-%m-%d %H:%M:%S')
+    full_msg = f"[{timestamp}] {msg}"
+    print(full_msg)
+    os.makedirs(LOG_DIR, exist_ok=True)
+    with open(LOG_FILE, "a", encoding="utf-8") as f:
+        f.write(full_msg + "\n")
 
 def warmup_game_info_cache(langs=["en", "tchinese", "japanese"], sleep_time=1):
     log("♨️ 開始批次快取遊戲名稱...")

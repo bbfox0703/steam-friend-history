@@ -305,19 +305,26 @@ def get_game_title(appid, lang='en'):
     return db_get_game_title(appid, lang)
 
 
+from datetime import datetime, timedelta
+
 def fetch_game_info(appid, lang="en"):
     log(f"🔍 fetch_game_info(appid={appid}, lang={lang})")
 
-    # 查詢快取
     cached = get_game_info_cache(appid, lang)
     if cached:
-        log(f"✅ 使用快取遊戲資料 appid={appid}")
-        return {
-            "name": cached["name"],
-            "header_image": cached["header_image"]
-        }
+        last_updated_str = cached.get("last_updated")
+        if last_updated_str:
+            last_updated = datetime.fromisoformat(last_updated_str)
+            if datetime.now() - last_updated <= timedelta(days=30):
+                log(f"✅ 使用快取遊戲資料 appid={appid}")
+                return {
+                    "name": cached["name"],
+                    "header_image": cached["header_image"]
+                }
+            else:
+                log(f"♻️ 快取過期（超過30天），重新取得 appid={appid}")
 
-    # 沒快取則打 API
+    # 沒快取或快取過期 → 打 API
     url = f"https://store.steampowered.com/api/appdetails?appids={appid}&l={lang}"
     try:
         r = safe_api_get(url)
@@ -325,7 +332,6 @@ def fetch_game_info(appid, lang="en"):
             data = r.json().get(str(appid), {}).get("data", {})
             name = data.get("name", "")
             header_image = data.get("header_image", "")
-            log(f"api return: name: {name}") 
             raw_json = json.dumps(data)
             save_game_info_cache(appid, lang, name, header_image, raw_json)
             return {
@@ -335,7 +341,10 @@ def fetch_game_info(appid, lang="en"):
     except Exception as e:
         log(f"❌ fetch_game_info failed: {e}")
 
-    return {"name": "", "header_image": ""}
+    return {
+        "name": cached["name"] if cached else "",
+        "header_image": cached["header_image"] if cached else ""
+    }
 
 
 # 查單個遊戲的Steam Store標題

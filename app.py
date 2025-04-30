@@ -573,7 +573,10 @@ def achievement_trend(appid):
         cached = get_cached_achievements(STEAM_ID, appid)
         if cached:
             log(f"✅ 使用快取的成就資料 appid={appid}")
-            achievements = [{"apiname": a["name"], "unlocktime": a["unlock_time"], "achieved": 1} for a in cached]
+            achievements = [
+                {"apiname": a["name"], "unlocktime": a["unlock_time"], "achieved": 1}
+                for a in cached
+            ]
         else:
             achievements = steam_api.fetch_achievements(appid)
             unlocked = [a for a in achievements if a.get("achieved") == 1]

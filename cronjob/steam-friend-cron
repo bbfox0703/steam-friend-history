@@ -31,7 +31,7 @@
 
 # 每日成就和遊玩時間記錄
 # 成就趨勢批次回填
-55 12,23 * * * root /bin/bash /app/cronjob/achievement_daily.sh >> /var/log/achievement_daily.log 2>&1
+55 23 * * * root /bin/bash /app/cronjob/achievement_daily.sh >> /var/log/achievement_daily.log 2>&1
 #
 # 取得持有遊戲總數
 58 7,23 * * * root /app/record_games_total.sh >> /var/log/record_games_total.log 2>&1

@@ -307,8 +307,19 @@ def get_game_title(appid, lang='en'):
 
 from datetime import datetime, timedelta
 
+
 def fetch_game_info(appid, lang="en"):
     log(f"🔍 fetch_game_info(appid={appid}, lang={lang})")
+
+    from datetime import datetime, timedelta
+    import time
+
+    lang_to_api = {
+        "en": "english",
+        "tchinese": "tchinese",
+        "japanese": "japanese"
+    }
+    api_lang = lang_to_api.get(lang, "english")
 
     cached = get_game_info_cache(appid, lang)
     if cached:
@@ -316,16 +327,15 @@ def fetch_game_info(appid, lang="en"):
         if last_updated_str:
             last_updated = datetime.fromisoformat(last_updated_str)
             if datetime.now() - last_updated <= timedelta(days=30):
-                log(f"✅ 使用快取遊戲資料 appid={appid}")
+                log(f"✅ 使用快取遊戲資料 appid={appid} lang={lang}")
                 return {
                     "name": cached["name"],
                     "header_image": cached["header_image"]
                 }
             else:
-                log(f"♻️ 快取過期（超過30天），重新取得 appid={appid}")
+                log(f"♻️ 快取過期（超過30天） appid={appid} lang={lang}")
 
-    # 沒快取或快取過期 → 打 API
-    url = f"https://store.steampowered.com/api/appdetails?appids={appid}&l={lang}"
+    url = f"https://store.steampowered.com/api/appdetails?appids={appid}&l={api_lang}"
     try:
         r = safe_api_get(url)
         if r.status_code == 200:
@@ -334,20 +344,35 @@ def fetch_game_info(appid, lang="en"):
             header_image = data.get("header_image", "")
             raw_json = json.dumps(data)
             save_game_info_cache(appid, lang, name, header_image, raw_json)
-            return {
-                "name": name,
-                "header_image": header_image
-            }
+        else:
+            raise Exception(f"Steam API Error: {r.status_code} {r.text}")
     except Exception as e:
-        log(f"❌ fetch_game_info failed: {e}")
+        log(f"❌ fetch_game_info(lang={lang}) failed: {e}")
+        name = ""
+        header_image = ""
 
-    return {
-        "name": cached["name"] if cached else "",
-        "header_image": cached["header_image"] if cached else ""
-    }
+    if lang != "en":
+        cached_en = get_game_info_cache(appid, "en")
+        need_en = True
+        if cached_en:
+            en_updated = datetime.fromisoformat(cached_en["last_updated"])
+            if datetime.now() - en_updated <= timedelta(days=30):
+                need_en = False
+        if need_en:
+            log(f"🈯 同步英文名稱快取 appid={appid}")
+            try:
+                time.sleep(1)
+                r_en = safe_api_get(f"https://store.steampowered.com/api/appdetails?appids={appid}&l=english")
+                if r_en.status_code == 200:
+                    data_en = r_en.json().get(str(appid), {}).get("data", {})
+                    name_en = data_en.get("name", "")
+                    raw_json_en = json.dumps(data_en)
+                    save_game_info_cache(appid, "en", name_en, "", raw_json_en)
+            except Exception as e:
+                log(f"⚠️ fetch_game_info() fallback english failed: {e}")
 
+    return {"name": name, "header_image": header_image}
 
-# 查單個遊戲的Steam Store標題
 def fetch_store_name(appid: str, lang: str) -> str:
     def query_store(appid, lang_code):
         url = f"https://store.steampowered.com/api/appdetails?appids={appid}&l={lang_code}"

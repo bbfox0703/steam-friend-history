@@ -580,12 +580,14 @@ def achievement_trend(appid):
         else:
             achievements = steam_api.fetch_achievements(appid)
             unlocked = [a for a in achievements if a.get("achieved") == 1]
-            if achievements and len(unlocked) == len(achievements):
-                save_achievement_cache(STEAM_ID, appid, [
-                    {"name": a["apiname"], "unlock_time": a.get("unlocktime", 0)} for a in unlocked
-                ])
-                log(f"📝 已快取全成就 appid={appid}")
+            if achievements:
+                if len(unlocked) == len(achievements):
+                    save_achievement_cache(STEAM_ID, appid, [
+                        {"name": a["apiname"], "unlock_time": a.get("unlocktime", 0)} for a in unlocked
+                    ])
+                    log(f"📝 已快取全成就 appid={appid}")
     except Exception as e:
+        log(f"❌ 查詢成就發生錯誤: {e}")
         msg = str(e)
         if "no stats" in msg:
             msg = "⚠️ 該遊戲沒有成就資料"

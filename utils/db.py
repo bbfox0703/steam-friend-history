@@ -88,6 +88,39 @@ def init_db():
     c.execute('''
         CREATE INDEX IF NOT EXISTS idx_achievement_history_appid ON achievement_history (appid)
     ''')
+    # 成就快取表
+    c.execute("""
+        CREATE TABLE IF NOT EXISTS achievement_cache (
+            steamid TEXT,
+            appid INTEGER,
+            achievement_name TEXT,
+            unlock_time INTEGER,
+            PRIMARY KEY (steamid, appid, achievement_name)
+        )
+    """)
+
+def get_cached_achievements(steamid, appid):
+    conn = sqlite3.connect(DB_FILE)
+    c = conn.cursor()
+    c.execute("""
+        SELECT achievement_name, unlock_time
+        FROM achievement_cache
+        WHERE steamid = ? AND appid = ?
+    """, (steamid, appid))
+    result = c.fetchall()
+    conn.close()
+    return [{"name": row[0], "unlock_time": row[1]} for row in result]
+
+def save_achievement_cache(steamid, appid, achievements):
+    conn = sqlite3.connect(DB_FILE)
+    c = conn.cursor()
+    c.executemany("""
+        INSERT OR REPLACE INTO achievement_cache (steamid, appid, achievement_name, unlock_time)
+        VALUES (?, ?, ?, ?)
+    """, [(steamid, appid, a["name"], a["unlock_time"]) for a in achievements])
+    conn.commit()
+    conn.close()
+
 
     conn.commit()
     conn.close()

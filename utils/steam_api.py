@@ -6,7 +6,7 @@ from utils.db import get_cached_achievements, save_achievement_cache
 import time
 import functools
 from datetime import datetime
-from utils.game_titles_db import get_game_title as db_get_game_title, get_all_game_titles
+from utils.game_titles_db import get_game_title as db_get_game_title, get_all_game_titles, get_game_info_cache, save_game_info_cache
 from dotenv import load_dotenv
 
 load_dotenv()

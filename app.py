@@ -235,17 +235,20 @@ def timeago(ts):
     except:
         return "時間未知"
 
+# 首頁：顯示目前好友清單
 @app.route('/')
 def index():
     data = steam_api.get_friend_data()
     return render_template('index.html', data=data)
 
+# 更新好友資料並建立當日備份
 @app.route('/update')
 def update():
     result = steam_api.update_friend_list()
     backup.backup_today()
     return {'status': 'ok', 'updated': result}
 
+# 歷史頁：顯示好友加入與移除紀錄，以及名稱變更
 @app.route("/history")
 def history():
     try:
@@ -329,6 +332,7 @@ def history():
                            friend_map=friend_map,
                            join_sort=join_sort)
 
+# 國籍分析頁：依國家列出好友分布
 @app.route("/country")
 def country():
     sort_mode = request.args.get("sort", "count")
@@ -351,6 +355,7 @@ def country():
                            sort_mode=sort_mode,
                            country_name_map=country_name_map)
 
+# 國籍統計圖表頁：長條圖視覺化好友國別
 @app.route("/country-chart")
 def country_chart():
     from collections import defaultdict
@@ -371,6 +376,7 @@ def country_chart():
 
     return render_template("country_chart.html", stats=stats)
 
+# 篩選頁：依條件顯示好友，支援 AJAX
 @app.route('/filter')
 def filter_friends():
     friends = filter_friend_list(request.args)
@@ -392,6 +398,7 @@ def filter_friends():
         all_countries=all_countries
     )
 
+# 趨勢頁：顯示好友新增/移除的時間趨勢圖
 @app.route("/trend")
 def trend():
     mode = request.args.get("mode", "month")  # 預設為月份
@@ -456,6 +463,7 @@ def trend():
 
     return render_template("trend.html", stats=stat.to_dict(orient="records"), mode=mode)
 
+# 狀態看板頁：即時顯示在線/離線好友狀態
 @app.route('/status-board')
 def status_board():
     friends = get_friend_data()
@@ -482,6 +490,7 @@ def status_board():
                            total_offline=total_offline,
                            update_time=update_time)
 
+# 備份管理頁：列出所有備份檔案
 @app.route('/backups')
 def backups():
     sort_by = request.args.get('sort', 'mtime')
@@ -509,10 +518,12 @@ def backups():
 
     return render_template('backups.html', files=files, sort_by=sort_by, order=order)
 
+# 備份下載 API
 @app.route('/backups/download/<filename>')
 def download_backup(filename):
     return send_from_directory('backups', filename, as_attachment=True)
 
+# 備份刪除 API
 @app.route('/backups/delete/<filename>', methods=['POST'])
 def delete_backup(filename):
     path = os.path.join('backups', filename)
@@ -538,6 +549,7 @@ def zip_backups():
     now_str = datetime.now().strftime('%Y%m%d_%H%M%S')
     return send_file(memory_file, as_attachment=True, download_name=f"steam_backups_{now_str}.zip", mimetype='application/zip')
 
+# 成就查詢入口頁（可輸入 AppID）
 @app.route("/achievement")
 def achievement_input():
     appid = request.args.get("appid")
@@ -545,6 +557,7 @@ def achievement_input():
         return redirect(url_for("achievement_trend", appid=appid))
     return render_template("achievement_search.html")
 
+# 成就趨勢圖頁：顯示某遊戲每日或每月成就達成狀況
 @app.route("/achievement/<appid>")
 def achievement_trend(appid):
     # 語言偵測
@@ -654,6 +667,7 @@ def achievement_trend(appid):
                            mode=mode,
                            playtime_minutes=playtime_minutes)
 
+# 等級趨勢圖：顯示帳號等級變化
 @app.route("/level-trend")
 def level_trend():
     mode = request.args.get("mode", "day")  # 預設為日
@@ -682,6 +696,7 @@ def level_trend():
 
     return render_template("level_trend.html", labels=labels, data=data, mode=mode)
 
+# 等級歷史頁：顯示完整與近 30 天的等級記錄
 @app.route('/level-history')
 def level_history():
     # 改成從 SQLite 撈資料
@@ -707,6 +722,7 @@ def level_history():
         recent_history=recent.items()
     )
 
+# 全體成就趨勢頁：綜合顯示所有遊戲每日成就與遊玩趨勢
 @app.route('/achievement-trend-overall')
 def achievement_trend_overall():
     mode = request.args.get('mode', 'day')
@@ -734,10 +750,12 @@ def achievement_trend_overall():
         mode=mode
     )
 
+# 遊玩時間查詢入口頁
 @app.route('/game-playtime-search')
 def game_playtime_search():
     return render_template('game_playtime_search.html')
 
+# 單一遊戲的遊玩時間趨勢頁（可選擇日/月/年）
 @app.route('/game-playtime/<appid>')
 def game_playtime(appid):
     try:
@@ -805,6 +823,7 @@ def game_playtime(appid):
         mode=mode
     )
 
+# 遊戲數趨勢頁：安裝遊戲總量變化統計
 @app.route("/games-trend")
 def games_trend():
     mode = request.args.get("mode", "day")
@@ -838,6 +857,7 @@ def games_trend():
 
     return render_template("games_trend.html", labels=labels, totals=totals, deltas=deltas, mode=mode)
 
+# 快取遊戲名稱清單 API（含語言切換）
 @cached_games_bp.route("/cached-games")
 def cached_games():
     titles = load_cached_titles()

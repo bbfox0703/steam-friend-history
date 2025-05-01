@@ -10,6 +10,8 @@ services:
       - ./logs:/var/log
       - ./utils:/app/utils
       - ./app_logs:/app/logs
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro      
     env_file:
       - .env
     environment:

@@ -3,6 +3,8 @@ FROM python:3.11-slim-bookworm
 # 停用互動模式，避免 tzdata 等卡住
 ENV DEBIAN_FRONTEND=noninteractive
 
+ENV TZ=Asia/Taipei
+
 WORKDIR /app
 
 # 更新 & 安裝必要套件
@@ -11,6 +13,9 @@ RUN apt-get update && \
     apt-get install -y cron curl supervisor logrotate procps tzdata jq zip sqlite3 && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
+
+# 設定時區為 Asia/Taipei
+RUN ln -snf /usr/share/zoneinfo/Asia/Taipei /etc/localtime && echo "Asia/Taipei" > /etc/timezone
 
 # 複製需求並安裝 Python 套件
 COPY requirements.txt ./

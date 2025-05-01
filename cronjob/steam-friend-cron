@@ -18,7 +18,7 @@
 5 3 * * * root /app/cronjob/backup_sqlite.sh >> /var/log/backup_sqlite 2>&1
 
 # Steam 等級記錄
-45,27 6,11,23 * * * root /app/cronjob/daily_level.sh >> /var/log/daily_level.log 2>&1
+45 6,23 * * * root /app/cronjob/daily_level.sh >> /var/log/daily_level.log 2>&1
 
 # 1) 取得持有遊戲名稱：繁中、日文、英文
 # 2) 下架或是不存在的遊戲30天內不再抓取

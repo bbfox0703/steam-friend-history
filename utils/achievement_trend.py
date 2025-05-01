@@ -115,10 +115,6 @@ def update_trends():
         all_dates = [yesterday]
         log(f"📅 update_trends(): 資料庫無歷史日期，初始化為昨日 {yesterday}")
 
-    ###for appid in yesterday_achievements:
-    ###    if appid not in achievements_today:
-    ###        achievements_today[appid] = yesterday_achievements[appid]
-
     for appid in yesterday_playtimes:
         if appid not in playtimes_today:
             playtimes_today[appid] = yesterday_playtimes[appid]
@@ -127,13 +123,20 @@ def update_trends():
 
     # ✅ 用今天的值補過去日期（避免補 0）
     for date in all_dates:
-        for appid in new_achievement_apps:
-            value = achievements_today.get(appid, 0)
-            insert_or_update_achievement(date, appid, value)
+        ###for appid in new_achievement_apps:
+        ###    value = achievements_today.get(appid, 0)
+        ###    insert_or_update_achievement(date, appid, value)
         for appid in new_playtime_apps:
             value = playtimes_today.get(appid, 0)
             insert_or_update_playtime(date, appid, value)
 
+    # ✅ 如果今天首次出現某 AppID，今天的成就數 > 0、且昨天沒有成就資料，就補昨天為 0
+    for appid in achievements_today:
+        if appid not in yesterday_achievements and achievements_today[appid] > 0:
+            insert_or_update_achievement(yesterday, appid, 0)
+            log(f"🆕 AppID {appid} 昨日成就補 0")
+
+    # ✅ 正式寫入今天成就
     for appid, value in achievements_today.items():
         current = get_achievements_by_date(today).get(str(appid), None)
 
@@ -145,6 +148,7 @@ def update_trends():
             else:
                 log(f"🛑 update_trends(): AppID {appid} 成就數未變 ({value})，跳過更新")
 
+    # ✅ 寫入今天的遊玩時間
     for appid, value in playtimes_today.items():
         insert_or_update_playtime(today, appid, value)
 

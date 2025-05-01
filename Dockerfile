@@ -1,5 +1,5 @@
 # Stage 0: fallback 時區來源（含 tzdata）
-FROM python:3.11-slim-bookworm as tzfallback
+FROM python:3.11-slim-bookworm AS tzfallback
 
 ENV DEBIAN_FRONTEND=noninteractive
 ENV TZ=Asia/Taipei

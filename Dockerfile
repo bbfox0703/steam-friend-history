@@ -1,9 +1,19 @@
+# fallback 階段建構 tzfallback image
+FROM busybox as tzfallback
+RUN mkdir -p /etc && \
+    echo "Asia/Taipei" > /etc/timezone && \
+    ln -snf /usr/share/zoneinfo/Asia/Taipei /etc/localtime
+
 FROM python:3.11-slim-bookworm
 
 # 停用互動模式，避免 tzdata 等卡住
 ENV DEBIAN_FRONTEND=noninteractive
-
 ENV TZ=Asia/Taipei
+
+# OS must installed tzdata
+# 嘗試從主機複製時區資訊，若失敗則使用 Asia/Taipei 預設值
+COPY --from=tzfallback /etc/localtime /etc/localtime
+COPY --from=tzfallback /etc/timezone /etc/timezone
 
 WORKDIR /app
 
@@ -15,7 +25,7 @@ RUN apt-get update && \
     rm -rf /var/lib/apt/lists/*
 
 # 設定時區為 Asia/Taipei
-RUN ln -snf /usr/share/zoneinfo/Asia/Taipei /etc/localtime && echo "Asia/Taipei" > /etc/timezone
+# RUN ln -snf /usr/share/zoneinfo/Asia/Taipei /etc/localtime && echo "Asia/Taipei" > /etc/timezone
 
 # 複製需求並安裝 Python 套件
 COPY requirements.txt ./

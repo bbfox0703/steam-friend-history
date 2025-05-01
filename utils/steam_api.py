@@ -40,12 +40,14 @@ def log(msg):
         f.write(full_msg + "\n")
 
 # 抓所有遊戲標題 cache
+# 📦 載入本地快取的所有遊戲標題（多語系）
 def load_cached_titles():
     global _cached_titles
     if _cached_titles is None:
         _cached_titles = get_all_game_titles()
     return _cached_titles
 
+# 👥 從 Steam API 抓取好友 SteamID 清單
 def fetch_friend_list():
     url = f"https://api.steampowered.com/ISteamUser/GetFriendList/v1/?key={API_KEY}&steamid={STEAM_ID}&relationship=friend"
     log(f" fetch_friend_list(): {url}")
@@ -55,6 +57,7 @@ def fetch_friend_list():
     # time.sleep(4)  # ← 檢查是否仍需要
     return response.json().get('friendslist', {}).get('friends', [])
 
+# 📇 從 Steam API 抓取好友個人資料（名稱、頭像、狀態、國家）
 def fetch_friend_profiles(steam_ids):
     if not steam_ids:
         return {}
@@ -85,6 +88,7 @@ def fetch_friend_profiles(steam_ids):
 
     return result
 
+# 🔄 若好友資料不完整，從備份中回補欄位
 def try_restore_from_backup(sid, fields=("persona_name", "avatar", "lastlogoff", "personastate"), lookback=10):
     files = sorted(
         [f for f in os.listdir(BACKUP_DIR) if f.startswith("friends_") and f.endswith(".json")],
@@ -104,12 +108,14 @@ def try_restore_from_backup(sid, fields=("persona_name", "avatar", "lastlogoff",
             continue
     return {}
 
+# 📂 讀取目前的好友資料（friends.json）
 def get_friend_data():
     if not os.path.exists(DB_PATH):
         return []
     with open(DB_PATH, 'r') as f:
         return json.load(f)
 
+# 💾 儲存好友資料，使用暫存檔方式避免損毀
 def save_friend_data(friend_list):
     os.makedirs(os.path.dirname(DB_PATH), exist_ok=True)
     tmp_path = DB_PATH + ".tmp"
@@ -117,6 +123,7 @@ def save_friend_data(friend_list):
         json.dump(friend_list, f, indent=2)
     os.replace(tmp_path, DB_PATH)  # ✅ 原子替換，避免讀到寫到一半的檔案
 
+# 🗂️ 備份好友資料到 backups 資料夾
 def backup_friend_data(friend_list):
     os.makedirs(BACKUP_DIR, exist_ok=True)
     timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
@@ -124,17 +131,20 @@ def backup_friend_data(friend_list):
     with open(path, 'w') as f:
         json.dump(friend_list, f, indent=2)
 
+# 📥 讀取任意 JSON 檔案為 dict
 def load_json(path):
     if not os.path.exists(path):
         return {}
     with open(path, 'r') as f:
         return json.load(f)
 
+# 📤 將資料儲存為 JSON 檔案
 def save_json(path, data):
     os.makedirs(os.path.dirname(path), exist_ok=True)
     with open(path, 'w') as f:
         json.dump(data, f, indent=2)
 
+# 🔁 更新好友清單，記錄變動並嘗試補齊缺失資料
 def update_friend_list():
     friend_list = fetch_friend_list()
     steam_ids = [f['steamid'] for f in friend_list]
@@ -219,6 +229,7 @@ def update_friend_list():
 #    return response.json().get("playerstats", {}).get("achievements", [])
 
 
+# 🏆 查詢某遊戲成就清單，支援 SQLite 快取（如為全成就）
 def fetch_achievements(appid):
     log(f"🔍 fetch_achievements(appid={appid})")
 
@@ -262,6 +273,7 @@ def fetch_achievements(appid):
 
 # ****** fetch_achievement_data 並未使用到 
 # ****** 如有使用到時移除此註解
+# 📊 查詢成就原始 JSON 結構（不使用快取）
 def fetch_achievement_data(appid, steam_id=None):
     if steam_id is None:
         steam_id = STEAM_ID
@@ -273,6 +285,7 @@ def fetch_achievement_data(appid, steam_id=None):
         raise Exception(f"Steam API Error: {response.status_code} {response.text}")
     return response.json().get("playerstats", {})
 
+# 📈 成就摘要（已解鎖 / 總數）
 def fetch_achievement_summary(appid):
     log(f"🔄 fetch_achievement_summary(appid={appid})")
     try:
@@ -288,6 +301,7 @@ def fetch_achievement_summary(appid):
         return None
 
 # 查目前持有的遊戲 (原本 fetch_owned_games 保留)
+# 🎮 查詢帳號持有的所有遊戲清單（含 appid 與名稱）
 def fetch_owned_games(lang="en"):
     url = f"https://api.steampowered.com/IPlayerService/GetOwnedGames/v1/?key={API_KEY}&steamid={STEAM_ID}&include_appinfo=true&l={lang}"
     log(f"🔍 fetch_owned_games()")
@@ -301,6 +315,7 @@ def fetch_owned_games(lang="en"):
     return []    
 
 # 查單個遊戲標題
+# 🏷️ 取得快取中指定 AppID 的遊戲名稱
 def get_game_title(appid, lang='en'):
     return db_get_game_title(appid, lang)
 
@@ -308,6 +323,7 @@ def get_game_title(appid, lang='en'):
 from datetime import datetime, timedelta
 
 
+# 🛒 查詢 Steam Store 的遊戲名稱與封面，快取 30 天有效
 def fetch_game_info(appid, lang="en"):
     log(f"🔍 fetch_game_info(appid={appid}, lang={lang})")
 
@@ -373,6 +389,7 @@ def fetch_game_info(appid, lang="en"):
 
     return {"name": name, "header_image": header_image}
 
+# 🔖 取得遊戲名稱（優先語言快取，否則備援英文）
 def fetch_store_name(appid, lang="en"):
     log(f"🔍 fetch_store_name(appid={appid}, lang={lang})")
 
@@ -390,6 +407,7 @@ def fetch_store_name(appid, lang="en"):
     # 查無資料
     return ""
     
+# 🕹️ 取得最近遊玩的遊戲清單
 def fetch_recent_games():
     url = f"https://api.steampowered.com/IPlayerService/GetRecentlyPlayedGames/v1/?key={API_KEY}&steamid={STEAM_ID}"
     log(f"🔍 fetch_recent_games(): {url}")
@@ -398,6 +416,7 @@ def fetch_recent_games():
         return resp.json().get('response', {}).get('games', [])
     return []
 
+# 🔢 統計某遊戲目前解鎖的成就數
 def fetch_achievement_count(appid):
     url = f"https://api.steampowered.com/ISteamUserStats/GetPlayerAchievements/v1/?key={API_KEY}&steamid={STEAM_ID}&appid={appid}"
     log(f"🔍 fetch_achievement_count(): {url}")
@@ -409,6 +428,7 @@ def fetch_achievement_count(appid):
         return len(unlocked)
     return 0
     
+# 🧬 查詢目前 Steam 帳號的等級
 def fetch_current_level():
     url = f"https://api.steampowered.com/IPlayerService/GetSteamLevel/v1/?key={API_KEY}&steamid={STEAM_ID}"
     try:

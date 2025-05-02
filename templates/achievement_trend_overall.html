@@ -33,6 +33,7 @@
 <canvas id="playtimeChart" height="100" style="margin-top: 50px;"></canvas>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
 <script>
 let achievementChartInstance = null;
 let playtimeChartInstance = null;
@@ -148,7 +149,14 @@ function drawAchievementTrend(forceZeroFirstPoint = true) {
     options: {
       responsive: true,
       scales: {
-        y: { beginAtZero: true }
+        y: {
+          beginAtZero: true,
+          ticks: {
+            callback: function(value) {
+              return Number.isInteger(value) ? value : null;
+            }
+          }
+        }
       }
     }
   });
@@ -166,6 +174,7 @@ function drawPlaytimeTrend() {
 
   const ctx = document.getElementById('playtimeChart').getContext('2d');
   playtimeChartInstance = new Chart(ctx, {
+    plugins: [ChartDataLabels],
     type: 'line',
     data: {
       labels: labels,
@@ -181,7 +190,14 @@ function drawPlaytimeTrend() {
     options: {
       responsive: true,
       scales: {
-        y: { beginAtZero: true }
+        y: {
+          beginAtZero: true,
+          ticks: {
+            callback: function(value) {
+              return Number.isInteger(value) ? value : null;
+            }
+          }
+        }
       }
     }
   });

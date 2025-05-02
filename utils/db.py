@@ -263,6 +263,14 @@ def save_game_info_cache(appid, lang, name, header_image, raw_json):
     conn.commit()
     conn.close()
 
+def vacuum_db():
+    conn = sqlite3.connect(DB_PATH)
+    try:
+        conn.execute("VACUUM")
+        log("✅ SQLite database vacuum completed.")
+    finally:
+        conn.close()
+
 # 第一次執行用來建表
 if __name__ == "__main__":
     init_db()

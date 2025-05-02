@@ -15,7 +15,10 @@
 0 1 * * * root /usr/sbin/logrotate /etc/logrotate.d/steam-friend-logs >> /var/log/cron_exec.log 2>&1
 
 # SQLite備份
-5 3 * * * root /app/cronjob/backup_sqlite.sh >> /var/log/backup_sqlite 2>&1
+5 3 * * * root /app/cronjob/backup_sqlite.sh >> /var/log/backup_sqlite.log 2>&1
+
+# SQLite DB compact
+20 0 * * 1 root /app/cronjob/db_vacuum.sh >> /var/log/db_vacuum.log 2>&1
 
 # Steam 等級記錄
 45 6,23 * * * root /app/cronjob/daily_level.sh >> /var/log/daily_level.log 2>&1

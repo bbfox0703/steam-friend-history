@@ -12,7 +12,9 @@
 			<option value="oldest" {% if request.args.get('sort') == 'oldest' %}selected{% endif %}>{{ _('最早優先') }}</option>
 		</select>
 	</label>
+	<!--
 	<label><input type="checkbox" name="online_only" {% if request.args.get('online_only') %}checked{% endif %}> {{ _('只顯示在線上') }}</label>
+	-->
 	<label><input type="checkbox" name="has_avatar" {% if request.args.get('has_avatar') %}checked{% endif %}> {{ _('有頭像') }}</label>
 	<label><input type="checkbox" name="has_country" {% if request.args.get('has_country') %}checked{% endif %}> {{ _('有國別') }}</label>
 	<label>{{ _('最近幾天內有上線：') }}

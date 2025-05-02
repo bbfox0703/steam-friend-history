@@ -57,8 +57,8 @@ const chart = new Chart(ctx, {
                 pointRadius: 4,
                 pointHoverRadius: 6,
                 borderWidth: 2,
-				tension: 0.3,
-				hoverBorderWidth: 4,
+                tension: 0.3,
+                hoverBorderWidth: 4,
             },
             {
                 label: '{{ _("持有總數") }}',
@@ -69,8 +69,8 @@ const chart = new Chart(ctx, {
                 pointRadius: 4,
                 pointHoverRadius: 6,
                 borderWidth: 2,
-				tension: 0.3,
-				hoverBorderWidth: 4,
+                tension: 0.3,
+                hoverBorderWidth: 4,
             }
         ]
     },
@@ -84,7 +84,14 @@ const chart = new Chart(ctx, {
                     display: true,
                     text: '{{ _("每日持有變化數") }}'
                 },
-                beginAtZero: true
+                beginAtZero: true,
+                ticks: {
+                    stepSize: 1,
+                    precision: 0,
+                    callback: function(value) {
+                        return Number.isInteger(value) ? value : null;
+                    }
+                }
             },
             y1: {
                 type: 'linear',
@@ -100,7 +107,11 @@ const chart = new Chart(ctx, {
                 suggestedMin: suggestedMin,
                 suggestedMax: suggestedMax,
                 ticks: {
-                    stepSize: stepSize
+                    stepSize: stepSize,
+                    precision: 0,
+                    callback: function(value) {
+                        return Number.isInteger(value) ? value : null;
+                    }
                 }
             }
         },

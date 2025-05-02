@@ -84,7 +84,14 @@ const chart = new Chart(ctx, {
                     display: true,
                     text: '{{ _("每日持有變化數") }}'
                 },
-                beginAtZero: true
+                beginAtZero: true,
+            	suggestedMin: suggestedMin,
+            	suggestedMax: suggestedMax,
+            	ticks: {
+            		stepSize: stepSize,
+            		callback: function(value) {
+            			return Number.isInteger(value) ? value : null;
+            		}				
             },
             y1: {
                 type: 'linear',

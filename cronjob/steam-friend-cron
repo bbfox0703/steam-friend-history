@@ -19,6 +19,7 @@
 
 # Steam 等級記錄
 45 6,23 * * * root /app/cronjob/daily_level.sh >> /var/log/daily_level.log 2>&1
+5 0 * * * root /app/cronjob/daily_level.sh >> /var/log/daily_level.log 2>&1
 
 # 1) 取得持有遊戲名稱：繁中、日文、英文
 # 2) 下架或是不存在的遊戲30天內不再抓取

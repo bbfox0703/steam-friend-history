@@ -33,6 +33,7 @@
 <canvas id="playtimeChart" height="100" style="margin-top: 50px;"></canvas>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
 <script>
 let achievementChartInstance = null;
 let playtimeChartInstance = null;
@@ -148,7 +149,14 @@ function drawAchievementTrend(forceZeroFirstPoint = true) {
     options: {
       responsive: true,
       scales: {
-        y: { beginAtZero: true }
+        y: {
+          beginAtZero: true,
+          ticks: {
+            callback: function(value) {
+              return Number.isInteger(value) ? value : null;
+            }
+          }
+        }
       }
     }
   });
@@ -165,26 +173,42 @@ function drawPlaytimeTrend() {
   if (playtimeChartInstance) playtimeChartInstance.destroy();
 
   const ctx = document.getElementById('playtimeChart').getContext('2d');
-  playtimeChartInstance = new Chart(ctx, {
-    type: 'line',
-    data: {
-      labels: labels,
-      datasets: [{
-        label: '{{ _('每日新增遊玩時間（分鐘）') }}',
-        data: data,
-        borderWidth: 2,
-        tension: 0.3,
-        spanGaps: false,
-        hoverBorderWidth: 4
-      }]
-    },
-    options: {
-      responsive: true,
-      scales: {
-        y: { beginAtZero: true }
-      }
-    }
-  });
+	playtimeChartInstance = new Chart(ctx, {
+	  type: 'line',
+	  data: {
+		labels: labels,
+		datasets: [{
+		  label: '{{ _("每日新增遊玩時間（分鐘）") }}',
+		  data: data,
+		  borderWidth: 2,
+		  tension: 0.3,
+		  spanGaps: false,
+		  hoverBorderWidth: 4
+		}]
+	  },
+	  options: {
+		responsive: true,
+		scales: {
+		  y: { beginAtZero: true }
+		},
+		plugins: {
+		  datalabels: {
+			display: function(context) {
+			  return context.dataIndex === context.chart.data.labels.length - 1;
+			},
+			align: 'top',
+			formatter: function(value) {
+			  return value;
+			},
+			color: 'black',
+			font: {
+			  weight: 'bold'
+			}
+		  }
+		}
+	  },
+	  plugins: [ChartDataLabels]
+	});
 }
 
 function updateCharts() {

@@ -1,6 +1,6 @@
 -- 刪除目標 appid 中 achievements = 0 的資料
 DELETE FROM achievement_trend
-WHERE appid IN (790820, 824550)
+WHERE appid IN (377160, 1151640)
   AND achievements = 0;
 
 -- 回填數值從最早日 ~ 最新日（包含）
@@ -17,8 +17,8 @@ date_range(date) AS (
 ),
 targets(appid, achievements) AS (
   VALUES
-    (790820, 7),
-	(617480, 9)
+    (377160, 41),
+	(1151640, 79)
 )
 INSERT OR REPLACE INTO achievement_trend(date, appid, achievements)
 SELECT d.date, t.appid, t.achievements

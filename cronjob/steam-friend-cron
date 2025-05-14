@@ -35,7 +35,7 @@
 
 # 每日成就和遊玩時間記錄
 # 成就趨勢批次回填
-50 23 * * * root /bin/bash /app/cronjob/achievement_daily_all.sh >> /var/log/achievement_daily_all.log 2>&1
+30 23 * * * root /bin/bash /app/cronjob/achievement_daily_all.sh >> /var/log/achievement_daily_all.log 2>&1
 
 # 每日成就和遊玩時間記錄
 50 2,5,8-22 * * * root /bin/bash /app/cronjob/achievement_daily_only.sh >> /var/log/achievement_daily_only.log 2>&1

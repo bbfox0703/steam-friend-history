@@ -5,8 +5,8 @@ echo "[$(date '+%Y-%m-%d %H:%M:%S')] 🕒 backup_sqlite.sh started at $(date)" >
 echo "[$(date '+%Y-%m-%d %H:%M:%S')] 🔍 backup_sqlite.sh cron: Working dir: $(pwd)" >> /var/log/cron_exec.log
 
 # 設定來源資料庫位置與備份目錄
-DB_FILE="./database/steam_data.db"
-BACKUP_DIR="./backups"
+DB_FILE="/app/database/steam_data.db"
+BACKUP_DIR="/app/backups"
 
 # 確保備份目錄存在
 mkdir -p "$BACKUP_DIR"

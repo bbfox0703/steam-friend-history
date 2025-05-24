@@ -8,8 +8,8 @@
   export PYTHONPATH="/app"
   cd /app
   echo "[$(date '+%Y-%m-%d %H:%M:%S')] 🎮 Updating game title cache (all languages)..." >> /var/log/cron_exec.log
-  /usr/local/bin/python3 -m utils.cache_games --lang all --sleep 5 >> /var/log/cron_exec.log 2 >> /var/log/cache_games_err.log
-  /usr/local/bin/python3 -m utils.recheck_unavailable >> /var/log/cron_exec.log 2 >> /var/log/recheck_unavailable_err.log
-  /usr/local/bin/python3 -m utils.record_games_total >> /var/log/cron_exec.log 2 >> /var/log/record_games_total_err.log
+  /usr/local/bin/python3 -m utils.cache_games --lang all --sleep 5 >> /var/log/cron_exec.log 2>> /var/log/cache_games_err.log
+  /usr/local/bin/python3 -m utils.recheck_unavailable >> /var/log/cron_exec.log 2>> /var/log/recheck_unavailable_err.log
+  /usr/local/bin/python3 -m utils.record_games_total >> /var/log/cron_exec.log 2>> /var/log/record_games_total_err.log
   echo "[$(date '+%Y-%m-%d %H:%M:%S')] ✅ cache_games_daily.sh completed." >> /var/log/cron_exec.log
 ) 9>/tmp/cache_games_daily.lock

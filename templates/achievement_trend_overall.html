@@ -149,33 +149,33 @@ function drawAchievementTrend(forceZeroFirstPoint = true) {
       }]
     },
     options: {
-      responsive: true,
-      scales: {
-        y: {
-          beginAtZero: true,
-          ticks: {
-            callback: function(value) {
-              return Number.isInteger(value) ? value : null;
-            }
-          }
-        }
-      }
-        plugins: {
-            zoom: {
-                pan: {
-                    enabled: true,
-                    mode: 'x',
-                },
-                zoom: {
-                    drag: {
-                        enabled: true,
-                    },
-                    mode: 'x',
-                }
-            },
-            legend: {
-                display: true
-            }
+		responsive: true,
+		scales: {
+			y: {
+			  beginAtZero: true,
+			  ticks: {
+				callback: function(value) {
+				  return Number.isInteger(value) ? value : null;
+				}
+			  }
+			}
+		},
+		plugins: {
+			zoom: {
+				pan: {
+					enabled: true,
+					mode: 'x',
+				},
+				zoom: {
+					drag: {
+						enabled: true,
+					},
+					mode: 'x',
+				}
+			},
+			legend: {
+				display: true
+			}
 		}
     }
   });

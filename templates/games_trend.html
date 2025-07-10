@@ -4,20 +4,18 @@
 
 {% block content %}
 <h1>{{ _('持有遊戲數趨勢圖') }}</h1>
-
 <div class="toggle-buttons" style="margin-bottom: 1em;">
-    <span>{{ _('顯示單位：') }}</span>
-    <a href="/games-trend?mode=day" class="{{ 'active' if mode == 'day' else '' }}">{{ _('日') }}</a>
-    <a href="/games-trend?mode=month" class="{{ 'active' if mode == 'month' else '' }}">{{ _('月') }}</a>
-    <a href="/games-trend?mode=year" class="{{ 'active' if mode == 'year' else '' }}">{{ _('年') }}</a>
+<span>{{ _('顯示單位：') }}</span>
+<a class="{{ 'active' if mode == 'day' else '' }}" href="/games-trend?mode=day">{{ _('日') }}</a>
+<a class="{{ 'active' if mode == 'month' else '' }}" href="/games-trend?mode=month">{{ _('月') }}</a>
+<a class="{{ 'active' if mode == 'year' else '' }}" href="/games-trend?mode=year">{{ _('年') }}</a>
 </div>
-
-<canvas id="gamesChart" class="chart-wrapper"></canvas>
+<canvas class="chart-wrapper" id="gamesChart"></canvas>
 {% endblock %}
 
 {% block extra_script %}
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script><script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@2.0.0"></script>
 <script>
 const labels = {{ labels | safe }};
 const deltas = {{ deltas | safe }};
@@ -76,6 +74,22 @@ const chart = new Chart(ctx, {
         ]
     },
     options: {
+
+        plugins: {
+            zoom: {
+                pan: {
+                    enabled: true,
+                    mode: 'x',
+                },
+                zoom: {
+                    drag: {
+                        enabled: true,
+                    },
+                    mode: 'x',
+                }
+            }
+        },
+
         responsive: true,
         scales: {
             y: {
@@ -139,6 +153,5 @@ const chart = new Chart(ctx, {
         }
     },
     plugins: [ChartDataLabels]
-});
-</script>
+});</script>
 {% endblock %}

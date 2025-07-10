@@ -1,11 +1,6 @@
 {% extends "base.html" %}
 
 {% block title %}{{ _('遊玩時間趨勢') }}{% endblock %}
-{% block extra_head %}
-
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@2.0.0"></script>
-{% endblock %}
 
 {% block content %}
 <h2>{{ _('遊玩時間趨勢') }} - {{ game_name }} (AppID: {{ appid }})</h2>
@@ -52,6 +47,8 @@
 
 {% block extra_script %}
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@2.0.0"></script>
+
 <script>
 {% if daily_minutes %}
 const ctx = document.getElementById('playtimeChart').getContext('2d');
@@ -61,7 +58,7 @@ const deltaValues = {{ daily_minutes.values()|list|tojson }};
 let total = 0;
 const cumulativeValues = deltaValues.map(v => total += v);
 
-new Chart(ctx, {
+new chart = new Chart(ctx, {
     type: 'line',
     data: {
         labels: labels,

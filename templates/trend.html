@@ -4,6 +4,7 @@
 
 {% block extra_head %}
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@2.0.0"></script>
 {% endblock %}
 
 {% block content %}
@@ -103,6 +104,18 @@
                 }
             },
             plugins: {
+				zoom: {
+					pan: {
+						enabled: true,
+						mode: 'x',
+					},
+					zoom: {
+						drag: {
+							enabled: true,
+						},
+						mode: 'x',
+					}
+				},			
                 legend: {
                     position: 'top'
                 },

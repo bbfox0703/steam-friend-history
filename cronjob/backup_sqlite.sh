@@ -27,4 +27,7 @@ zip -j "$ZIP_BACKUP" "$TEMP_BACKUP"
 # 刪除未壓縮的 db 檔案
 rm "$TEMP_BACKUP"
 
+# 刪除 30 天以前的 daily 備份
+find /app/backups/ -name "steam_data_*.db.zip" -mtime +30 -delete
+
 echo "[$(date)] 資料庫已壓縮備份：$ZIP_BACKUP"

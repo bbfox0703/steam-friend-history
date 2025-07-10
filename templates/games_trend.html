@@ -74,22 +74,6 @@ const chart = new Chart(ctx, {
         ]
     },
     options: {
-
-        plugins: {
-            zoom: {
-                pan: {
-                    enabled: true,
-                    mode: 'x',
-                },
-                zoom: {
-                    drag: {
-                        enabled: true,
-                    },
-                    mode: 'x',
-                }
-            }
-        },
-
         responsive: true,
         scales: {
             y: {
@@ -131,6 +115,18 @@ const chart = new Chart(ctx, {
             }
         },
         plugins: {
+            zoom: {
+                pan: {
+                    enabled: true,
+                    mode: 'x',
+                },
+                zoom: {
+                    drag: {
+                        enabled: true,
+                    },
+                    mode: 'x',
+                }
+            },
             legend: {
                 display: true
             },

@@ -34,6 +34,8 @@
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@2.0.0"></script>
+
 <script>
 let achievementChartInstance = null;
 let playtimeChartInstance = null;
@@ -158,6 +160,23 @@ function drawAchievementTrend(forceZeroFirstPoint = true) {
           }
         }
       }
+        plugins: {
+            zoom: {
+                pan: {
+                    enabled: true,
+                    mode: 'x',
+                },
+                zoom: {
+                    drag: {
+                        enabled: true,
+                    },
+                    mode: 'x',
+                }
+            },
+            legend: {
+                display: true
+            }
+		}
     }
   });
 }

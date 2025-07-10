@@ -58,7 +58,7 @@ const deltaValues = {{ daily_minutes.values()|list|tojson }};
 let total = 0;
 const cumulativeValues = deltaValues.map(v => total += v);
 
-new chart = new Chart(ctx, {
+const chart = new Chart(ctx, {
     type: 'line',
     data: {
         labels: labels,

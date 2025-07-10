@@ -211,19 +211,34 @@ function drawPlaytimeTrend() {
 		  y: { beginAtZero: true }
 		},
 		plugins: {
-		  datalabels: {
-			display: function(context) {
-			  return context.dataIndex === context.chart.data.labels.length - 1;
+			zoom: {
+				pan: {
+					enabled: true,
+					mode: 'x',
+				},
+				zoom: {
+					drag: {
+						enabled: true,
+					},
+					mode: 'x',
+				}
 			},
-			align: 'top',
-			formatter: function(value) {
-			  return value;
-			},
-			color: 'black',
-			font: {
-			  weight: 'bold'
+			legend: {
+				display: true
+			},		
+			datalabels: {
+				display: function(context) {
+					return context.dataIndex === context.chart.data.labels.length - 1;
+				},
+				align: 'top',
+				formatter: function(value) {
+					return value;
+				},
+				color: 'black',
+				font: {
+					weight: 'bold'
+				}
 			}
-		  }
 		}
 	  },
 	  plugins: [ChartDataLabels]

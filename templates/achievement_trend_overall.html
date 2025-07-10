@@ -34,6 +34,8 @@
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@2.0.0"></script>
+
 <script>
 let achievementChartInstance = null;
 let playtimeChartInstance = null;
@@ -147,17 +149,34 @@ function drawAchievementTrend(forceZeroFirstPoint = true) {
       }]
     },
     options: {
-      responsive: true,
-      scales: {
-        y: {
-          beginAtZero: true,
-          ticks: {
-            callback: function(value) {
-              return Number.isInteger(value) ? value : null;
-            }
-          }
-        }
-      }
+		responsive: true,
+		scales: {
+			y: {
+			  beginAtZero: true,
+			  ticks: {
+				callback: function(value) {
+				  return Number.isInteger(value) ? value : null;
+				}
+			  }
+			}
+		},
+		plugins: {
+			zoom: {
+				pan: {
+					enabled: true,
+					mode: 'x',
+				},
+				zoom: {
+					drag: {
+						enabled: true,
+					},
+					mode: 'x',
+				}
+			},
+			legend: {
+				display: true
+			}
+		}
     }
   });
 }
@@ -192,19 +211,34 @@ function drawPlaytimeTrend() {
 		  y: { beginAtZero: true }
 		},
 		plugins: {
-		  datalabels: {
-			display: function(context) {
-			  return context.dataIndex === context.chart.data.labels.length - 1;
+			zoom: {
+				pan: {
+					enabled: true,
+					mode: 'x',
+				},
+				zoom: {
+					drag: {
+						enabled: true,
+					},
+					mode: 'x',
+				}
 			},
-			align: 'top',
-			formatter: function(value) {
-			  return value;
-			},
-			color: 'black',
-			font: {
-			  weight: 'bold'
+			legend: {
+				display: true
+			},		
+			datalabels: {
+				display: function(context) {
+					return context.dataIndex === context.chart.data.labels.length - 1;
+				},
+				align: 'top',
+				formatter: function(value) {
+					return value;
+				},
+				color: 'black',
+				font: {
+					weight: 'bold'
+				}
 			}
-		  }
 		}
 	  },
 	  plugins: [ChartDataLabels]

@@ -11,12 +11,28 @@
             <li>
                 <strong><a href="https://steamcommunity.com/profiles/{{ sid }}" target="_blank">{{ sid }}</a></strong>
                 <ul>
-                {% for record in logs %}
+                {% set recent = logs[-3:] %}
+                {% for record in recent %}
                     <li>
                         <time class="datetime-auto" data-timestamp="{{ record.ts }}">{{ record.time }}</time>
                         ：{{ record.old }} → {{ record.new }}
                     </li>
                 {% endfor %}
+                {% if logs|length > 3 %}
+                    <li>
+                        <details>
+                            <summary>{{ _('顯示更早紀錄') }}</summary>
+                            <ul>
+                            {% for record in logs[:-3] %}
+                                <li>
+                                    <time class="datetime-auto" data-timestamp="{{ record.ts }}">{{ record.time }}</time>
+                                    ：{{ record.old }} → {{ record.new }}
+                                </li>
+                            {% endfor %}
+                            </ul>
+                        </details>
+                    </li>
+                {% endif %}
                 </ul>
             </li>
         {% endfor %}

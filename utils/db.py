@@ -165,10 +165,26 @@ def get_appids_from_playtime_trend():
     conn.close()
     return appids
 
+def get_appids_from_achievement_trend() -> list[str]:
+    conn = get_connection()
+    c = conn.cursor()
+    c.execute('SELECT DISTINCT appid FROM achievement_trend')
+    appids = [str(row[0]) for row in c.fetchall()]
+    conn.close()
+    return appids
+
 def count_appid_entries(appid: str) -> int:
     conn = get_connection()
     c = conn.cursor()
     c.execute('SELECT COUNT(*) FROM playtime_trend WHERE appid = ?', (appid,))
+    count = c.fetchone()[0]
+    conn.close()
+    return count
+
+def count_achievement_entries(appid: str) -> int:
+    conn = get_connection()
+    c = conn.cursor()
+    c.execute('SELECT COUNT(*) FROM achievement_trend WHERE appid = ?', (appid,))
     count = c.fetchone()[0]
     conn.close()
     return count

@@ -7,6 +7,8 @@ from utils.db import (
     get_all_dates,
     insert_or_update_achievement,
     insert_or_update_playtime,
+    get_appids_from_playtime_trend,
+    get_appids_from_achievement_trend,
     get_connection
 )
 from utils.steam_api import fetch_recent_games, fetch_achievement_summary
@@ -101,9 +103,12 @@ def update_trends():
 
     log(f"🎯 update_trends(): 成就 {len(achievements_today)} 筆，遊玩時間 {len(playtimes_today)} 筆")
 
-    # 新出現 AppID
-    new_achievement_apps = set(achievements_today.keys()) - set(yesterday_achievements.keys())
-    new_playtime_apps = set(playtimes_today.keys()) - set(yesterday_playtimes.keys())
+    # 新出現 AppID（資料庫從未出現過）
+    existing_achievement_appids = set(get_appids_from_achievement_trend())
+    existing_playtime_appids = set(get_appids_from_playtime_trend())
+
+    new_achievement_apps = set(achievements_today.keys()) - existing_achievement_appids
+    new_playtime_apps = set(playtimes_today.keys()) - existing_playtime_appids
 
     if new_achievement_apps:
         log(f"➕ update_trends(): 新成就AppID: {', '.join(map(str, new_achievement_apps))}")
@@ -127,17 +132,18 @@ def update_trends():
             value = playtimes_today.get(appid, 0)
             insert_or_update_playtime(date, appid, value)
 
+    # ✅ 回填新成就 AppID 的所有歷史日期，
+    #    以今天的累計值作為基準避免 chart 跳動
+    for date in all_dates:
+        for appid in new_achievement_apps:
+            value = achievements_today.get(appid, 0)
+            insert_or_update_achievement(date, appid, value)
+
     # 🔁 若昨天出現但今天沒出現，補上昨天值
     for appid in yesterday_achievements:
         if appid not in achievements_today:
             achievements_today[appid] = yesterday_achievements[appid]
             log(f"🔁 AppID {appid} 今日沒出現，使用昨日成就值 {yesterday_achievements[appid]}")
-
-    # ✅ 如果今天首次出現某 AppID，今天的成就數 > 0、且昨天沒有成就資料，就補昨天為 0
-    for appid in achievements_today:
-        if appid not in yesterday_achievements and achievements_today[appid] > 0:
-            insert_or_update_achievement(yesterday, appid, 0)
-            log(f"🆕 AppID {appid} 昨日成就補 0")
 
     # ✅ 正式寫入今天成就
     for appid, value in achievements_today.items():

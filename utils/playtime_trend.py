@@ -76,7 +76,8 @@ def calculate_daily_minutes(playtime_records):
         today_playtime = record["playtime_minutes"]
 
         if last_playtime is None:
-            diff = today_playtime if today_playtime and today_playtime <= 1440 else 0
+            # Treat the first record as baseline to avoid inflating playtime
+            diff = 0
         else:
             diff = today_playtime - last_playtime if today_playtime is not None else 0
             if diff < 0 or diff > 1440:

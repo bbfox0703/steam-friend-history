@@ -1,4 +1,6 @@
 import requests
+
+session = requests.Session()
 import time
 import os
 
@@ -23,7 +25,7 @@ def safe_api_get(url, min_delay=1, **kwargs):
 
     for attempt in range(max_retries):
         try:
-            response = requests.get(url, **kwargs)
+            response = session.get(url, **kwargs)
             if response.status_code == 429:
                 log(f"⚠️ [safe_api_get] 429 Too Many Requests - retrying in {backoff_time} sec...")
                 time.sleep(backoff_time)

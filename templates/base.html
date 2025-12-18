@@ -32,9 +32,9 @@
         <div class="language-switcher">
             <span class="lang-label">{{ _('語言') }}:</span>
             <select id="langSelect" class="lang-select">
-                <option value="zh-TW">{{ _('繁體中文') }}</option>
-                <option value="en">{{ _('English') }}</option>
-                <option value="ja">{{ _('日本語') }}</option>
+                <option value="zh-TW" {% if get_locale() == 'zh-TW' %}selected{% endif %}>{{ _('繁體中文') }}</option>
+                <option value="en" {% if get_locale() == 'en' %}selected{% endif %}>{{ _('English') }}</option>
+                <option value="ja" {% if get_locale() == 'ja' %}selected{% endif %}>{{ _('日本語') }}</option>
             </select>
         </div>
     </div>

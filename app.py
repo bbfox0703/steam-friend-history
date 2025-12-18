@@ -192,17 +192,13 @@ from flask import g
 
 @app.context_processor
 def inject_globals():
-    return {'_': _}
+    return {'_': _, 'get_locale': get_locale}
 
 @app.before_request
 def detect_language():
-    lang = request.accept_languages.best_match(["zh-TW", "ja", "en"], default="en")
-    if lang.lower().startswith("zh"):
-        g.language = "zh-tw"
-    elif lang.lower().startswith("ja"):
-        g.language = "ja"
-    else:
-        g.language = "en"
+    # 這個函數已被 utils/i18n.py 中的 get_locale() 取代
+    # 保留是為了兼容性，實際語言檢測由 i18n.get_locale() 處理
+    pass
 
 @app.template_filter('datetimeformat')
 def datetimeformat(ts):
@@ -763,11 +759,7 @@ def game_playtime(appid):
     except ValueError:
         return "Invalid AppID", 400
 
-    lang_override = request.cookies.get("lang_override")
-    if lang_override:
-        lang = lang_override
-    else:
-        lang = request.accept_languages.best_match(["zh-tw", "ja", "en"], default="en")
+    lang = get_locale()
 
     # 取得遊戲名稱
     titles = load_cached_titles()
@@ -899,6 +891,24 @@ def set_language(lang):
     response.set_cookie('lang_override', lang, max_age=60*60*24*365)  # 1年有效期
 
     return response
+
+# 調試語言設定的路由
+@app.route('/debug-lang')
+def debug_lang():
+    from flask import request
+    lang_cookie = request.cookies.get('lang_override')
+    current_lang = get_locale()
+    accept_langs = request.headers.get('Accept-Language', '')
+
+    debug_info = f"""
+    <h2>語言設定調試</h2>
+    <p><strong>Cookie 語言:</strong> {lang_cookie}</p>
+    <p><strong>當前語言:</strong> {current_lang}</p>
+    <p><strong>瀏覽器語言:</strong> {accept_langs}</p>
+    <p><strong>測試文字:</strong> {_('好友清單')}</p>
+    <p><a href="/">返回首頁</a></p>
+    """
+    return debug_info
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=3000)

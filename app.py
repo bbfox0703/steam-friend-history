@@ -1012,9 +1012,14 @@ def reload_translations():
     from utils.i18n import load_translations
 
     # 重新載入翻譯
-    load_translations()
+    try:
+        load_translations()
+        message = "翻譯檔案重新載入成功！"
+    except Exception as e:
+        message = f"翻譯檔案載入失敗: {e}"
 
     response = make_response(redirect('/debug-lang'))
+    # 可以考慮添加 flash 訊息，但這裡簡單重定向
     return response
 
 # 簡單的語言切換測試頁面

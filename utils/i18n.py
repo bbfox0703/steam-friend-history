@@ -41,11 +41,27 @@ def get_locale():
 TRANSLATIONS = {}
 
 def load_translations():
+    # 檔案名稱對照表（處理大小寫不一致問題）
+    file_mapping = {
+        'zh-TW': 'zh-tw.json',
+        'ja': 'ja.json',
+        'en': 'en.json'
+    }
+
     for lang in SUPPORTED_LANGS:
-        path = os.path.join(LOCALE_DIR, f'{lang}.json')
+        filename = file_mapping.get(lang, f'{lang}.json')
+        path = os.path.join(LOCALE_DIR, filename)
         if os.path.exists(path):
-            with open(path, 'r', encoding='utf-8') as f:
-                TRANSLATIONS[lang] = json.load(f)
+            try:
+                with open(path, 'r', encoding='utf-8') as f:
+                    TRANSLATIONS[lang] = json.load(f)
+                    print(f"Loaded {len(TRANSLATIONS[lang])} translations for {lang}")
+            except Exception as e:
+                print(f"Error loading {lang}: {e}")
+                TRANSLATIONS[lang] = {}
+        else:
+            print(f"Translation file not found: {path}")
+            TRANSLATIONS[lang] = {}
 
 def _(text):
     lang = get_locale()

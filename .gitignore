@@ -1,2 +1,7 @@
 .env
+.claude
 /tmp/
+/database/*.json
+/database/*.db
+/database/*.bak
+__pycache__/

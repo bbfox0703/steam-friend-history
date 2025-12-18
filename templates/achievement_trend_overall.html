@@ -90,6 +90,10 @@ function processDailyChange(data, granularity, forceZeroFirstPoint = true) {
       diff = todayTotal;
     } else {
       diff = todayTotal - prevTotal;
+      // 防止負值：成就數量理論上只能增加，不會減少
+      if (diff < 0) {
+        diff = 0;
+      }
     }
 
     if (!(key in result)) result[key] = 0;

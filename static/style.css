@@ -162,6 +162,40 @@ a:visited:not(.menu-link) {
     box-shadow: 0 0 6px rgba(255,255,255,0.5);
 }
 
+.language-switcher {
+    display: flex;
+    align-items: center;
+    margin-left: auto;
+    gap: 8px;
+}
+
+.lang-label {
+    color: #fff;
+    font-size: 0.9em;
+    font-weight: 500;
+}
+
+.lang-select {
+    padding: 6px 12px;
+    border-radius: 15px;
+    border: 1px solid #ffffff44;
+    background-color: #ffffff22;
+    color: #fff;
+    font-size: 0.9em;
+    cursor: pointer;
+    outline: none;
+    transition: background-color 0.2s;
+}
+
+.lang-select:hover {
+    background-color: #ffffff33;
+}
+
+.lang-select option {
+    background-color: #333;
+    color: #fff;
+}
+
 .menu-link.active {
     background-color: #ffffff88;
     font-weight: bold;

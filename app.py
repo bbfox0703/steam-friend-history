@@ -881,6 +881,24 @@ def cached_games():
     return jsonify(result)
 
 app.register_blueprint(cached_games_bp)
-                       
+
+# 語言切換路由
+@app.route('/set-language/<lang>')
+def set_language(lang):
+    from flask import make_response, redirect, request
+    from utils.i18n import SUPPORTED_LANGS
+
+    if lang not in SUPPORTED_LANGS:
+        lang = 'en'  # 預設語言
+
+    # 取得來源頁面，或回到首頁
+    referrer = request.referrer or url_for('index')
+
+    # 建立回應並設定 Cookie
+    response = make_response(redirect(referrer))
+    response.set_cookie('lang_override', lang, max_age=60*60*24*365)  # 1年有效期
+
+    return response
+
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=3000)

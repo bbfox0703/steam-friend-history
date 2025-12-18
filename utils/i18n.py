@@ -8,8 +8,16 @@ DEFAULT_LANG = 'en'
 LOCALE_DIR = os.path.join(os.path.dirname(__file__), '../lang')
 
 def get_locale():
-    if hasattr(g, 'lang'):
+    # 如果 g.lang 已設定，直接返回
+    if hasattr(g, 'lang') and g.lang:
         return g.lang
+
+    # 優先檢查 Cookie 中的語言設定
+    lang_override = request.cookies.get('lang_override')
+    if lang_override and lang_override in SUPPORTED_LANGS:
+        g.lang = lang_override
+        return g.lang
+
     # 自 Accept-Language 偵測使用語系
     accept_langs = request.accept_languages.values()
     for lang in accept_langs:
@@ -25,6 +33,7 @@ def get_locale():
             break
     else:
         g.lang = DEFAULT_LANG
+
     return g.lang
 
 TRANSLATIONS = {}

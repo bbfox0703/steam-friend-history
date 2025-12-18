@@ -18,6 +18,10 @@
   "查詢 Steam 遊戲成就趨勢": "Search Steam Game Achievement Trends",
   "請輸入 AppID：": "Enter AppID:",
   "例如 3123410": "e.g., 3123410",
+  "語言": "Language",
+  "繁體中文": "繁體中文",
+  "English": "English",
+  "日本語": "日本語",
   "查詢": "Search",
   "⏳ 正在查詢資料，請稍候...": "⏳ Querying data, please wait...",
   "或從已擁有的遊戲中設搜尋條件：": "Or search from your owned games:",
@@ -154,5 +158,9 @@
   "每日持有變化數": "Daily Owned Games Change",
   "持有總數": "Total Owned Games",
   "遊玩時間趨勢": "Playtime Trend",
-  "第一筆成就趨勢強制為0": "Force the first achievement trend point to 0"  
+  "第一筆成就趨勢強制為0": "Force the first achievement trend point to 0",
+  "語言": "Language",
+  "繁體中文": "繁體中文",
+  "English": "English",
+  "日本語": "日本語"
 }

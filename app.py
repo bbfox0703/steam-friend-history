@@ -200,6 +200,15 @@ def detect_language():
     # 保留是為了兼容性，實際語言檢測由 i18n.get_locale() 處理
     pass
 
+@app.after_request
+def add_cache_headers(response):
+    # 添加快取控制標頭，確保語言變更能即時生效
+    if request.endpoint in ['index', 'achievement', 'achievement_trend']:
+        response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
+        response.headers['Pragma'] = 'no-cache'
+        response.headers['Expires'] = '0'
+    return response
+
 @app.template_filter('datetimeformat')
 def datetimeformat(ts):
     try:
@@ -1007,6 +1016,71 @@ def reload_translations():
 
     response = make_response(redirect('/debug-lang'))
     return response
+
+# 簡單的語言切換測試頁面
+@app.route('/lang-test')
+def lang_test():
+    lang_cookie = request.cookies.get('lang_override')
+    current_lang = get_locale()
+
+    html = f"""
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <title>語言切換測試</title>
+        <meta charset="utf-8">
+        <style>
+            body {{ font-family: Arial, sans-serif; padding: 20px; }}
+            .info {{ background: #f0f0f0; padding: 10px; margin: 10px 0; }}
+            .button {{ padding: 10px 20px; margin: 5px; cursor: pointer; }}
+        </style>
+    </head>
+    <body>
+        <h1>語言切換測試頁面</h1>
+
+        <div class="info">
+            <p><strong>當前時間:</strong> {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}</p>
+            <p><strong>Cookie 語言:</strong> {lang_cookie or '無'}</p>
+            <p><strong>檢測到的語言:</strong> {current_lang}</p>
+        </div>
+
+        <h3>翻譯測試:</h3>
+        <ul>
+            <li><strong>好友清單:</strong> {_('好友清單')}</li>
+            <li><strong>語言:</strong> {_('語言')}</li>
+            <li><strong>繁體中文:</strong> {_('繁體中文')}</li>
+            <li><strong>English:</strong> {_('English')}</li>
+            <li><strong>日本語:</strong> {_('日本語')}</li>
+        </ul>
+
+        <h3>語言切換:</h3>
+        <button class="button" onclick="setLanguage('zh-TW')">繁體中文</button>
+        <button class="button" onclick="setLanguage('en')">English</button>
+        <button class="button" onclick="setLanguage('ja')">日本語</button>
+        <button class="button" onclick="clearLanguage()" style="background: red; color: white;">重置</button>
+
+        <br><br>
+        <a href="/">返回首頁</a> | <a href="/debug-lang">詳細調試</a>
+
+        <script>
+        function setLanguage(lang) {{
+            console.log('Setting language to:', lang);
+            document.cookie = `lang_override=${{lang}}; max-age=${{60*60*24*365}}; path=/`;
+            console.log('Cookie set, reloading...');
+            window.location.reload(true);
+        }}
+
+        function clearLanguage() {{
+            console.log('Clearing language cookie');
+            document.cookie = 'lang_override=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+            console.log('Cookie cleared, reloading...');
+            window.location.reload(true);
+        }}
+        </script>
+    </body>
+    </html>
+    """
+    return html
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=3000)

@@ -175,25 +175,43 @@ a:visited:not(.menu-link) {
     font-weight: 500;
 }
 
-.lang-select {
+.lang-buttons {
+    display: flex;
+    gap: 4px;
+}
+
+.lang-btn {
     padding: 6px 12px;
     border-radius: 15px;
     border: 1px solid #ffffff44;
     background-color: #ffffff22;
     color: #fff;
-    font-size: 0.9em;
+    font-size: 0.85em;
+    text-decoration: none;
     cursor: pointer;
-    outline: none;
-    transition: background-color 0.2s;
+    transition: all 0.2s;
+    white-space: nowrap;
 }
 
-.lang-select:hover {
+.lang-btn:hover {
     background-color: #ffffff33;
+    color: #fff;
+    text-decoration: none;
 }
 
-.lang-select option {
-    background-color: #333;
-    color: #fff;
+.lang-btn.active {
+    background-color: #ffffff66;
+    font-weight: bold;
+    border-color: #ffffff88;
+}
+
+.lang-btn.reset {
+    background-color: #ff4444aa;
+    border-color: #ff6666;
+}
+
+.lang-btn.reset:hover {
+    background-color: #ff5555;
 }
 
 .menu-link.active {

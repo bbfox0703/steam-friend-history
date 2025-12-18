@@ -957,6 +957,7 @@ def debug_lang():
     </ul>
 
     <h3>語言切換測試</h3>
+    <p style="color: green; font-weight: bold;">✅ 語言切換已修正！主頁面的語言選擇器現在使用相同的強制切換機制。</p>
     <ul>
         <li><a href="/force-language/zh-TW">強制切換到繁體中文</a></li>
         <li><a href="/force-language/en">強制切換到英文</a></li>

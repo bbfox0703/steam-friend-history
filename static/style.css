@@ -22,8 +22,8 @@ th, td { padding: 8px; border: 1px solid #ccc; }
 .online { background-color: #e0ffe0; }
 .offline { background-color: #f8f8f8; }
 
-a:link:not(.menu-link),
-a:visited:not(.menu-link) {
+a:link:not(.menu-link):not(.lang-btn),
+a:visited:not(.menu-link):not(.lang-btn) {
   color: #558888;
   text-decoration: none;
 }
@@ -185,7 +185,7 @@ a:visited:not(.menu-link) {
     border-radius: 15px;
     border: 1px solid #ffffff44;
     background-color: #ffffff33;
-    color: #fff;
+    color: #fff !important;
     font-size: 0.85em;
     text-decoration: none;
     cursor: pointer;
@@ -193,9 +193,14 @@ a:visited:not(.menu-link) {
     white-space: nowrap;
 }
 
+.lang-btn:link,
+.lang-btn:visited {
+    color: #fff !important;
+}
+
 .lang-btn:hover {
     background-color: #ffffff55;
-    color: #fff;
+    color: #fff !important;
     text-decoration: none;
     box-shadow: 0 0 6px rgba(255,255,255,0.5);
 }
@@ -204,6 +209,7 @@ a:visited:not(.menu-link) {
     background-color: #ffffff88;
     font-weight: bold;
     border-color: #ffffff88;
+    color: #fff !important;
 }
 
 .menu-link.active {

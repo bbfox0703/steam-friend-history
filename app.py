@@ -910,13 +910,49 @@ def debug_lang():
     </ul>
     <p><strong>語言切換測試:</strong></p>
     <ul>
-        <li><a href="/set-language/zh-TW">切換到繁體中文</a></li>
-        <li><a href="/set-language/en">切換到英文</a></li>
-        <li><a href="/set-language/ja">切換到日文</a></li>
+        <li><a href="/force-language/zh-TW">強制切換到繁體中文</a></li>
+        <li><a href="/force-language/en">強制切換到英文</a></li>
+        <li><a href="/force-language/ja">強制切換到日文</a></li>
+        <li><a href="/force-language/auto" style="color: red; font-weight: bold;">清除語言設定（重置為自動）</a></li>
+    </ul>
+    <p><strong>緊急修復:</strong></p>
+    <ul>
+        <li><a href="/clear-language" style="color: red;">強制清除語言 Cookie</a></li>
     </ul>
     <p><a href="/">返回首頁</a> | <a href="/achievement">成就頁面</a></p>
     """
     return debug_info
+
+# 強制清除語言 Cookie 的路由
+@app.route('/clear-language')
+def clear_language():
+    from flask import make_response, redirect
+
+    # 清除語言 Cookie 並重定向到首頁
+    response = make_response(redirect('/'))
+    response.set_cookie('lang_override', '', expires=0)  # 立即過期
+
+    return response
+
+# 強制設定語言的路由（用於緊急修復）
+@app.route('/force-language/<lang>')
+def force_language(lang):
+    from flask import make_response, redirect
+    from utils.i18n import SUPPORTED_LANGS
+
+    if lang not in SUPPORTED_LANGS and lang != 'auto':
+        lang = 'auto'
+
+    response = make_response(redirect('/'))
+
+    if lang == 'auto':
+        # 清除 Cookie
+        response.set_cookie('lang_override', '', expires=0)
+    else:
+        # 強制設定 Cookie
+        response.set_cookie('lang_override', lang, max_age=60*60*24*365, path='/')
+
+    return response
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=3000)

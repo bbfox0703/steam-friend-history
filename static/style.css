@@ -184,7 +184,7 @@ a:visited:not(.menu-link) {
     padding: 6px 12px;
     border-radius: 15px;
     border: 1px solid #ffffff44;
-    background-color: #ffffff22;
+    background-color: #ffffff33;
     color: #fff;
     font-size: 0.85em;
     text-decoration: none;
@@ -194,24 +194,16 @@ a:visited:not(.menu-link) {
 }
 
 .lang-btn:hover {
-    background-color: #ffffff33;
+    background-color: #ffffff55;
     color: #fff;
     text-decoration: none;
+    box-shadow: 0 0 6px rgba(255,255,255,0.5);
 }
 
 .lang-btn.active {
-    background-color: #ffffff66;
+    background-color: #ffffff88;
     font-weight: bold;
     border-color: #ffffff88;
-}
-
-.lang-btn.reset {
-    background-color: #ff4444aa;
-    border-color: #ff6666;
-}
-
-.lang-btn.reset:hover {
-    background-color: #ff5555;
 }
 
 .menu-link.active {

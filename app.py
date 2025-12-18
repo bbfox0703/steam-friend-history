@@ -192,7 +192,7 @@ from flask import g
 
 @app.context_processor
 def inject_globals():
-    return {'_': _, 'get_locale': get_locale}
+    return {'_': _, 'get_locale': get_locale, 'request': request}
 
 @app.before_request
 def detect_language():
@@ -556,13 +556,9 @@ def achievement_input():
 # 成就趨勢圖頁：顯示某遊戲每日或每月成就達成狀況
 @app.route("/achievement/<appid>")
 def achievement_trend(appid):
-    # 語言偵測
-    lang_override = request.args.get("lang")
-    if lang_override in lang_map:
-        steam_lang = lang_map[lang_override]
-    else:
-        lang = request.accept_languages.best_match(["zh-tw", "ja", "en"], default="en")
-        steam_lang = lang_map.get(lang, "english")
+    # 語言偵測 - 使用統一的 i18n 系統
+    current_lang = get_locale()
+    steam_lang = lang_map.get(current_lang.lower(), "english")
 
     game_info = fetch_game_info(appid, steam_lang)
     game_name = game_info["name"] or get_game_title(appid)
@@ -905,8 +901,20 @@ def debug_lang():
     <p><strong>Cookie 語言:</strong> {lang_cookie}</p>
     <p><strong>當前語言:</strong> {current_lang}</p>
     <p><strong>瀏覽器語言:</strong> {accept_langs}</p>
-    <p><strong>測試文字:</strong> {_('好友清單')}</p>
-    <p><a href="/">返回首頁</a></p>
+    <p><strong>測試文字:</strong></p>
+    <ul>
+        <li>好友清單: {_('好友清單')}</li>
+        <li>語言: {_('語言')}</li>
+        <li>自動偵測: {_('自動偵測')}</li>
+        <li>繁體中文: {_('繁體中文')}</li>
+    </ul>
+    <p><strong>語言切換測試:</strong></p>
+    <ul>
+        <li><a href="/set-language/zh-TW">切換到繁體中文</a></li>
+        <li><a href="/set-language/en">切換到英文</a></li>
+        <li><a href="/set-language/ja">切換到日文</a></li>
+    </ul>
+    <p><a href="/">返回首頁</a> | <a href="/achievement">成就頁面</a></p>
     """
     return debug_info
 

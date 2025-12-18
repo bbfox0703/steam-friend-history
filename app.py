@@ -200,6 +200,15 @@ def detect_language():
     # 保留是為了兼容性，實際語言檢測由 i18n.get_locale() 處理
     pass
 
+@app.after_request
+def add_cache_headers(response):
+    # 添加快取控制標頭，確保語言變更能即時生效
+    if request.endpoint in ['index', 'achievement', 'achievement_trend']:
+        response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
+        response.headers['Pragma'] = 'no-cache'
+        response.headers['Expires'] = '0'
+    return response
+
 @app.template_filter('datetimeformat')
 def datetimeformat(ts):
     try:
@@ -891,32 +900,193 @@ def set_language(lang):
 # 調試語言設定的路由
 @app.route('/debug-lang')
 def debug_lang():
-    from flask import request
+    from flask import request, g
+    from utils.i18n import TRANSLATIONS, SUPPORTED_LANGS
+
     lang_cookie = request.cookies.get('lang_override')
     current_lang = get_locale()
     accept_langs = request.headers.get('Accept-Language', '')
 
+    # 檢查 g 物件狀態
+    g_lang = getattr(g, 'lang', 'Not Set')
+
+    # 檢查翻譯是否載入
+    translations_status = {}
+    for lang in SUPPORTED_LANGS:
+        count = len(TRANSLATIONS.get(lang, {}))
+        translations_status[lang] = f"{count} translations"
+
+    # 測試具體的翻譯
+    test_translations = {}
+    for lang in SUPPORTED_LANGS:
+        test_key = '好友清單'
+        result = TRANSLATIONS.get(lang, {}).get(test_key, f"MISSING: {test_key}")
+        test_translations[lang] = result
+
     debug_info = f"""
-    <h2>語言設定調試</h2>
-    <p><strong>Cookie 語言:</strong> {lang_cookie}</p>
-    <p><strong>當前語言:</strong> {current_lang}</p>
-    <p><strong>瀏覽器語言:</strong> {accept_langs}</p>
-    <p><strong>測試文字:</strong></p>
+    <h2>完整語言設定調試</h2>
+
+    <h3>語言檢測狀態</h3>
+    <p><strong>Cookie (lang_override):</strong> {lang_cookie}</p>
+    <p><strong>get_locale() 返回:</strong> {current_lang}</p>
+    <p><strong>g.lang:</strong> {g_lang}</p>
+    <p><strong>瀏覽器 Accept-Language:</strong> {accept_langs}</p>
+
+    <h3>翻譯檔案狀態</h3>
     <ul>
-        <li>好友清單: {_('好友清單')}</li>
-        <li>語言: {_('語言')}</li>
-        <li>自動偵測: {_('自動偵測')}</li>
-        <li>繁體中文: {_('繁體中文')}</li>
+        <li><strong>支援語言:</strong> {', '.join(SUPPORTED_LANGS)}</li>
+        <li><strong>zh-TW:</strong> {translations_status.get('zh-TW', 'Not loaded')}</li>
+        <li><strong>en:</strong> {translations_status.get('en', 'Not loaded')}</li>
+        <li><strong>ja:</strong> {translations_status.get('ja', 'Not loaded')}</li>
     </ul>
-    <p><strong>語言切換測試:</strong></p>
+
+    <h3>測試翻譯 (好友清單)</h3>
     <ul>
-        <li><a href="/set-language/zh-TW">切換到繁體中文</a></li>
-        <li><a href="/set-language/en">切換到英文</a></li>
-        <li><a href="/set-language/ja">切換到日文</a></li>
+        <li><strong>zh-TW:</strong> {test_translations.get('zh-TW')}</li>
+        <li><strong>en:</strong> {test_translations.get('en')}</li>
+        <li><strong>ja:</strong> {test_translations.get('ja')}</li>
     </ul>
+
+    <h3>當前頁面翻譯測試</h3>
+    <ul>
+        <li><strong>好友清單:</strong> {_('好友清單')}</li>
+        <li><strong>語言:</strong> {_('語言')}</li>
+        <li><strong>繁體中文:</strong> {_('繁體中文')}</li>
+        <li><strong>English:</strong> {_('English')}</li>
+        <li><strong>日本語:</strong> {_('日本語')}</li>
+    </ul>
+
+    <h3>語言切換測試</h3>
+    <p style="color: green; font-weight: bold;">✅ 語言切換已修正！主頁面的語言選擇器現在使用相同的強制切換機制。</p>
+    <ul>
+        <li><a href="/force-language/zh-TW">強制切換到繁體中文</a></li>
+        <li><a href="/force-language/en">強制切換到英文</a></li>
+        <li><a href="/force-language/ja">強制切換到日文</a></li>
+        <li><a href="/force-language/auto" style="color: red; font-weight: bold;">清除語言設定（重置為自動）</a></li>
+    </ul>
+
+    <h3>緊急修復</h3>
+    <ul>
+        <li><a href="/clear-language" style="color: red;">強制清除語言 Cookie</a></li>
+        <li><a href="/reload-translations" style="color: blue;">重新載入翻譯檔案</a></li>
+    </ul>
+
     <p><a href="/">返回首頁</a> | <a href="/achievement">成就頁面</a></p>
     """
     return debug_info
+
+# 強制清除語言 Cookie 的路由
+@app.route('/clear-language')
+def clear_language():
+    from flask import make_response, redirect
+
+    # 清除語言 Cookie 並重定向到首頁
+    response = make_response(redirect('/'))
+    response.set_cookie('lang_override', '', expires=0)  # 立即過期
+
+    return response
+
+# 強制設定語言的路由（用於緊急修復）
+@app.route('/force-language/<lang>')
+def force_language(lang):
+    from flask import make_response, redirect
+    from utils.i18n import SUPPORTED_LANGS
+
+    if lang not in SUPPORTED_LANGS and lang != 'auto':
+        lang = 'auto'
+
+    response = make_response(redirect('/'))
+
+    if lang == 'auto':
+        # 清除 Cookie
+        response.set_cookie('lang_override', '', expires=0)
+    else:
+        # 強制設定 Cookie
+        response.set_cookie('lang_override', lang, max_age=60*60*24*365, path='/')
+
+    return response
+
+# 重新載入翻譯檔案的路由
+@app.route('/reload-translations')
+def reload_translations():
+    from flask import make_response, redirect
+    from utils.i18n import load_translations
+
+    # 重新載入翻譯
+    try:
+        load_translations()
+        message = "翻譯檔案重新載入成功！"
+    except Exception as e:
+        message = f"翻譯檔案載入失敗: {e}"
+
+    response = make_response(redirect('/debug-lang'))
+    # 可以考慮添加 flash 訊息，但這裡簡單重定向
+    return response
+
+# 簡單的語言切換測試頁面
+@app.route('/lang-test')
+def lang_test():
+    lang_cookie = request.cookies.get('lang_override')
+    current_lang = get_locale()
+
+    html = f"""
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <title>語言切換測試</title>
+        <meta charset="utf-8">
+        <style>
+            body {{ font-family: Arial, sans-serif; padding: 20px; }}
+            .info {{ background: #f0f0f0; padding: 10px; margin: 10px 0; }}
+            .button {{ padding: 10px 20px; margin: 5px; cursor: pointer; }}
+        </style>
+    </head>
+    <body>
+        <h1>語言切換測試頁面</h1>
+
+        <div class="info">
+            <p><strong>當前時間:</strong> {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}</p>
+            <p><strong>Cookie 語言:</strong> {lang_cookie or '無'}</p>
+            <p><strong>檢測到的語言:</strong> {current_lang}</p>
+        </div>
+
+        <h3>翻譯測試:</h3>
+        <ul>
+            <li><strong>好友清單:</strong> {_('好友清單')}</li>
+            <li><strong>語言:</strong> {_('語言')}</li>
+            <li><strong>繁體中文:</strong> {_('繁體中文')}</li>
+            <li><strong>English:</strong> {_('English')}</li>
+            <li><strong>日本語:</strong> {_('日本語')}</li>
+        </ul>
+
+        <h3>語言切換:</h3>
+        <button class="button" onclick="setLanguage('zh-TW')">繁體中文</button>
+        <button class="button" onclick="setLanguage('en')">English</button>
+        <button class="button" onclick="setLanguage('ja')">日本語</button>
+        <button class="button" onclick="clearLanguage()" style="background: red; color: white;">重置</button>
+
+        <br><br>
+        <a href="/">返回首頁</a> | <a href="/debug-lang">詳細調試</a>
+
+        <script>
+        function setLanguage(lang) {{
+            console.log('Setting language to:', lang);
+            document.cookie = `lang_override=${{lang}}; max-age=${{60*60*24*365}}; path=/`;
+            console.log('Cookie set, reloading...');
+            window.location.reload(true);
+        }}
+
+        function clearLanguage() {{
+            console.log('Clearing language cookie');
+            document.cookie = 'lang_override=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+            console.log('Cookie cleared, reloading...');
+            window.location.reload(true);
+        }}
+        </script>
+    </body>
+    </html>
+    """
+    return html
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=3000)

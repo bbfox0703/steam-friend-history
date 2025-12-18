@@ -22,8 +22,8 @@ th, td { padding: 8px; border: 1px solid #ccc; }
 .online { background-color: #e0ffe0; }
 .offline { background-color: #f8f8f8; }
 
-a:link:not(.menu-link),
-a:visited:not(.menu-link) {
+a:link:not(.menu-link):not(.lang-btn),
+a:visited:not(.menu-link):not(.lang-btn) {
   color: #558888;
   text-decoration: none;
 }
@@ -175,25 +175,41 @@ a:visited:not(.menu-link) {
     font-weight: 500;
 }
 
-.lang-select {
+.lang-buttons {
+    display: flex;
+    gap: 4px;
+}
+
+.lang-btn {
     padding: 6px 12px;
     border-radius: 15px;
     border: 1px solid #ffffff44;
-    background-color: #ffffff22;
-    color: #fff;
-    font-size: 0.9em;
-    cursor: pointer;
-    outline: none;
-    transition: background-color 0.2s;
-}
-
-.lang-select:hover {
     background-color: #ffffff33;
+    color: #fff !important;
+    font-size: 0.85em;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
 }
 
-.lang-select option {
-    background-color: #333;
-    color: #fff;
+.lang-btn:link,
+.lang-btn:visited {
+    color: #fff !important;
+}
+
+.lang-btn:hover {
+    background-color: #ffffff55;
+    color: #fff !important;
+    text-decoration: none;
+    box-shadow: 0 0 6px rgba(255,255,255,0.5);
+}
+
+.lang-btn.active {
+    background-color: #ffffff88;
+    font-weight: bold;
+    border-color: #ffffff88;
+    color: #fff !important;
 }
 
 .menu-link.active {

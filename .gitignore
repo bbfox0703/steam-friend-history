@@ -1,2 +1,5 @@
 .env
 /tmp/
+/database/*.json
+/database/*.db
+/database/*.bak

@@ -185,6 +185,11 @@ function drawAchievementTrend(forceZeroFirstPoint = true) {
   });
 }
 
+function formatMinutesToHours(minutes) {
+  const hours = (minutes / 60).toFixed(2);
+  return `${hours} (${minutes})`;
+}
+
 function drawPlaytimeTrend() {
   const [startDate, endDate] = getDateRange(achievements, playtimes);
   const filledPlaytimes = fillMissingDates(playtimes, startDate, endDate);
@@ -229,13 +234,27 @@ function drawPlaytimeTrend() {
 			},
 			legend: {
 				display: true
-			},		
+			},
+			tooltip: {
+				callbacks: {
+					label: function(context) {
+						const value = context.parsed.y;
+						if (mode === 'month' || mode === 'year') {
+							return '{{ _("每日新增遊玩時間（分鐘）") }}: ' + formatMinutesToHours(value);
+						}
+						return '{{ _("每日新增遊玩時間（分鐘）") }}: ' + value;
+					}
+				}
+			},
 			datalabels: {
 				display: function(context) {
 					return context.dataIndex === context.chart.data.labels.length - 1;
 				},
 				align: 'top',
 				formatter: function(value) {
+					if (mode === 'month' || mode === 'year') {
+						return formatMinutesToHours(value);
+					}
 					return value;
 				},
 				color: 'black',

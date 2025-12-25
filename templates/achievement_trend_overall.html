@@ -35,6 +35,7 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
 <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@2.0.0"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@2.0.0"></script>
 
 <script>
 let achievementChartInstance = null;
@@ -138,6 +139,10 @@ function drawAchievementTrend(forceZeroFirstPoint = true) {
 
   if (achievementChartInstance) achievementChartInstance.destroy();
 
+  // 計算初始平均值
+  const validData = data.filter(v => v !== null && v !== undefined && v !== 0);
+  const initialAvg = validData.length > 0 ? validData.reduce((a, b) => a + b, 0) / validData.length : 0;
+
   const ctx = document.getElementById('achievementChart').getContext('2d');
   achievementChartInstance = new Chart(ctx, {
     type: 'line',
@@ -169,16 +174,52 @@ function drawAchievementTrend(forceZeroFirstPoint = true) {
 				pan: {
 					enabled: true,
 					mode: 'x',
+					onPanComplete: function({chart}) {
+						const avg = calculateVisibleAverage(chart);
+						chart.options.plugins.annotation.annotations.avgLine.yMin = avg;
+						chart.options.plugins.annotation.annotations.avgLine.yMax = avg;
+						chart.options.plugins.annotation.annotations.avgLine.label.content = '{{ _("平均") }}: ' + avg.toFixed(2);
+						chart.update('none');
+					}
 				},
 				zoom: {
 					drag: {
 						enabled: true,
 					},
 					mode: 'x',
+					onZoomComplete: function({chart}) {
+						const avg = calculateVisibleAverage(chart);
+						chart.options.plugins.annotation.annotations.avgLine.yMin = avg;
+						chart.options.plugins.annotation.annotations.avgLine.yMax = avg;
+						chart.options.plugins.annotation.annotations.avgLine.label.content = '{{ _("平均") }}: ' + avg.toFixed(2);
+						chart.update('none');
+					}
 				}
 			},
 			legend: {
 				display: true
+			},
+			annotation: {
+				annotations: {
+					avgLine: {
+						type: 'line',
+						yMin: initialAvg,
+						yMax: initialAvg,
+						borderColor: 'rgba(255, 99, 132, 0.8)',
+						borderWidth: 2,
+						borderDash: [5, 5],
+						label: {
+							display: true,
+							content: '{{ _("平均") }}: ' + initialAvg.toFixed(2),
+							position: 'end',
+							backgroundColor: 'rgba(255, 99, 132, 0.8)',
+							color: 'white',
+							font: {
+								weight: 'bold'
+							}
+						}
+					}
+				}
 			}
 		}
     }
@@ -190,6 +231,23 @@ function formatMinutesToHours(minutes) {
   return `${hours} (${minutes})`;
 }
 
+function calculateVisibleAverage(chart) {
+  const dataset = chart.data.datasets[0];
+  if (!dataset || !dataset.data) return 0;
+
+  // 獲取當前可見範圍
+  const xScale = chart.scales.x;
+  const visibleMin = xScale.min !== undefined ? xScale.min : 0;
+  const visibleMax = xScale.max !== undefined ? xScale.max : dataset.data.length - 1;
+
+  // 只計算可見範圍內的有效數據
+  const visibleData = dataset.data.slice(visibleMin, visibleMax + 1).filter(v => v !== null && v !== undefined && v !== 0);
+
+  if (visibleData.length === 0) return 0;
+  const sum = visibleData.reduce((a, b) => a + b, 0);
+  return sum / visibleData.length;
+}
+
 function drawPlaytimeTrend() {
   const [startDate, endDate] = getDateRange(achievements, playtimes);
   const filledPlaytimes = fillMissingDates(playtimes, startDate, endDate);
@@ -199,6 +257,10 @@ function drawPlaytimeTrend() {
   const data = Object.values(dailyData);
 
   if (playtimeChartInstance) playtimeChartInstance.destroy();
+
+  // 計算初始平均值
+  const validPlaytimeData = data.filter(v => v !== null && v !== undefined && v !== 0);
+  const initialPlaytimeAvg = validPlaytimeData.length > 0 ? validPlaytimeData.reduce((a, b) => a + b, 0) / validPlaytimeData.length : 0;
 
   const ctx = document.getElementById('playtimeChart').getContext('2d');
 	playtimeChartInstance = new Chart(ctx, {
@@ -224,16 +286,54 @@ function drawPlaytimeTrend() {
 				pan: {
 					enabled: true,
 					mode: 'x',
+					onPanComplete: function({chart}) {
+						const avg = calculateVisibleAverage(chart);
+						const avgLabel = mode === 'month' || mode === 'year' ? formatMinutesToHours(avg) : avg.toFixed(2);
+						chart.options.plugins.annotation.annotations.avgLine.yMin = avg;
+						chart.options.plugins.annotation.annotations.avgLine.yMax = avg;
+						chart.options.plugins.annotation.annotations.avgLine.label.content = '{{ _("平均") }}: ' + avgLabel;
+						chart.update('none');
+					}
 				},
 				zoom: {
 					drag: {
 						enabled: true,
 					},
 					mode: 'x',
+					onZoomComplete: function({chart}) {
+						const avg = calculateVisibleAverage(chart);
+						const avgLabel = mode === 'month' || mode === 'year' ? formatMinutesToHours(avg) : avg.toFixed(2);
+						chart.options.plugins.annotation.annotations.avgLine.yMin = avg;
+						chart.options.plugins.annotation.annotations.avgLine.yMax = avg;
+						chart.options.plugins.annotation.annotations.avgLine.label.content = '{{ _("平均") }}: ' + avgLabel;
+						chart.update('none');
+					}
 				}
 			},
 			legend: {
 				display: true
+			},
+			annotation: {
+				annotations: {
+					avgLine: {
+						type: 'line',
+						yMin: initialPlaytimeAvg,
+						yMax: initialPlaytimeAvg,
+						borderColor: 'rgba(54, 162, 235, 0.8)',
+						borderWidth: 2,
+						borderDash: [5, 5],
+						label: {
+							display: true,
+							content: '{{ _("平均") }}: ' + (mode === 'month' || mode === 'year' ? formatMinutesToHours(initialPlaytimeAvg) : initialPlaytimeAvg.toFixed(2)),
+							position: 'end',
+							backgroundColor: 'rgba(54, 162, 235, 0.8)',
+							color: 'white',
+							font: {
+								weight: 'bold'
+							}
+						}
+					}
+				}
 			},
 			tooltip: {
 				callbacks: {

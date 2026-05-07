@@ -4,38 +4,37 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{% block title %}{{ _('Steam 好友工具') }}{% endblock %}</title>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Noto+Sans+TC:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     {% block extra_head %}{% endblock %}
 </head>
 <body class="main-body">
 
     <div class="menu-bar">
-        <a href="/" class="menu-link">{{ _('好友清單') }}</a>
-        <a href="/history" class="menu-link">{{ _('變更紀錄') }}</a>
-        <a href="/trend" class="menu-link">{{ _('好友趨勢圖') }}</a>
-		<!--
-        <a href="/status-board" class="menu-link">{{ _('好友狀態看板') }}</a>
-		-->
-        <a href="/filter" class="menu-link">{{ _('條件篩選') }}</a>
-        <a href="/country" class="menu-link">{{ _('國別分析') }}</a>
-        <a href="/country-chart" class="menu-link">{{ _('國別統計圖') }}</a>
-        <a href="/achievement" class="menu-link">{{ _('成就查詢') }}</a>
-        <a href="/achievement-trend-overall" class="menu-link">{{ _('成就及遊玩時間總趨勢') }}</a>
-        <a href="/game-playtime-search" class="menu-link">{{ _('遊玩時間趨勢') }}</a>
-        <a href="/games-trend" class="menu-link">{{ _('持有遊戲數趨勢') }}</a>
-        <a href="/level-trend" class="menu-link">{{ _('等級趨勢圖') }}</a>
-        <a href="/level-history" class="menu-link">{{ _('等級變化紀錄') }}</a>
-        <a href="/backups" class="menu-link">{{ _('備份管理') }}</a>
-        <a href="/update" class="menu-link">{{ _('更新資料（背景有自動定期更新）') }}</a>
+        <a href="/" class="menu-link {% if request.path == '/' %}active{% endif %}">{{ _('好友清單') }}</a>
+        <a href="/history" class="menu-link {% if request.path == '/history' %}active{% endif %}">{{ _('變更紀錄') }}</a>
+        <a href="/trend" class="menu-link {% if request.path == '/trend' %}active{% endif %}">{{ _('好友趨勢圖') }}</a>
+        <a href="/filter" class="menu-link {% if request.path == '/filter' %}active{% endif %}">{{ _('條件篩選') }}</a>
+        <a href="/country" class="menu-link {% if request.path == '/country' %}active{% endif %}">{{ _('國別分析') }}</a>
+        <a href="/country-chart" class="menu-link {% if request.path == '/country-chart' %}active{% endif %}">{{ _('國別統計圖') }}</a>
+        <a href="/achievement" class="menu-link {% if '/achievement' in request.path and 'overall' not in request.path %}active{% endif %}">{{ _('成就查詢') }}</a>
+        <a href="/achievement-trend-overall" class="menu-link {% if request.path == '/achievement-trend-overall' %}active{% endif %}">{{ _('成就及遊玩時間總趨勢') }}</a>
+        <a href="/game-playtime-search" class="menu-link {% if '/game-playtime' in request.path %}active{% endif %}">{{ _('遊玩時間趨勢') }}</a>
+        <a href="/games-trend" class="menu-link {% if request.path == '/games-trend' %}active{% endif %}">{{ _('持有遊戲數趨勢') }}</a>
+        <a href="/level-trend" class="menu-link {% if request.path == '/level-trend' %}active{% endif %}">{{ _('等級趨勢圖') }}</a>
+        <a href="/level-history" class="menu-link {% if request.path == '/level-history' %}active{% endif %}">{{ _('等級變化紀錄') }}</a>
+        <a href="/backups" class="menu-link {% if request.path == '/backups' %}active{% endif %}">{{ _('備份管理') }}</a>
+        <a href="/update" class="menu-link {% if request.path == '/update' %}active{% endif %}">{{ _('更新資料（背景有自動定期更新）') }}</a>
 
         <div class="language-switcher">
-            <span class="lang-label">{{ _('語言') }}:</span>
+            <span class="lang-label">{{ _('語言') }}</span>
             <div class="lang-buttons">
-                <a href="/force-language/zh-TW" class="lang-btn {% if get_locale() == 'zh-TW' and request.cookies.get('lang_override') %}active{% endif %}">{{ _('繁體中文') }}</a>
-                <a href="/force-language/en" class="lang-btn {% if get_locale() == 'en' and request.cookies.get('lang_override') %}active{% endif %}">{{ _('English') }}</a>
-                <a href="/force-language/ja" class="lang-btn {% if get_locale() == 'ja' and request.cookies.get('lang_override') %}active{% endif %}">{{ _('日本語') }}</a>
-                <a href="/force-language/auto" class="lang-btn {% if not request.cookies.get('lang_override') %}active{% endif %}">{{ _('自動偵測') }}</a>
+                <a href="/force-language/zh-TW" class="lang-btn {% if get_locale() == 'zh-TW' and request.cookies.get('lang_override') %}active{% endif %}">繁中</a>
+                <a href="/force-language/en" class="lang-btn {% if get_locale() == 'en' and request.cookies.get('lang_override') %}active{% endif %}">EN</a>
+                <a href="/force-language/ja" class="lang-btn {% if get_locale() == 'ja' and request.cookies.get('lang_override') %}active{% endif %}">日本</a>
+                <a href="/force-language/auto" class="lang-btn {% if not request.cookies.get('lang_override') %}active{% endif %}">AUTO</a>
             </div>
         </div>
     </div>
@@ -60,12 +59,8 @@
     function formatLocalTime(ts) {
         const date = new Date(ts * 1000);
         return date.toLocaleString(document.documentElement.lang, {
-            year: 'numeric',
-            month: 'numeric',
-            day: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit',
-            second: '2-digit',
+            year: 'numeric', month: 'numeric', day: 'numeric',
+            hour: '2-digit', minute: '2-digit', second: '2-digit',
             hourCycle: 'h23'
         });
     }
@@ -88,8 +83,14 @@
     }
     document.addEventListener('DOMContentLoaded', updateAllTimestamps);
 
-    // 語言切換現在使用直接鏈接，不需要 JavaScript
-    // 保留此註釋供參考
+    // Set Chart.js defaults to match dark theme (only if Chart is present)
+    document.addEventListener('DOMContentLoaded', () => {
+        if (window.Chart) {
+            Chart.defaults.color = '#b9c5d2';
+            Chart.defaults.borderColor = 'rgba(255,255,255,0.08)';
+            Chart.defaults.font.family = "'Inter', 'Noto Sans TC', system-ui, sans-serif";
+        }
+    });
 
     function getCookie(name) {
         const value = `; ${document.cookie}`;

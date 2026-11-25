@@ -43,4 +43,4 @@
 
 #
 # 取得持有遊戲總數
-56 7,23 * * * root /app/record_games_total.sh >> /var/log/record_games_total.log 2>&1
+56 7,23 * * * root /app/cronjob/record_games_total.sh >> /var/log/record_games_total.log 2>&1

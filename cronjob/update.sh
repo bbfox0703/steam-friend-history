@@ -6,7 +6,10 @@ echo "[$(date '+%Y-%m-%d %H:%M:%S')] 🕒 update.sh started at $(date)" >> /var/
 echo "[$(date '+%Y-%m-%d %H:%M:%S')] 🔍 update.sh cron: Working dir: $(pwd)" >> /var/log/cron_exec.log
 
 # Flask 更新資料
-curl -s http://localhost:3000/update
+if ! curl -fsS http://localhost:3000/update; then
+  echo "[$(date '+%Y-%m-%d %H:%M:%S')] ❌ /update failed (詳見 /app/logs/app.log)" | tee -a /var/log/cron_exec.log
+fi
+echo
 
 # 快照儲存路徑
 DB_PATH="/app/database/friends.json"

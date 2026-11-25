@@ -4,3 +4,5 @@ docker compose down
 git pull
 COMPOSE_BAKE=true docker compose build
 docker compose up -d
+# 清掉每次重建後留下的舊 image（<none>），避免 SSD 空間被吃掉
+docker image prune -f

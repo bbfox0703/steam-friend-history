@@ -1,5 +1,5 @@
 # Stage 0: fallback 時區來源（含 tzdata）
-FROM python:3.11-slim-bookworm AS tzfallback
+FROM python:3.13-slim-trixie AS tzfallback
 
 ENV DEBIAN_FRONTEND=noninteractive
 ENV TZ=Asia/Taipei
@@ -11,7 +11,7 @@ RUN apt-get update && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Stage 1: 主建置階段
-FROM python:3.11-slim-bookworm
+FROM python:3.13-slim-trixie
 
 # --- 基本環境設定 ---
 ENV DEBIAN_FRONTEND=noninteractive

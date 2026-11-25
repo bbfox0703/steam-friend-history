@@ -1,7 +1,7 @@
 import os
 import json
 import requests
-from utils.api_utils import safe_api_get
+from utils.api_utils import safe_api_get, mask_key
 from utils.db import get_cached_achievements, save_achievement_cache, get_game_info_cache, save_game_info_cache
 import time
 import functools
@@ -33,7 +33,7 @@ _cached_titles = None
 
 def log(msg):
     timestamp = time.strftime('%Y-%m-%d %H:%M:%S')
-    full_msg = f"[{timestamp}] {msg}"
+    full_msg = f"[{timestamp}] {mask_key(msg)}"  # 避免 API key 進 log
     print(full_msg)
     os.makedirs(LOG_DIR, exist_ok=True)
     with open(LOG_FILE, "a", encoding="utf-8") as f:
@@ -47,15 +47,25 @@ def load_cached_titles():
         _cached_titles = get_all_game_titles()
     return _cached_titles
 
+class FriendListPrivateError(Exception):
+    """GetFriendList 回 401：好友清單非公開（或 API key 無效）。"""
+
 # 👥 從 Steam API 抓取好友 SteamID 清單
 def fetch_friend_list():
     url = f"https://api.steampowered.com/ISteamUser/GetFriendList/v1/?key={API_KEY}&steamid={STEAM_ID}&relationship=friend"
     log(f" fetch_friend_list(): {url}")
     response = safe_api_get(url)
+    if response.status_code == 401:
+        # GetFriendList 對「好友清單非公開」的帳號一律回 401 {}（API key 本身沒問題時也一樣）
+        msg = ("Steam API 401: 好友清單無法讀取（隱私設定非「公開」，或 STEAM_API_KEY 無效）。")
+        log(f"⚠️ {msg}")
+        raise FriendListPrivateError(msg)
     if response.status_code != 200:
         raise Exception(f"Steam API Error: {response.status_code} {response.text}")
-    # time.sleep(4)  # ← 檢查是否仍需要
-    return response.json().get('friendslist', {}).get('friends', [])
+    data = response.json()
+    if 'friendslist' not in data:
+        raise Exception(f"Steam API 回傳格式異常（沒有 friendslist）：{response.text[:200]}")
+    return data['friendslist'].get('friends', [])
 
 # 📇 從 Steam API 抓取好友個人資料（名稱、頭像、狀態、國家）
 def fetch_friend_profiles(steam_ids):
@@ -145,15 +155,39 @@ def save_json(path, data):
         json.dump(data, f, indent=2)
 
 # 🔁 更新好友清單，記錄變動並嘗試補齊缺失資料
+# 回傳 {'count': 好友數, 'mode': 'full' | 'names_only'}
+#   full       ：好友清單公開，偵測新增 / 刪除 / 改名
+#   names_only ：好友清單非公開（401），只用 friends.json 既有的 steamid 追蹤改名、頭像、狀態；
+#                無法偵測新增 / 刪除好友，也不會寫入 friend_changes.json
 def update_friend_list():
-    friend_list = fetch_friend_list()
-    steam_ids = [f['steamid'] for f in friend_list]
-    profiles = fetch_friend_profiles(steam_ids)
-
     old_friends = get_friend_data()
     old_dict = {f['steamid']: f for f in old_friends}
     old_ids = set(old_dict.keys())
+
+    mode = 'full'
+    try:
+        friend_list = fetch_friend_list()
+    except FriendListPrivateError:
+        if not old_friends:
+            raise Exception("好友清單非公開，且沒有既有的 friends.json 可供追蹤；請先把好友清單設為公開執行一次")
+        mode = 'names_only'
+        log(f"ℹ️ 好友清單非公開，改用備援模式：只追蹤既有 {len(old_friends)} 位好友的改名（無法偵測新增 / 刪除）")
+        friend_list = [{'steamid': f['steamid'], 'friend_since': f.get('friend_since', 0)} for f in old_friends]
+
+    steam_ids = [f['steamid'] for f in friend_list]
     new_ids = set(steam_ids)
+
+    # 🛡️ 防呆：API 若暫時回傳空清單 / 大幅縮水，不要把所有人記成「刪除好友」並覆寫 friends.json
+    if mode == 'full' and old_ids and (not new_ids or len(old_ids - new_ids) > max(20, len(old_ids) // 2)):
+        msg = (f"好友清單異常縮水（舊 {len(old_ids)} → 新 {len(new_ids)}，"
+               f"減少 {len(old_ids - new_ids)}），本次不寫入以免誤判")
+        log(f"❌ {msg}")
+        raise Exception(msg)
+
+    profiles = fetch_friend_profiles(steam_ids)
+    if mode == 'names_only' and not profiles:
+        # 401 也可能是 API key 失效；這時 GetPlayerSummaries 同樣拿不到資料，不要拿空資料覆寫
+        raise Exception("備援模式下 GetPlayerSummaries 也沒有回傳任何資料，請確認 STEAM_API_KEY 是否有效")
 
     now = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
@@ -161,7 +195,7 @@ def update_friend_list():
     changes = load_json(CHANGELOG_PATH)
     added = sorted(list(new_ids - old_ids))
     removed = sorted(list(old_ids - new_ids))
-    if added or removed:
+    if mode == 'full' and (added or removed):
         changes[now] = {"added": added, "removed": removed}
 
     enriched_friends = []
@@ -216,7 +250,8 @@ def update_friend_list():
     save_json(HISTORY_PATH, name_history)
     save_json(CHANGELOG_PATH, changes)
     backup_friend_data(enriched_friends)
-    return len(enriched_friends)
+    log(f"✅ update_friend_list(): mode={mode}, count={len(enriched_friends)}")
+    return {'count': len(enriched_friends), 'mode': mode}
 
 #def fetch_achievements(appid, steam_id=None):
 #    if steam_id is None:

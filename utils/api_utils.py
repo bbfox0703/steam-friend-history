@@ -1,8 +1,15 @@
 import requests
+import re
 
 session = requests.Session()
 import time
 import os
+
+_KEY_RE = re.compile(r'(key=)[^&\s]+', re.IGNORECASE)
+
+def mask_key(text):
+    """把 URL / 訊息中的 key=xxxx 遮蔽，避免 API key 寫進 log。"""
+    return _KEY_RE.sub(r'\1***', str(text))
 
 LOG_DIR = "./logs"
 LOG_FILE = os.path.join(LOG_DIR, "api_util.log")
@@ -33,6 +40,7 @@ def safe_api_get(url, min_delay=1, **kwargs):
             time.sleep(min_delay)
             return response
         except Exception as e:
-            log(f"⚠️ [safe_api_get] Exception on attempt {attempt+1}: {e}")
+            log(f"⚠️ [safe_api_get] Exception on attempt {attempt+1}: {mask_key(e)}")
             time.sleep(10)
-    return None
+    # 不回傳 None：呼叫端都直接讀 response.status_code，None 會變成難懂的 AttributeError
+    raise Exception(f"safe_api_get failed after {max_retries} attempts: {mask_key(url)}")

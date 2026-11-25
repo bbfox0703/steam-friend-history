@@ -16,11 +16,8 @@ services:
       - .env
     environment:
       TZ: Asia/Taipei     
-    dns:
-      - 192.168.1.3
-      - 192.168.1.2
-      - 1.1.1.1
-      - 9.9.9.9
+    # 註：原本的 dns 192.168.1.2/.3 已不在目前的 LAN (192.168.50.x)，每次查詢都要等 ~8 秒 timeout。
+    # 不指定 dns 時 Docker 會沿用主機的 DNS 設定。
     restart: unless-stopped
     healthcheck: 
       test: ["CMD", "curl", "-f", "http://localhost:3000/"]

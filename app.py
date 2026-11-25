@@ -249,9 +249,13 @@ def index():
 # 更新好友資料並建立當日備份
 @app.route('/update')
 def update():
-    result = steam_api.update_friend_list()
+    try:
+        result = steam_api.update_friend_list()
+    except Exception as e:
+        log(f"❌ /update 失敗：{e}")
+        return {'status': 'error', 'error': str(e)}, 500
     backup.backup_today()
-    return {'status': 'ok', 'updated': result}
+    return {'status': 'ok', 'updated': result['count'], 'mode': result['mode']}
 
 # 歷史頁：顯示好友加入與移除紀錄，以及名稱變更
 @app.route("/history")
@@ -523,6 +527,13 @@ def backups():
 
     return render_template('backups.html', files=files, sort_by=sort_by, order=order)
 
+def safe_backup_path(filename):
+    """只允許 backups/ 目錄下的檔名，擋掉 ../.env 或絕對路徑之類的 path traversal。"""
+    name = os.path.basename(filename or '')
+    if not name or name != filename or name.startswith('.'):
+        return None
+    return os.path.join('backups', name)
+
 # 備份下載 API
 @app.route('/backups/download/<filename>')
 def download_backup(filename):
@@ -531,8 +542,8 @@ def download_backup(filename):
 # 備份刪除 API
 @app.route('/backups/delete/<filename>', methods=['POST'])
 def delete_backup(filename):
-    path = os.path.join('backups', filename)
-    if os.path.exists(path):
+    path = safe_backup_path(filename)
+    if path and os.path.isfile(path):
         os.remove(path)
         return jsonify({'status': 'deleted'})
     return jsonify({'status': 'not_found'})
@@ -546,8 +557,8 @@ def zip_backups():
     memory_file = io.BytesIO()
     with zipfile.ZipFile(memory_file, 'w') as zf:
         for name in filenames:
-            path = os.path.join('backups', name)
-            if os.path.exists(path):
+            path = safe_backup_path(name)
+            if path and os.path.isfile(path):
                 zf.write(path, arcname=name)
     memory_file.seek(0)
 
